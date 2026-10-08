@@ -37,7 +37,7 @@ function page({simulation='existing',hidden=false,sendFails=false,storage=new Ma
         counts:{available:0,in_flight:0,delayed:0},age_seconds:0,stale_after_seconds:30,observed_at:'sample-time'})};
       if(url==='/ingestion/telemetry') {
         posts++;if(sendRead)await sendRead(posts);if(sendFails===true||sendFails===posts)throw Error('lost HTTP response');
-        return {ok:true,json:async()=>({correlation_id:'new-simulation',event_id:'event-'+(posts+eventOffset),envelope_id:'envelope-'+posts,transport_telemetry-lab:receipt:{message_id:'transport-'+posts}})};
+        return {ok:true,json:async()=>({correlation_id:'new-simulation',event_id:'event-'+(posts+eventOffset),envelope_id:'envelope-'+posts,transport_receipt:{message_id:'transport-'+posts}})};
       }
       return {ok:true,json:async()=>read()};
     }};
@@ -62,7 +62,7 @@ async function running(options={}) {
 
 test('old single measurement v2 cache stays readable and replayable without inventing second measurement',async()=>{
   const body=JSON.stringify({building_id:'demo-existing',timestamp:'2026-10-07T00:00:00Z',co2_ppm:1400});
-  const storage=new Map([['telemetry-lab:simulation-v2:existing',JSON.stringify({body,posts:[{telemetry-lab:receipt:{response:{event_id:'event-1'}}}]})]]);
+  const storage=new Map([['telemetry-lab:simulation-v2:existing',JSON.stringify({body,posts:[{receipt:{response:{event_id:'event-1'}}}]})]]);
   const p=page({storage,read:()=>({...unknown,results:[result('event-1',1400)]})});await drain();
   assert.equal(p.nodes.get('continue').hidden,true);await p.click('resend');assert.equal(posts(p)[0].options.body,body);
 });
@@ -220,7 +220,7 @@ test('missing journal still allows a correlated business reaction but not duplic
 test('legacy v3 CO2 scenario requires explicit continuation and resends the exact second body',async()=>{
   const bodies=[700,1400].map((co2,i)=>JSON.stringify({building_id:'demo-existing',timestamp:'2026-10-07T00:00:0'+i+'Z',co2_ppm:co2}));
   const storage=new Map([['telemetry-lab:simulation-v3:existing',JSON.stringify({version:3,measurements:bodies.map((body,i)=>({
-    id:i?'high':'normal',label:i?'CO2 high':'CO2 normal',body,posts:i?[]:[{telemetry-lab:receipt:{response:{event_id:'event-1'}}}]
+    id:i?'high':'normal',label:i?'CO2 high':'CO2 normal',body,posts:i?[]:[{receipt:{response:{event_id:'event-1'}}}]
   }))})]]);
   let proof={...unknown,results:[result('event-1',700)]};
   const p=page({storage,read:()=>proof,eventOffset:1});await drain();

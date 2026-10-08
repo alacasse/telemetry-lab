@@ -1,6 +1,6 @@
 # AWS preparation
 
-The repository contains Lambda packaging tools, SAM-related artifacts, Terraform configuration and staging helper scripts for possible future cloud work. Their presence does not establish deployed resources, successful cloud execution or production readiness.
+The repository contains Lambda packaging tools that use a SAM build image, Terraform configuration and staging helper scripts for possible future cloud work. Their presence does not establish deployed resources, successful cloud execution or production readiness.
 
 GitHub Actions runs quality, integration, bundle and Terraform checks. It has no active AWS deployment job or GitHub AWS identity integration. Optional GitLab OIDC infrastructure configuration remains inactive preparation material; it is not the CI execution path for this repository.
 

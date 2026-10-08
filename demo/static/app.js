@@ -243,7 +243,7 @@ async function submitMeasurement(measurement) {
   if (sending || !validBody(measurement?.body)) return;
   sending = true; $('send').disabled = true;
   clearTimeout(timer); const token = ++generation; deadline = 0;
-  const post = {browser_requested_at:new Date().toISOString(), telemetry-lab:receipt:null};
+  const post = {browser_requested_at:new Date().toISOString(), receipt:null};
   measurement.posts.push(post); save(); showReceipts(); updateActions();
   $('status').textContent = measurement.label + ' · envoi HTTP en cours…';
   try {

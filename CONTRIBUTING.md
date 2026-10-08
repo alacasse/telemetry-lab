@@ -7,15 +7,15 @@ Keep changes focused on observable behavior. Preserve explicit evidence states: 
 Use Python 3.12, `uv`, Node.js for browser-controller tests, and Docker for real integration checks:
 
 ```sh
-uv sync --frozen --group dev
+uv sync --frozen --python 3.12 --group dev
 uv run ruff check .
 uv run mypy .
 uv run pytest
 node --test tests/ui/*.test.cjs
-sh scripts/test-postgres.sh
-sh scripts/test-thermal-command-migration.sh
+PYTHON=.venv/bin/python sh scripts/test-postgres.sh
+PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
 sh scripts/demo-local.sh --port 8089 --test
-sh scripts/demo-local.sh --port 8090 --test-thermostat
+sh scripts/demo-local.sh --port 8090 --test-thermostat --startup-order runtime-first
 ```
 
 Ordinary pytest execution can skip opt-in integration tests. The launcher test modes provision real disposable PostgreSQL and LocalStack services and clean them up on exit. Check scripts and GitHub Actions for the exact environment required by each suite.

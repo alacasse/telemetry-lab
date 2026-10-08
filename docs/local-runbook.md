@@ -19,10 +19,11 @@ A browser reload preserves the stored room within the same running environment. 
 Use separate free ports; each test mode creates and removes its own composition:
 
 ```sh
-sh scripts/test-postgres.sh
-sh scripts/test-thermal-command-migration.sh
+uv sync --frozen --python 3.12 --group dev
+PYTHON=.venv/bin/python sh scripts/test-postgres.sh
+PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
 sh scripts/demo-local.sh --port 8089 --test
-sh scripts/demo-local.sh --port 8090 --test-thermostat
+sh scripts/demo-local.sh --port 8090 --test-thermostat --startup-order runtime-first
 ```
 
 `--test` exercises the local message pipeline and scenario routes. `--test-thermostat` exercises the persistent thermostat behavior on a fresh room. Report the actual results, skipped tests and runtime used in [validation](validation.md).
