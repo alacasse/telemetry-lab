@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
-from demo import thermal_runtime
+from packages.thermal import process as thermal_runtime
 from packages.thermal.authority import AuthorityBusy, AuthorityLost
 
 
@@ -85,19 +85,13 @@ def test_shutdown_deadline_and_cleanup_admission(
     monkeypatch: pytest.MonkeyPatch, failure: str,
 ) -> None:
     """One exhausted join must leave zero time, and unsafe stops cannot recover."""
-    monkeypatch.setenv("TELEMETRY_LAB_LOCAL_DEMO", "1")
-    settings = Mock(is_staging=False, release_revision="test")
     sessions = sessionmaker(create_engine("sqlite://"))
     authority = Mock()
     if failure == "fatal":
         authority.renew.side_effect = RuntimeError("database failed")
     if failure == "lost":
         authority.check_active.side_effect = AuthorityLost()
-    monkeypatch.setattr(thermal_runtime, "get_settings", lambda: settings)
-    monkeypatch.setattr(thermal_runtime, "create_authority_session_factory", lambda _: sessions)
-    monkeypatch.setattr(thermal_runtime, "PgAuthority", lambda *_, **kwargs: authority)
     monkeypatch.setattr(thermal_runtime, "initialize_runtime", Mock())
-    monkeypatch.setattr(thermal_runtime, "ThermalQueue", Mock())
     monkeypatch.setattr(thermal_runtime, "RoomClock", Mock())
     recovery = Mock()
     monkeypatch.setattr(thermal_runtime, "recover_simulations", recovery)
@@ -105,6 +99,7 @@ def test_shutdown_deadline_and_cleanup_admission(
     monkeypatch.setattr(
         thermal_runtime.signal, "signal", lambda _, callback: handlers.append(callback)
     )
+    monkeypatch.setattr(thermal_runtime.threading, "Timer", Mock())
     now = [100.0]
     monkeypatch.setattr(thermal_runtime.time, "monotonic", lambda: now[0])
     threads: list[Mock] = []
@@ -119,16 +114,23 @@ def test_shutdown_deadline_and_cleanup_admission(
                 thread.start.side_effect = lambda: handlers[0](0, None)
 
         def join(*, timeout: float) -> None:
-            now[0] += timeout  # First join exhausts the shared budget.
+            if failure == "stranded":
+                now[0] += timeout  # A stranded thread exhausts the shared budget.
 
         thread.join.side_effect = join
         threads.append(thread)
         return thread
 
     monkeypatch.setattr(thermal_runtime.threading, "Thread", thread_factory)
-    assert thermal_runtime.run() == (0 if failure == "none" else 1)
+    from contextlib import nullcontext
+
+    assert thermal_runtime.run_process(
+        sessions, authority,
+        transports=lambda: nullcontext(thermal_runtime.ThermalTransports(Mock(), Mock())),
+    ) == (0 if failure == "none" else 1)
     assert threads[0].join.call_args.kwargs["timeout"] == 4
-    assert all(thread.join.call_args.kwargs["timeout"] == 0 for thread in threads[1:])
+    if failure == "stranded":
+        assert all(thread.join.call_args.kwargs["timeout"] == 0 for thread in threads[1:])
     if failure == "none":
         recovery.assert_called_once()
         authority.release.assert_called_once()
@@ -198,3 +200,62 @@ def test_historical_integration_groups_cover_crash_windows_separately(crash_wind
     assert (str(launcher.ROOT / "tests/integration/test_local_demo.py") in selection) is (
         not crash_windows
     )
+
+
+def test_busy_process_never_constructs_transports(monkeypatch: pytest.MonkeyPatch) -> None:
+    authority, transports = Mock(), Mock()
+    authority.acquire.side_effect = AuthorityBusy()
+    sessions = sessionmaker(create_engine("sqlite://"))
+    assert thermal_runtime.run_process(sessions, authority, transports=transports) == 75
+    transports.assert_not_called()
+
+
+@pytest.mark.parametrize("hang", ["transport", "cleanup"])
+def test_signal_shutdown_bounds_hung_cleanup(hang: str) -> None:
+    """A real subprocess must exit even when adapter/database cleanup never returns."""
+    import sys
+    import time
+
+    code = r"""
+import os, signal, threading, time
+from contextlib import contextmanager
+from unittest.mock import MagicMock, Mock
+from packages.thermal import process
+process.initialize_runtime = Mock()
+process.RoomClock = Mock()
+process.reading_publication = Mock()
+process.command_publication = Mock()
+process.receive_commands = Mock()
+process.recover_simulations = Mock()
+authority = Mock()
+@contextmanager
+def transports():
+    print('READY', flush=True)
+    yield process.ThermalTransports(Mock(), Mock())
+    if HANG == 'transport':
+        while True: time.sleep(1)
+class Sessions:
+    def __call__(self):
+        if HANG == 'cleanup':
+            while True: time.sleep(1)
+        return MagicMock()
+raise SystemExit(process.run_process(Sessions(), authority, transports=transports))
+"""
+    child = subprocess.Popen(
+        [sys.executable, "-c", "HANG = " + repr(hang) + "\n" + code],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    try:
+        assert child.stdout is not None
+        assert child.stdout.readline().strip() == "READY"
+        started = time.monotonic()
+        child.send_signal(__import__("signal").SIGTERM)
+        time.sleep(0.1)
+        child.send_signal(__import__("signal").SIGINT)
+        child.communicate(timeout=5)
+        assert child.returncode == 1
+        assert time.monotonic() - started < 4.8
+    finally:
+        if child.poll() is None:
+            child.kill()
+            child.communicate()

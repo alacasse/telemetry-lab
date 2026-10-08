@@ -31,7 +31,8 @@ def main() -> None:
                     "assert callable(getattr(importlib.import_module(module),attribute)); "
                     "from packages.thermal.http import create_router; "
                     "from packages.thermal.runtime import RoomClock; "
-                    "assert callable(create_router) and callable(RoomClock)",
+                    "from packages.thermal.process import run_process; "
+                    "assert all(map(callable, (create_router, RoomClock, run_process)))",
                     directory,
                     target["handler"],
                 ],

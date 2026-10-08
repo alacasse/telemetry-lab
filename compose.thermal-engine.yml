@@ -1,0 +1,100 @@
+# Disposable phase 3 validation: no host ports, AWS credentials or host mounts.
+x-environment: &environment
+  APP_ENV: local
+  DATABASE_URL: postgresql+psycopg://thermal:thermal@postgres:5432/thermal
+  QUEUE_BACKEND: sqs
+  QUEUE_NAME: thermal-validation-measurements
+  QUEUE_URL: http://localstack:4566/000000000000/thermal-validation-measurements
+  AWS_REGION: ca-central-1
+  AWS_ENDPOINT_URL: http://localstack:4566
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_EC2_METADATA_DISABLED: "true"
+  RELEASE_REVISION: ${THERMAL_VALIDATION_REVISION:-phase3-local-working-tree}
+  THERMAL_TRANSPORT_MODE: local-emulator
+  THERMAL_INGESTION_URL: http://ingestion:8000/telemetry
+  THERMAL_QUEUE_URL: http://localstack:4566/000000000000/thermal-validation-commands
+  THERMAL_TIME_MULTIPLIER: "1"
+  THERMAL_INITIALIZE_THERMOSTAT: "1"
+  WORKER_RECEIVE_WAIT_SECONDS: "1"
+
+x-fixture: &fixture
+  build:
+    context: .
+    dockerfile: services/thermal-engine/Dockerfile
+    target: validation
+  environment: *environment
+  read_only: true
+  tmpfs:
+    - /tmp
+
+services:
+  postgres:
+    image: postgres:16-alpine@sha256:20edbde7749f822887a1a022ad526fde0a47d6b2be9a8364433605cf65099416
+    environment:
+      POSTGRES_DB: thermal
+      POSTGRES_USER: thermal
+      POSTGRES_PASSWORD: thermal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U thermal -d thermal"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
+  localstack:
+    image: localstack/localstack:3.4@sha256:54fcf172f6ff70909e1e26652c3bb4587282890aff0d02c20aa7695469476ac0
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: ca-central-1
+      SQS_ENDPOINT_STRATEGY: "off"
+    healthcheck:
+      test: ["CMD", "awslocal", "sqs", "list-queues"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  setup:
+    <<: *fixture
+    command: ["scripts/thermal-engine-probe.py", "setup"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+  ingestion:
+    <<: *fixture
+    command: ["-m", "uvicorn", "ingestion_service.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=1)"]
+      interval: 1s
+      timeout: 2s
+      retries: 30
+  worker:
+    <<: *fixture
+    command: ["-m", "processing_worker.main"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+  thermal-engine:
+    build:
+      context: .
+      dockerfile: services/thermal-engine/Dockerfile
+      target: runtime
+    environment: *environment
+    read_only: true
+    tmpfs:
+      - /tmp
+    stop_grace_period: 5s
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      ingestion:
+        condition: service_healthy
+  validation:
+    <<: *fixture
+    environment:
+      <<: *environment
+      THERMAL_CONTAINER_VALIDATION: "1"
+    profiles: ["validation"]
+    command: ["-c", "import time; time.sleep(3600)"]

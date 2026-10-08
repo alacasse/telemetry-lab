@@ -46,6 +46,17 @@ Le renouvellement utilise un pool distinct. Les pools locaux du moteur et de
 l'observation ont une attente de connexion et un verrou SQL limités à **1 seconde**;
 connexion, instruction et transaction inactive sont limitées à **2 secondes**.
 
+Les transactions protégées d'une même instance passent désormais par une admission
+locale commune, avant la création de session et jusqu'au commit ou rollback.
+Le renouvellement utilise cette même admission, prioritaire lorsqu'il attend, et
+la conserve jusqu'à sa confirmation locale. Une transaction sœur attend donc sans
+consommer le pool ni demander un verrou PostgreSQL. Cette attente vérifie le délai
+existant de cinq secondes; elle n'ajoute aucun budget et ne transforme aucune
+erreur de base en reprise. Un client externe reste soumis aux délais SQL existants.
+Les transactions de sélection à vide, la cadence d'horloge et les expirations
+métier restent inchangées. L'[analyse et la comparaison](thermal-availability-2026-10-08.md)
+distinguent cette correction du moteur de la mitigation SAM antérieure.
+
 Une erreur de base, une autorité perdue ou **5 secondes sans renouvellement
 confirmé** rend le processus définitivement inactif. Chaque admission et chaque
 renouvellement vérifie aussi ce délai monotone. La confirmation du renouvellement
@@ -66,6 +77,18 @@ partagent **4 secondes au total** pour se terminer. Récupération et libératio
 s'exécutent que si les threads sont arrêtés et l'autorité encore valide. Après une
 erreur fatale, une perte d'autorité ou un thread restant vivant, aucun nettoyage
 métier tardif n'est exécuté.
+
+Un arrêt normal réveille et annule les admissions locales en attente sans les
+qualifier de panne d'autorité. Les transactions déjà admises peuvent se terminer;
+les boucles quittent ensuite sans engager une nouvelle transaction. Le nettoyage
+final utilise son contrôle transactionnel direct seulement après leur arrêt.
+
+La phase 3 centralise ce cycle dans `packages/thermal/process.py`, utilisé par le
+lanceur local et le service autonome. La borne de quatre secondes inclut désormais
+le nettoyage protégé et la fermeture des transports : un watchdog termine le
+processus avec le code 1 si cette borne est atteinte. `SIGTERM` et `SIGINT`
+partagent la même échéance, même lorsqu'ils sont répétés. Cette borne n'est ni une
+nouvelle durée de bail ni une modification des expirations métier.
 
 Le lanceur observe passivement PostgreSQL avant chaque redémarrage. Une autorité
 occupée le fait attendre; une observation impossible ne permet aucun démarrage et

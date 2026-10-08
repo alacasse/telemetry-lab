@@ -37,7 +37,7 @@ def process_acquire(url: str, start: object, result: object) -> None:
 
 
 def process_initialize(url: str, start: object, result: object) -> None:
-    import demo.thermal_runtime as runtime
+    import packages.thermal.process as runtime
 
     sessions = sessionmaker(create_engine(url))
     authority = PgAuthority(sessions)
@@ -280,7 +280,7 @@ def test_connection_loss_permanently_disables_authority(database: tuple) -> None
 def test_atomic_startup_rollback_restores_authority_and_simulation(
     database: tuple, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import demo.thermal_runtime as runtime
+    import packages.thermal.process as runtime
 
     _, sessions = database
     sid = str(uuid4())

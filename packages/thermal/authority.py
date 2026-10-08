@@ -6,7 +6,8 @@ import os
 import threading
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import AbstractContextManager, contextmanager
 from datetime import datetime, timedelta
 from typing import Protocol
 
@@ -15,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from packages.config import Settings
+from packages.thermal.diagnostics import DiagnosticQueuePool, install_pool_diagnostics
 from packages.thermal.models import ThermalAuthority
 
 LEASE_SECONDS = 10
@@ -30,9 +32,14 @@ class AuthorityBusy(RuntimeError):  # noqa: N818
     """Another process owns a valid lease."""
 
 
+class AuthorityStopping(RuntimeError):  # noqa: N818
+    """Normal shutdown cancelled work that has not entered a transaction."""
+
+
 class Authority(Protocol):
     def check_active(self) -> None: ...
     def guard(self, session: Session) -> None: ...
+    def transaction(self, sessions: sessionmaker[Session]) -> AbstractContextManager[Session]: ...
     def heartbeat(self, session: Session) -> None: ...
     def fail(self) -> None: ...
 
@@ -46,12 +53,15 @@ def create_authority_session_factory(settings: Settings) -> sessionmaker[Session
         pool_size=1,
         max_overflow=0,
         pool_timeout=1,
+        **({"poolclass": DiagnosticQueuePool} if os.getenv("THERMAL_DIAGNOSTICS") == "1" else {}),
         connect_args={
             "connect_timeout": 2,
             "options": "-c lock_timeout=1000 -c statement_timeout=2000 "
             "-c idle_in_transaction_session_timeout=2000",
         },
     )
+    if os.getenv("THERMAL_DIAGNOSTICS") == "1":
+        install_pool_diagnostics(engine)
     return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
@@ -72,6 +82,10 @@ class PgAuthority:
         self._confirmed: float | None = None
         self._failed = False
         self._state_lock = threading.Lock()
+        self._admission_changed = threading.Condition()
+        self._transaction_running = False
+        self._renewals_waiting = 0
+        self._stopping = False
 
     @property
     def active(self) -> bool:
@@ -84,6 +98,59 @@ class PgAuthority:
     def fail(self) -> None:
         with self._state_lock:
             self._failed = True
+        with self._admission_changed:
+            self._admission_changed.notify_all()
+
+    def stop_admission(self) -> None:
+        """Cancel queued work; the joined supervisor may still guard final cleanup."""
+        with self._admission_changed:
+            self._stopping = True
+            self._admission_changed.notify_all()
+
+    @contextmanager
+    def _admission(self, *, renewal: bool = False) -> Iterator[None]:
+        # PostgreSQL already serializes these transactions on shared-room. Queue
+        # siblings here, before checkout, so a healthy but slow commit does not
+        # manufacture a pool/row-lock timeout in another loop. A queued renewal
+        # goes next; frequent business work cannot consume its remaining budget.
+        with self._admission_changed:
+            if renewal:
+                self._renewals_waiting += 1
+            try:
+                while True:
+                    self.check_active()
+                    if self._stopping:
+                        raise AuthorityStopping("Thermal runtime is stopping")
+                    if not self._transaction_running and (renewal or not self._renewals_waiting):
+                        self._transaction_running = True
+                        break
+                    # This is a deadline/cancellation poll, not a new timeout.
+                    # No connection or database lock is held by this waiter.
+                    self._admission_changed.wait(timeout=0.05)
+            finally:
+                if renewal:
+                    self._renewals_waiting -= 1
+                    self._admission_changed.notify_all()
+        try:
+            yield
+        finally:
+            with self._admission_changed:
+                self._transaction_running = False
+                self._admission_changed.notify_all()
+
+    @contextmanager
+    def transaction(self, sessions: sessionmaker[Session]) -> Iterator[Session]:
+        """Admit, fence and finish one transaction before admitting a sibling."""
+        with self._admission():
+            try:
+                with sessions() as session, session.begin():
+                    self.guard(session)
+                    yield session
+            except SQLAlchemyError:
+                # Publish failure before releasing admission, including a failed
+                # commit/rollback. Ordinary domain rejection remains nonfatal.
+                self.fail()
+                raise
 
     def check_active(self) -> None:
         with self._state_lock:
@@ -162,33 +229,34 @@ class PgAuthority:
         row.clock_passed_at = session.scalar(select(func.clock_timestamp()))
 
     def renew(self) -> None:
-        self.check_active()
-        try:
-            with self.sessions() as session, session.begin():
-                self.guard(session)
-                row = session.get(ThermalAuthority, "shared-room")
-                assert row is not None
-                now = session.scalar(select(func.clock_timestamp()))
-                assert now is not None
-                self.check_active()
-                if row.expires_at is None or row.expires_at <= now:
-                    raise AuthorityLost("Expired shared-room lease cannot be renewed")
-                row.expires_at = now + timedelta(seconds=LEASE_SECONDS)
-                row.renewed_at = now
-            # Do not let a suspended renewal revive an already failed process.
-            with self._state_lock:
-                confirmed = self.monotonic()
-                if (
-                    self._failed
-                    or self._confirmed is None
-                    or confirmed - self._confirmed >= FAIL_CLOSED_SECONDS
-                ):
-                    self._failed = True
-                    raise AuthorityLost("Shared-room authority is permanently inactive")
-                self._confirmed = confirmed
-        except Exception:
-            self.fail()
-            raise
+        with self._admission(renewal=True):
+            try:
+                with self.sessions() as session, session.begin():
+                    self.guard(session)
+                    row = session.get(ThermalAuthority, "shared-room")
+                    assert row is not None
+                    now = session.scalar(select(func.clock_timestamp()))
+                    assert now is not None
+                    self.check_active()
+                    if row.expires_at is None or row.expires_at <= now:
+                        raise AuthorityLost("Expired shared-room lease cannot be renewed")
+                    row.expires_at = now + timedelta(seconds=LEASE_SECONDS)
+                    row.renewed_at = now
+                # Keep admission through confirmation. A suspended renewal may
+                # never refresh the deadline, even if its database commit worked.
+                with self._state_lock:
+                    confirmed = self.monotonic()
+                    if (
+                        self._failed
+                        or self._confirmed is None
+                        or confirmed - self._confirmed >= FAIL_CLOSED_SECONDS
+                    ):
+                        self._failed = True
+                        raise AuthorityLost("Shared-room authority is permanently inactive")
+                    self._confirmed = confirmed
+            except Exception:
+                self.fail()
+                raise
 
     def release(self, session: Session) -> None:
         self.guard(session)

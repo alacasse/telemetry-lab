@@ -39,4 +39,4 @@ for attempt in range(30):
             raise
         time.sleep(1)
 PY
-"$PYTHON" -m pytest tests/integration/test_postgres_pipeline.py tests/integration/test_thermal_authority.py tests/integration/test_thermal_multiuser.py -q
+"$PYTHON" -m pytest tests/integration/test_postgres_pipeline.py tests/integration/test_thermal_authority.py tests/integration/test_thermal_multiuser.py tests/integration/test_thermal_contention.py tests/integration/test_thermal_availability.py -q

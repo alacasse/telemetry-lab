@@ -2,26 +2,51 @@
 
 Recherche documentaire du **2026-10-08**, fondée sur les sources officielles AWS et le code local. Aucun compte AWS interrogé, aucune ressource créée et aucune exécution cloud attestée. Cette note propose des options; elle ne constitue pas une décision de déploiement.
 
+## Mise à jour après les phases 1 à 3
+
+Les constats initiaux ci-dessous sont historiques. Confrontés au code actuel :
+
+- La pièce commune à plusieurs visiteurs est le périmètre adopté. L'identité des
+  visiteurs, les pièces individuelles et la clé de stockage partagée entre onglets
+  ne sont pas réalisés par cette phase.
+- Routes et moteur réutilisables vivent dans `packages/thermal`. L'observation
+  HTTP est passive et fondée sur l'autorité PostgreSQL, et non sur un fichier/PID.
+- L'exclusion, le transfert, le crash et la reprise explicite ont un contrat
+  réalisé en [phase 2](phase2-proposal.md); ils ne sont plus seulement proposés.
+- La phase 3 fournit `services/thermal-engine`, une image et une configuration
+  explicite PostgreSQL/ingestion/file de commandes. Une composition isolée valide
+  ce service hors de `demo`, sur réseau Docker avec PostgreSQL et LocalStack.
+  Les restrictions du lanceur local sont conservées.
+- Les adaptateurs utilisent la chaîne d'identifiants SDK et le contrat de secrets
+  staging existant. Leur exécution AWS, les permissions et le réseau n'ont pas été
+  prouvés. Le choix ECS/Fargate reste ouvert.
+
+Consulter [validation](validation.md) pour les résultats exécutés et
+[préparation AWS](aws-preparation.md) pour les dépendances du premier essai cloud.
+Les chiffres AWS et observations Terraform de la recherche initiale ne valent
+pas préflight d'un compte : quotas, versions et configuration restent à revalider
+au moment d'une décision de déploiement.
+
 ## État de préparation
 
 | Objectif | État observé | Ce qui reste à établir |
 | --- | --- | --- |
 | Démonstration locale | Parcours et validations documentés | Les résultats consignés ne sont pas une nouvelle exécution des tests |
 | Backend de télémétrie sur AWS | Terraform, quatre bundles Lambda, migrations et smoke tests présents | Corriger IAM et le parcours de livraison, vérifier le compte/région, puis prouver le traitement réel |
-| Thermostat utilisable par une URL HTTPS | Interface et comportement existants en local | Héberger l'interface, exposer ses routes, adapter le runtime et les commandes à AWS |
-| Utilisateurs indépendants | Une pièce globale et conflits de révision gérés | Identité, propriété des pièces et isolation des données absentes du parcours actuel |
+| Thermostat utilisable par une URL HTTPS | Interface locale, moteur autonome et adaptateurs préparés | Héberger l'interface, exposer ses routes, choisir l'hôte du moteur et vérifier AWS |
+| Pièce partagée multiusager | Périmètre adopté, conflits de révision gérés | Accès et identité à décider; pièces individuelles hors périmètre |
 
-Sources locales : [validation](validation.md), [préparation AWS](aws-preparation.md), [composition HTTP](../demo/app.py), [routes du thermostat](../demo/thermal_routes.py), [runtime](../demo/thermal_runtime.py), [transport des commandes](../demo/thermal_queue.py), [livraison](../scripts/deploy-staging.sh).
+Sources locales : [validation](validation.md), [préparation AWS](aws-preparation.md), [composition HTTP](../demo/app.py), [routes du thermostat](../packages/thermal/http.py), [runtime](../demo/thermal_runtime.py), [transport des commandes](../demo/thermal_queue.py), [livraison](../scripts/deploy-staging.sh).
 
-Pour un premier jalon, une pièce partagée à accès contrôlé limite les changements de modèle. Conserver le backend Lambda/SQS/RDS et lui ajouter le parcours navigateur et un seul simulateur supervisé permettrait de démontrer les services AWS réels. C'est une proposition à comparer avec un hébergement sur une seule machine; son coût et son exploitation ne sont pas encore chiffrés.
+La pièce partagée est adoptée; son contrôle d'accès reste à décider. Conserver le backend Lambda/SQS/RDS et lui ajouter le parcours navigateur et un seul simulateur supervisé permettrait de démontrer les services AWS réels. C'est une proposition à comparer avec un hébergement sur une seule machine; son coût et son exploitation ne sont pas encore chiffrés.
 
 ## Runtime thermique
 
 Une invocation Lambda standard est limitée à **900 secondes**. Après la fin du runtime et des extensions, Lambda peut geler l'environnement; sa réutilisation ne garantit pas la continuité d'un traitement. La documentation distingue désormais des variantes Managed Instances et Durable Functions : elles ne sont pas configurées dans ce dépôt. [Timeout Lambda](https://docs.aws.amazon.com/lambda/latest/dg/configuration-timeout.html), [Cycle de vie](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtime-environment.html).
 
-**Constat local :** `demo/thermal_runtime.py` entretient plusieurs boucles de threads, dont un tick toutes les 0,05 seconde. Terraform ne prévoit que quatre fonctions standard, avec des délais de 15, 15, 60 et 120 secondes; aucun runtime thermique cloud n'y est déclaré. **Déduction :** transposer ces threads derrière un handler qui retourne ne fournirait pas une horloge continue fiable.
+**Constat local :** `packages/thermal/process.py` entretient plusieurs boucles de threads, dont un tick toutes les 0,05 seconde. Terraform ne prévoit que quatre fonctions standard, avec des délais de 15, 15, 60 et 120 secondes; aucun runtime thermique cloud n'y est déclaré. **Déduction :** transposer ces threads derrière un handler qui retourne ne fournirait pas une horloge continue fiable.
 
-**Option à décider :** un service ECS sur Fargate pour le processus continu. Le scheduler ECS maintient le nombre demandé de tâches et remplace les tâches arrêtées ou défaillantes; AWS le recommande pour les services et applications de longue durée. Il peut utiliser Fargate. Cela exige encore la définition du conteneur, du réseau, des contrôles de santé, de la reprise persistante et de l'exclusion de deux horloges simultanées pendant un remplacement. Ces éléments applicatifs sont des travaux proposés, pas des garanties ECS. [Services ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html).
+**Option à décider :** un service ECS sur Fargate pour le processus continu. Le scheduler ECS maintient le nombre demandé de tâches et remplace les tâches arrêtées ou défaillantes; AWS le recommande pour les services et applications de longue durée. Il peut utiliser Fargate. Le conteneur et les protections applicatives sont désormais implémentés et validés localement. Le réseau, la supervision, les contrôles de santé et le remplacement réel sur AWS restent à établir; ces garanties applicatives ne sont pas des garanties ECS. [Services ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html).
 
 ## Concurrence Lambda et SQS
 
@@ -48,7 +73,7 @@ Une HTTP API appelée depuis une autre origine peut gérer CORS et répondre aut
 Ces observations viennent de la lecture des sources, sans exécution AWS :
 
 - `demo/app.py` et `demo/thermal_runtime.py` refusent explicitement staging. La présence des bundles Lambda et des routes de télémétrie ne fournit pas la démonstration navigateur ni les routes thermostat.
-- Le runtime local, sa file de commandes et son observation par fichier/PID nécessitent une adaptation cloud. Le modèle actuel possède une pièce courante partagée; l'isolation par utilisateur n'est pas acquise. Une démonstration contrôlée d'une seule pièce est une proposition de périmètre à valider.
+- Le runtime autonome et sa file de commandes disposent désormais d'adaptateurs distincts du lanceur local; l'observation est PostgreSQL. Une pièce partagée est adoptée. L'exécution cloud et l'identité des visiteurs restent à établir; l'isolation par utilisateur est hors périmètre.
 - `scripts/deploy-staging.sh` calcule sa révision indépendamment du manifest des bundles, avec repli `local`, puis appelle `terraform apply -auto-approve` sans plan sauvegardé et revu. Il exporte les sorties; migrations et smoke tests restent des étapes séparées. Ce script doit être durci avant une utilisation autorisée.
 - La version PostgreSQL RDS épinglée et les quotas Lambda doivent être vérifiés pour le compte et la région choisis. Les workflows GitHub existants ne constituent pas une intégration de déploiement AWS.
 
@@ -57,9 +82,9 @@ Ces observations viennent de la lecture des sources, sans exécution AWS :
 - Une URL HTTPS ouvre la page sans installation locale et applique le contrôle d'accès choisi.
 - Un réglage traverse les services AWS réels; le navigateur affiche un relevé traité et les preuves de commande correspondantes.
 - Le rechargement conserve l'état; l'arrêt et le remplacement du simulateur rendent l'interruption visible et respectent la reprise explicite.
-- Deux navigateurs ont le comportement annoncé : pièce partagée avec gestion des conflits, ou pièces isolées si ce périmètre est retenu.
+- Deux navigateurs ont le comportement annoncé : pièce partagée avec gestion des conflits, conformément au périmètre adopté.
 - Le déploiement utilise une révision identifiable, applique les migrations et vérifie le fonctionnement; restauration et suppression sont décrites.
 
 Le coût doit inclure les composants persistants, pas seulement les appels Lambda : RDS, endpoints privés, hébergement du simulateur, stockage et observabilité. Les destinataires de budget sont vides par défaut dans [les variables staging](../infrastructure/staging/variables.tf); les seuils déclarés ne sont pas un devis ni un plafond de dépenses.
 
-L'étape suivante est une décision d'architecture et de périmètre, puis les corrections de préparation et une validation locale appropriée. Le compte, les quotas et les versions régionales restent à vérifier. La création de ressources payantes n'est pas autorisée par cette demande d'évaluation; aucun résultat de cette note ne constitue une preuve de déploiement.
+Après la phase 3, l'étape suivante est une décision d'hébergement et d'accès, suivie des corrections de préparation et d'un préflight autorisé. Le compte, les quotas et les versions régionales restent à vérifier. La création de ressources payantes n'est pas autorisée par cette demande d'évaluation; aucun résultat de cette note ne constitue une preuve de déploiement.

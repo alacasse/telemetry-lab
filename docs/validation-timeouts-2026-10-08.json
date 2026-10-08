@@ -1,0 +1,2068 @@
+{
+  "date": "2026-10-08",
+  "base_revision": "38dfa09cbd0dda24b8eba694735e79b7b8ba9e2d",
+  "source_dirty": true,
+  "scope": "Local PostgreSQL/LocalStack and Docker only; no commit, push, AWS operation, upload or deployment.",
+  "finding": "Observed WALSync stalls retained business connections or renewal authority locks beyond unchanged one-second bounds, causing sqlalchemy.exc.TimeoutError and SQLSTATE 55P03. Historical phase3 root cause remains unproven.",
+  "mitigation": "SAM temporary dependency installation/cache/venv on bounded executable tmpfs; final artifacts and PostgreSQL remain on disk; no engine policy changes.",
+  "checks": {
+    "ruff": "passed",
+    "mypy": "passed:120 source files",
+    "pytest": "253 passed,34 opt-in skips,21 warnings",
+    "postgres": "14 passed including pool and delayed-renewal-commit controls",
+    "crash_windows": "2 passed,8 deselected",
+    "standalone_container": "passed",
+    "container_signal_evidence": "container-delivery.log",
+    "reviews": "general and import clean; follow-up diagnostics/cleanup/helper/classifier reviews clean"
+  },
+  "runtime_image_id": "sha256:df266e0c8b97379c64f398d889f393050aa8ef9c2b6cfeb96bc7a94cba59a5d7",
+  "sam_image_id": "sha256:de65ccf40ee2f292287dfe72a38fb7d603489bf66bae4d5e1c51ea49733d555f",
+  "batches": [
+    {
+      "directory": ".run/validation/timeout-investigation/20261008T161119Z-5834883f",
+      "summary": [
+        {
+          "phase": "baseline",
+          "mode": "thermostat",
+          "runs": 1,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "baseline",
+          "mode": "legacy",
+          "runs": 1,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "runs": 2,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "runs": 2,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        }
+      ],
+      "runs": [
+        {
+          "phase": "baseline",
+          "mode": "legacy",
+          "port": 18411,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1094869,
+              "exit_code": -15
+            },
+            {
+              "pid": 1094870,
+              "exit_code": -15
+            },
+            {
+              "pid": 1101388,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1094871,
+              "exit_code": -9,
+              "monotonic": 43226.814485123
+            },
+            {
+              "pid": 1099639,
+              "exit_code": -9,
+              "monotonic": 43249.090129382
+            }
+          ],
+          "elapsed_seconds": 163.538
+        },
+        {
+          "phase": "baseline",
+          "mode": "thermostat",
+          "port": 18410,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1089292,
+              "exit_code": -15
+            },
+            {
+              "pid": 1089208,
+              "exit_code": -15
+            },
+            {
+              "pid": 1093054,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1089167,
+              "exit_code": -9,
+              "monotonic": 43123.308243493
+            }
+          ],
+          "elapsed_seconds": 87.161
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18413,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1106293,
+              "exit_code": -15
+            },
+            {
+              "pid": 1106294,
+              "exit_code": -15
+            },
+            {
+              "pid": 1117780,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1106295,
+              "exit_code": -9,
+              "monotonic": 43394.474689642
+            },
+            {
+              "pid": 1114962,
+              "exit_code": -9,
+              "monotonic": 43416.015137004
+            }
+          ],
+          "elapsed_seconds": 166.483
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18415,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1125834,
+              "exit_code": -15
+            },
+            {
+              "pid": 1125835,
+              "exit_code": -15
+            },
+            {
+              "pid": 1131563,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1125836,
+              "exit_code": -9,
+              "monotonic": 43557.221729367
+            },
+            {
+              "pid": 1130439,
+              "exit_code": -9,
+              "monotonic": 43579.149301134
+            }
+          ],
+          "elapsed_seconds": 162.324
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18412,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1106456,
+              "exit_code": -15
+            },
+            {
+              "pid": 1106374,
+              "exit_code": -15
+            },
+            {
+              "pid": 1112157,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1106288,
+              "exit_code": -9,
+              "monotonic": 43376.686961346
+            }
+          ],
+          "elapsed_seconds": 85.616
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18414,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "process_exits": [
+            {
+              "pid": 1115716,
+              "exit_code": -15
+            },
+            {
+              "pid": 1115620,
+              "exit_code": -15
+            },
+            {
+              "pid": 1123683,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1115442,
+              "exit_code": -9,
+              "monotonic": 43460.875322841
+            }
+          ],
+          "elapsed_seconds": 86.657
+        }
+      ]
+    },
+    {
+      "directory": ".run/validation/timeout-investigation/20261008T162118Z-a74972ff",
+      "summary": [
+        {
+          "phase": "baseline",
+          "mode": "thermostat",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "baseline",
+          "mode": "legacy",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "runs": 4,
+          "failed_launchers": 1,
+          "runs_with_unexpected_fatal": 1
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "runs": 4,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 1
+        }
+      ],
+      "runs": [
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18421,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:21:18.242068+00:00",
+          "process_exits": [
+            {
+              "pid": 1137371,
+              "exit_code": -15
+            },
+            {
+              "pid": 1137372,
+              "exit_code": -15
+            },
+            {
+              "pid": 1148425,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1137373,
+              "exit_code": -9,
+              "monotonic": 43745.127169876
+            },
+            {
+              "pid": 1143885,
+              "exit_code": -9,
+              "monotonic": 43767.314840952
+            }
+          ],
+          "elapsed_seconds": 170.441
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18423,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:21:18.242281+00:00",
+          "process_exits": [
+            {
+              "pid": 1137196,
+              "exit_code": -15
+            },
+            {
+              "pid": 1137197,
+              "exit_code": -15
+            },
+            {
+              "pid": 1148289,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1137198,
+              "exit_code": -9,
+              "monotonic": 43742.539250752
+            },
+            {
+              "pid": 1143720,
+              "exit_code": -9,
+              "monotonic": 43766.511330577
+            }
+          ],
+          "elapsed_seconds": 170.391
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18425,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:22:47.811054+00:00",
+          "process_exits": [
+            {
+              "pid": 1145345,
+              "exit_code": -15
+            },
+            {
+              "pid": 1145346,
+              "exit_code": -15
+            },
+            {
+              "pid": 1170367,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 1,
+          "unexpected_fatal_authority_lost": 3,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 3,
+          "thermal_exits": [
+            {
+              "pid": 1145347,
+              "exit_code": 1,
+              "monotonic": 43772.061702809
+            },
+            {
+              "pid": 1149140,
+              "exit_code": -9,
+              "monotonic": 43834.126561693
+            },
+            {
+              "pid": 1163950,
+              "exit_code": -9,
+              "monotonic": 43856.384754647
+            }
+          ],
+          "elapsed_seconds": 168.405
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18427,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:24:08.600106+00:00",
+          "process_exits": [
+            {
+              "pid": 1162990,
+              "exit_code": -15
+            },
+            {
+              "pid": 1162991,
+              "exit_code": -15
+            },
+            {
+              "pid": 1194735,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1162992,
+              "exit_code": -9,
+              "monotonic": 43911.450509943
+            },
+            {
+              "pid": 1187406,
+              "exit_code": -9,
+              "monotonic": 43934.234751151
+            }
+          ],
+          "elapsed_seconds": 166.153
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18420,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:21:18.241636+00:00",
+          "process_exits": [
+            {
+              "pid": 1137374,
+              "exit_code": -15
+            },
+            {
+              "pid": 1137281,
+              "exit_code": -15
+            },
+            {
+              "pid": 1141394,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1137104,
+              "exit_code": -9,
+              "monotonic": 43725.641144032
+            }
+          ],
+          "elapsed_seconds": 89.602
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18422,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:21:18.239491+00:00",
+          "process_exits": [
+            {
+              "pid": 1137577,
+              "exit_code": -15
+            },
+            {
+              "pid": 1137446,
+              "exit_code": -15
+            },
+            {
+              "pid": 1141495,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1137360,
+              "exit_code": -9,
+              "monotonic": 43727.338414217
+            }
+          ],
+          "elapsed_seconds": 88.851
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18424,
+          "launcher_exit_code": 1,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:22:47.061118+00:00",
+          "process_exits": [
+            {
+              "pid": 1145512,
+              "exit_code": -15
+            },
+            {
+              "pid": 1145341,
+              "exit_code": -15
+            },
+            {
+              "pid": 1148867,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 2,
+          "unexpected_fatal_authority_lost": 2,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1145177,
+              "exit_code": 1,
+              "monotonic": 43772.07620275
+            }
+          ],
+          "elapsed_seconds": 40.192
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18426,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:23:27.251968+00:00",
+          "process_exits": [
+            {
+              "pid": 1154040,
+              "exit_code": -15
+            },
+            {
+              "pid": 1153817,
+              "exit_code": -15
+            },
+            {
+              "pid": 1169674,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1153578,
+              "exit_code": -9,
+              "monotonic": 43855.602019896
+            }
+          ],
+          "elapsed_seconds": 85.361
+        }
+      ]
+    },
+    {
+      "directory": ".run/validation/timeout-investigation/20261008T162739Z-42130507",
+      "summary": [
+        {
+          "phase": "baseline",
+          "mode": "thermostat",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "baseline",
+          "mode": "legacy",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "runs": 4,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "runs": 4,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        }
+      ],
+      "runs": [
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18431,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:27:39.640440+00:00",
+          "process_exits": [
+            {
+              "pid": 1233963,
+              "exit_code": -15
+            },
+            {
+              "pid": 1233964,
+              "exit_code": -15
+            },
+            {
+              "pid": 1248538,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1233965,
+              "exit_code": -9,
+              "monotonic": 44126.094503259
+            },
+            {
+              "pid": 1244516,
+              "exit_code": -9,
+              "monotonic": 44147.415329529
+            }
+          ],
+          "elapsed_seconds": 168.283
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18433,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:27:39.639644+00:00",
+          "process_exits": [
+            {
+              "pid": 1233972,
+              "exit_code": -15
+            },
+            {
+              "pid": 1233973,
+              "exit_code": -15
+            },
+            {
+              "pid": 1248971,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1233974,
+              "exit_code": -9,
+              "monotonic": 44126.21517227
+            },
+            {
+              "pid": 1244749,
+              "exit_code": -9,
+              "monotonic": 44148.647045485
+            }
+          ],
+          "elapsed_seconds": 170.039
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18435,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:29:09.114757+00:00",
+          "process_exits": [
+            {
+              "pid": 1245513,
+              "exit_code": -15
+            },
+            {
+              "pid": 1245514,
+              "exit_code": -15
+            },
+            {
+              "pid": 1267994,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1245515,
+              "exit_code": -9,
+              "monotonic": 44211.529494228
+            },
+            {
+              "pid": 1261572,
+              "exit_code": -9,
+              "monotonic": 44233.492045396
+            }
+          ],
+          "elapsed_seconds": 163.749
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18437,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:30:27.894229+00:00",
+          "process_exits": [
+            {
+              "pid": 1261540,
+              "exit_code": -15
+            },
+            {
+              "pid": 1261541,
+              "exit_code": -15
+            },
+            {
+              "pid": 1291996,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1261542,
+              "exit_code": -9,
+              "monotonic": 44291.687049797
+            },
+            {
+              "pid": 1284561,
+              "exit_code": -9,
+              "monotonic": 44314.371832082
+            }
+          ],
+          "elapsed_seconds": 166.684
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18430,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:27:39.638858+00:00",
+          "process_exits": [
+            {
+              "pid": 1234637,
+              "exit_code": -15
+            },
+            {
+              "pid": 1234219,
+              "exit_code": -15
+            },
+            {
+              "pid": 1241556,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1233904,
+              "exit_code": -9,
+              "monotonic": 44108.092071031
+            }
+          ],
+          "elapsed_seconds": 85.646
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18432,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:27:39.641117+00:00",
+          "process_exits": [
+            {
+              "pid": 1234201,
+              "exit_code": -15
+            },
+            {
+              "pid": 1233851,
+              "exit_code": -15
+            },
+            {
+              "pid": 1241604,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1233459,
+              "exit_code": -9,
+              "monotonic": 44107.601915826
+            }
+          ],
+          "elapsed_seconds": 89.502
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18434,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:29:05.257540+00:00",
+          "process_exits": [
+            {
+              "pid": 1245049,
+              "exit_code": -15
+            },
+            {
+              "pid": 1244856,
+              "exit_code": -15
+            },
+            {
+              "pid": 1255718,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1244538,
+              "exit_code": -9,
+              "monotonic": 44189.637933185
+            }
+          ],
+          "elapsed_seconds": 82.506
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18436,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:30:27.764035+00:00",
+          "process_exits": [
+            {
+              "pid": 1262046,
+              "exit_code": -15
+            },
+            {
+              "pid": 1261777,
+              "exit_code": -15
+            },
+            {
+              "pid": 1279710,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1261517,
+              "exit_code": -9,
+              "monotonic": 44275.629942912
+            }
+          ],
+          "elapsed_seconds": 86.374
+        }
+      ]
+    },
+    {
+      "directory": ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88",
+      "summary": [
+        {
+          "phase": "baseline",
+          "mode": "thermostat",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "baseline",
+          "mode": "legacy",
+          "runs": 0,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "runs": 2,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "runs": 2,
+          "failed_launchers": 0,
+          "runs_with_unexpected_fatal": 0
+        }
+      ],
+      "runs": [
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18441,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:34:37.301954+00:00",
+          "process_exits": [
+            {
+              "pid": 1337164,
+              "exit_code": -15
+            },
+            {
+              "pid": 1337165,
+              "exit_code": -15
+            },
+            {
+              "pid": 1344244,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "unexpected_fatal_total": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1337166,
+              "exit_code": -9,
+              "monotonic": 44544.388260632
+            },
+            {
+              "pid": 1343056,
+              "exit_code": -9,
+              "monotonic": 44565.67413225
+            }
+          ],
+          "elapsed_seconds": 168.995
+        },
+        {
+          "phase": "parallel",
+          "mode": "legacy",
+          "port": 18443,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:34:37.304918+00:00",
+          "process_exits": [
+            {
+              "pid": 1337161,
+              "exit_code": -15
+            },
+            {
+              "pid": 1337162,
+              "exit_code": -15
+            },
+            {
+              "pid": 1344322,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "unexpected_fatal_total": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 2,
+          "thermal_exits": [
+            {
+              "pid": 1337163,
+              "exit_code": -9,
+              "monotonic": 44545.622426911
+            },
+            {
+              "pid": 1343128,
+              "exit_code": -9,
+              "monotonic": 44567.146862783
+            }
+          ],
+          "elapsed_seconds": 169.906
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18440,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:34:37.303114+00:00",
+          "process_exits": [
+            {
+              "pid": 1337214,
+              "exit_code": -15
+            },
+            {
+              "pid": 1337112,
+              "exit_code": -15
+            },
+            {
+              "pid": 1341425,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "unexpected_fatal_total": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1336940,
+              "exit_code": -9,
+              "monotonic": 44524.296535208
+            }
+          ],
+          "elapsed_seconds": 84.551
+        },
+        {
+          "phase": "parallel",
+          "mode": "thermostat",
+          "port": 18442,
+          "launcher_exit_code": 0,
+          "timed_out": false,
+          "launched_at_utc": "2026-10-08T16:34:37.305311+00:00",
+          "process_exits": [
+            {
+              "pid": 1337372,
+              "exit_code": -15
+            },
+            {
+              "pid": 1337236,
+              "exit_code": -15
+            },
+            {
+              "pid": 1341593,
+              "exit_code": 0
+            }
+          ],
+          "unexpected_fatal_timeout": 0,
+          "unexpected_fatal_authority_lost": 0,
+          "unexpected_fatal_total": 0,
+          "thermal_log_present": true,
+          "thermal_restarts_including_deliberate_crash_tests": 1,
+          "thermal_exits": [
+            {
+              "pid": 1337138,
+              "exit_code": -9,
+              "monotonic": 44526.136595565
+            }
+          ],
+          "elapsed_seconds": 87.355
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "First instrumented batch was preliminary with evolving instrumentation; historical reference overlapped a PostgreSQL suite.",
+    "Natural batch had 2/8 fatal compositions; one scenario suite nevertheless returned 0. Mitigation batches observed 0/12; final sink-only safety fix subsequently passed fresh launcher/container/tests.",
+    "First tmpfs build failed native-extension mapping and was corrected with explicit exec; its success is not claimed.",
+    "SAM contribution to shared-storage latency is inferred; underlying device cause and historical18381/18382 cause remain unproven.",
+    "Timing events may be dropped and PostgreSQL wait samples report transaction age, not exact continuous wait duration.",
+    "Finite comparative runs are not a throughput guarantee or production/AWS evidence."
+  ],
+  "historical_phase3_logs_unchanged": true,
+  "source_sha256": {
+    ".github/workflows/ci.yml": "1cb3d7a3dab3f5e25b936d9c5fb90a96c5f277872dde1f098c0f34e8334118c2",
+    "CONTRIBUTING.md": "4a0de62a8ed89c33f4c1e63edd0911ee26a98b124e9777ea432f4f06cb7b90ea",
+    "README.md": "f7d9033451bb1288d42e44ad516fc8bc04eb6a648576fcc4e4e9e8ec57b90183",
+    "compose.thermal-engine.yml": "100860639dc951648a2bdcc0d17406d488363d0cadca50f68627948f3a92922c",
+    "demo/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "demo/app.py": "f837bb84e164ccfd116203bd92f39b0956a4c26cffc8e9592750108709fdc669",
+    "demo/queue_observation.py": "17dac71765231bdd29168ed25cbce9708ad045c63f08f34cd1c4ffa4efdfc012",
+    "demo/thermal_local.py": "256274b3a36a8e6af5ad0cf61b3a045957ad7e1a7916cd9792e4b564533f8933",
+    "demo/thermal_queue.py": "8185a95c73eec1308dbeccd65c4e808945bac61b19b53c71e8e036b4b16e10ae",
+    "demo/thermal_runtime.py": "97e0d2c7457075eb84d64acf72ef81390b85acdae4be9a71b06d31cf5afe2104",
+    "docker-compose.yml": "87e31168fae1106b868af02c7c839a069e2c7a4a530d3cdc64b14c9514b95118",
+    "docs/README.md": "7dfe6f2cafd77b520334d01790972527149941f79ba7273b3375bdeb5786f092",
+    "docs/architecture.md": "62902f7da7b62c1e050b20bb97f54d3cf09de1be67a1aaf817fd7f2a097af1ec",
+    "docs/aws-preparation.md": "da15988d04152e0822e0513b191249aec2da63c99c6f460795a3012e5447d2eb",
+    "docs/aws-readiness-research.md": "d1184c96b13e26dc6b218a618763b4ef6dc349aec5f0e3817147fb41d0e176cc",
+    "docs/local-runbook.md": "833630fa61c6984d8f8703c1cf20cea81e0552b6823be96fda252d50d6e1ba6d",
+    "docs/phase2-proposal.md": "7415f7393d4316c01c393a9b140d8f206af5a1eb13ff5928a3945a1c0d551590",
+    "docs/thermostat.md": "4e558969d00db9f9b4424c1b567e5a1825a7cddeea7388f3804dafa77727acdb",
+    "docs/timeout-investigation-2026-10-08.md": "66300d93a6a4b38373961864c119337e4003e750a00c20c172d44411d9ea4a16",
+    "docs/validation.md": "4d21ff22f54bbeecbcbdd260db874d202de15ac0178d4c5d24ca4551b0bb2d42",
+    "migrations/env.py": "9021f9676289c154ddd7b2e29e6a82d459fadae755501d64918c55083f9ce9c5",
+    "migrations/versions/0001_initial.py": "056ae4e8e127cae5be20a3e18837f81b3b5c963c47c87e26dff3793e3534af85",
+    "migrations/versions/0002_processing_observations.py": "6edeae3b7acaece516e3ce591c7c62dbd3a7d2d9f1f0c700c23f35ddcf09b329",
+    "migrations/versions/0003_thermal_simulations.py": "225df2ad222c36fcc21520333d40d0787b6211428bae91876afcd254b9e752a2",
+    "migrations/versions/0004_typed_thermal_commands.py": "70b006752b899e76d2643e235202d21a457f8a4e0c24a5c022ee823968e9e0e6",
+    "migrations/versions/0005_cooling_and_stop.py": "f8d1e6480ca9703d6a82b6d6b49e541c9a7b43f241558d8d08ddce52d5197f1f",
+    "migrations/versions/0006_thermostat.py": "09acbe495740ffa577688846f194e2f04315ef0ebd793b43a3c7f3a82b7018eb",
+    "migrations/versions/0007_shared_room_authority.py": "da3cd38bfe0d8d989ad6036d80934f95fc36daaadcc3d35975b5642ba75e19cc",
+    "packages/__init__.py": "43edb33b8fec54a5a70267827335763d39a888e5e14b94c76d892c1488fe91ec",
+    "packages/aws/__init__.py": "90b5377a38ad4f28018cbdf3e572c9ab7b3a3ef05ddc446dcf6c4bb702c68091",
+    "packages/aws/secrets.py": "c122b67bed2df85f49a5cbdad701e495f3e9ef2773b06855f53e6f71d3c0f0ca",
+    "packages/aws/tracing.py": "18396cd44db807744f9b0df6b8198d2fdd5d6d54d8780fd0ff5edc03deda295b",
+    "packages/config/__init__.py": "a513e0e37eb9e760b55e43efad869f42f58952220267aacf2a285c46b9007cac",
+    "packages/config/settings.py": "bc3a60f77d08ffca2551b681a18a1985c4d71657be46e82087c9eb0b4900a7a5",
+    "packages/db/__init__.py": "ccdcd8d29370788139039b87468dc4febbff8f5be2f1ad6821fc347dac7c24b7",
+    "packages/db/base.py": "987edfd9dfe38b2c49492c7d1a4e774015d16b72e2281b018e4160be6b47d560",
+    "packages/db/migration_handler.py": "1f6fd161314db4aeb64243a357a90f0475daf461086fdf759f62a7c9192b4c3a",
+    "packages/db/models.py": "28115c95ec8d3f176bbe0c0b101fa708f81df8877af755f2b349c74e1c2b8d23",
+    "packages/db/repositories.py": "f221ebb2f1574fc27bd40f13212394b00294c55e5de2407f5b5b0d61c5523340",
+    "packages/db/session.py": "04d4bc63364b7e09bdee36048eaf0fdad891582fcb688ec1278561cd62a1d295",
+    "packages/domain/__init__.py": "adef6a7a1a17db1c99c5e953c89e9849601315de7222c54a06b80f017be8ce42",
+    "packages/domain/normalization.py": "dce1b83614bd171d5d469fc15d60135b7e755025b6f4b5086e21d8e332f1cfe8",
+    "packages/domain/rules.py": "d5855c13aa510f699fd2e4e4e9d40c0df0079a7ed3eaedc9a0accd83499f8421",
+    "packages/domain/validation.py": "a622eeb304513bfe21643ba12bdeddcdb0f0c5d91da67eb6dc3ff32e29db6aab",
+    "packages/logging/__init__.py": "142d96ec279006b0d99a4b50cc9b017c819c2e608d696c81fed6e4d0ab6a5170",
+    "packages/logging/logging.py": "ca182bb7d398d80c99ca1f420ffb2d31a2f2f551c52f6d2342eadf309e20088a",
+    "packages/queue/__init__.py": "2c125d06ae0c5bb437e159249e6227982775bde2d4590b619013bc3353d9d698",
+    "packages/queue/base.py": "c49b12b5d4122919f7ca45ff29758ce0e72011537dcbb46318c87d6977b3d45f",
+    "packages/queue/factory.py": "b5e539857d1aa5a570094f364ce5b0cecc17df33f0fde53e9eb1d090157db45c",
+    "packages/queue/memory.py": "f4552d2b7ca4b2bd08da34e507bebda997ed115e5fb52cbb72c9fa283c33928b",
+    "packages/queue/sqs.py": "c5c37d327656c1cd991fe1343eb5d026b697717de8498f05828d511869b96cc3",
+    "packages/schemas/__init__.py": "b1ac80dbbe902324ccfe38733fc25fe4e87292573ebf6bd83e205e312823cf0c",
+    "packages/schemas/api.py": "b804694f2d5b20b79328153dbcf602d6adc65f694b06d12096e713acfb4652c5",
+    "packages/schemas/queue.py": "5405ed22e2d36c7d96b5cf3c3d0b1941bacf5685a1f6399029c8c4078e296298",
+    "packages/schemas/telemetry.py": "0551ccfaf2326fcb715f6ff94675492a844d8e78dd47a46a113fb7f2adde8218",
+    "packages/thermal/__init__.py": "05fba53bac0881f94967a21034d4276d80a91067a17b1cdd1b814f650ce209d3",
+    "packages/thermal/authority.py": "854ef347ee7486f2225ab775bd6e3f9c48bf94ddda62be2a4c9232a7aeb57f5d",
+    "packages/thermal/commands.py": "8cf0921811578f45fed4a83447c3fdb06b529b276084a880a0d370fff3fca2cf",
+    "packages/thermal/diagnostics.py": "7960fb39bcd61392572d1f1c4b883b95ccab94d02fd0be44cb3a8884a5345c13",
+    "packages/thermal/http.py": "6811813f3b84ca5eead5aca979f538e66a3a5ff967a60c7969538949930a5e3b",
+    "packages/thermal/models.py": "c38199b0eeddddeb0f89ca91e89b8c90ff7cf4203c4c8da20b83a5bbe067b253",
+    "packages/thermal/process.py": "0310d22c820bb5fe695abdf6299594359b7364644254f9823a1a904a58a09859",
+    "packages/thermal/runtime.py": "b4689bb8f15a8264e6bd6a536bfcc1be996997909795a73c0fe8c6ffe00782ac",
+    "packages/thermal/service.py": "9ab61da190cc382670aaf9db952a308a065805d4d6ec8ab96a72d5b9d9730f21",
+    "packages/tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "packages/tracking/journal.py": "d9cdf40dc483c166cd19e4a09c7246abbf415af07ff7139c57c90c29d601e5c6",
+    "packages/tracking/query.py": "6b8b905f44477f50db3037010407c134c3da872d3590859c86498a8cc46e9a18",
+    "postman/README.md": "f21ceeae533b9c0576bd098a5e2a17759533697a931bd586c64e9d99b18a5d74",
+    "pyproject.toml": "2f0e431363936dd393d985c6e9384f42452eeb3fa0ef5a2578ea1c0e0f436afa",
+    "scripts/bootstrap-local.sh": "07ab024e458b988e9823d0d44a44b0c1cffedad3a8e3fb2bdda73aecb67b72f4",
+    "scripts/bootstrap-staging.sh": "4a540a01ec703451728055e8f89f80b1c795e733c2480a13aa31c2d97f9a9246",
+    "scripts/build-lambda-bundles-local.sh": "b35a8fd4185c13428953c192a53c5b8ab4a9d1b56f04faef301c94641b9a6776",
+    "scripts/check-terraform-plan.py": "95785414340e62462a369181f8aba16d9c5e4323a0f83cec6c525128773d9736",
+    "scripts/demo-local.py": "b2a670adadff223307c3f40b5621ebd8d567f8225569d7ea9d535da0e5876e50",
+    "scripts/demo-local.sh": "2fd356ce78f821ea7796a6d9e0effb14afd53673effa2b581cb3ff1250f5f450",
+    "scripts/deploy-staging.sh": "fff6c37b8398e4f2e1b3305fe207d0ea25cdbbde70f801760e6796dd0c9a77e0",
+    "scripts/destroy-staging.sh": "a147e2e5476c78ef702d40c067e8972a777747866502d4d30cc30509fdcc7b6e",
+    "scripts/export-lambda-manifest-env.py": "585cbec87261ff598a308f88d66aceeb330a213a864d151adbf3d0bb176fa919",
+    "scripts/export-terraform-outputs-env.py": "ab17cf4fdf940b00d735fdbd6877758848945bcad95d98b72e7845e19b8de769",
+    "scripts/install-terraform.py": "8c7120732a5e58507ae3772bc983a11058da2860d934ffab1355b10c49f68247",
+    "scripts/invoke-migration-lambda.py": "98a88d72f1032d571fbf0f63aad4ceb1aa9bc49fdc30933f991f3ea0f15b96c7",
+    "scripts/package-lambdas.py": "ed88023cf04890a643d4e5e3dd57642755a7adc44ae000de726b52469c4f192d",
+    "scripts/render-postman-env.py": "666692a75f482d61ab42d7a3bbcbf42c9121667749d092b7a72c2c07c77a932f",
+    "scripts/reproduce-thermal-timeouts.py": "ed548b029cfc1608f732042128b5af05e82df732ad38982558eecaeeacf522ee",
+    "scripts/require-env.py": "a4bde959982a30721a1e7484e201d97f015be083efed68c02482724747f6e5db",
+    "scripts/rollback-staging.sh": "e1c16d4aa86a3b057961ebf7d3f7338848dab33bdbfeb6eec1a811088a2b75ee",
+    "scripts/run-smoke-tests.py": "e1ae11cf3e7a9fd8bcd7bca507b386e50e897650049df763193052124054dffc",
+    "scripts/run-smoke-tests.sh": "97abd81a8b199c5ca7bd9d7c54f38963d295a3870e16e05fa3e262bf66db4672",
+    "scripts/smoke-staging.sh": "f6c99a3edc54d1f23fdd1d8412446686d9b2f964f9642c416d9aeaf7728ea171",
+    "scripts/test-postgres.sh": "0f0aa8169b9010732278ae94b88d55015f30a18d4a74a531786b2bc6d8456e25",
+    "scripts/test-thermal-command-migration.sh": "2c60c01af7de3bf34e5c352eb75e9b5ce66259f2592b48e945103c16dcabe3c9",
+    "scripts/test-thermal-engine.sh": "6e74fe42db71f76d09049edd6f4a81d2e391850cdd83a62a93eebf9b19caef29",
+    "scripts/thermal-engine-probe.py": "588f2aca4e67cd64309763e9a44f90fd3a366710add9df68d75243a25d6696c6",
+    "scripts/thermal-engine-validation.py": "cb2406219da176364922272be059866ee0c93601dcff71e40bb2fae690f8e659",
+    "scripts/upload-lambda-artifacts.py": "ff80fa8c72ca7c068d6f5d78d40137edd27227e2e8c37ac081051a80c5a11dc4",
+    "scripts/verify-lambda-bundles.py": "01cf1472fe9ca52ce5e340e09f7e2c1a5f69a6b59ce47953736a9743f705a497",
+    "services/ingestion-service/ingestion_service/__init__.py": "257f354dbbd74ca3e600a1a18be9b658d9ec50de330d34823ffca020866b65fa",
+    "services/ingestion-service/ingestion_service/lambda_handler.py": "31c1c0d35f4768769a85e64b7c97340654ad0104189b1614b11400e25e274e51",
+    "services/ingestion-service/ingestion_service/main.py": "e5aa6edfe900068d8b9f70cf72a1df167a74d26418b10e6ec61c7509d4008968",
+    "services/processing-worker/processing_worker/__init__.py": "85c397035cbf3d706199f885b550a8343531e61dea4973edaabda8ff0bad7788",
+    "services/processing-worker/processing_worker/lambda_handler.py": "703de2f5531d625cd33fc9f70098e5986de72868330df22a7d1b6af2b88def8a",
+    "services/processing-worker/processing_worker/main.py": "fa10410eeb4f46ba9326a10291ad073a1d48af33156db2629986c68f5942beb1",
+    "services/processing-worker/processing_worker/processor.py": "b62e6b6e89f91b4fb59e4f9c884a2804e56f1577e560f8e6ecd95a50c236fd63",
+    "services/query-service/query_service/__init__.py": "41e6b8bb08892334702ac3832b25ffe0198cd5afafcb244130cb9afc3f63e7a7",
+    "services/query-service/query_service/lambda_handler.py": "f31a79f5c0baf8b637bc6e2e1218ad6e2acb045491cd19a3444a20a37b1f44f4",
+    "services/query-service/query_service/main.py": "0b43f4ef0e7faf1e19e31a42f6d633e3f8935d406d1a567c59625f683d466a5b",
+    "services/simulator/simulator/__init__.py": "9b63097e59eb823202ad2acb095a52324104d7f10cd3ede9afa0206b62696e65",
+    "services/simulator/simulator/main.py": "a4eb1898b7fb1ab678502116744cf7541944c3f2d54f4d53300e156fbdaadf2a",
+    "services/thermal-engine/thermal_engine/__init__.py": "42d0dc991dc4833e8d3e8b466610fece558677555e95b50352406f3ffd9cd20a",
+    "services/thermal-engine/thermal_engine/config.py": "a8316346c5f464371e96d03323fb44068e5cf55d4aefdfe25d6a023687642c12",
+    "services/thermal-engine/thermal_engine/main.py": "2811b2621aa650110aa6f13092dd7cf4ae2c5190fd51181f6826c0e41a50c46c",
+    "services/thermal-engine/thermal_engine/transports.py": "a3451dfa78c8f255bd510a2c0cd5723eafbcc2b71f21fc6a8831d5999389aa1a",
+    "tests/conftest.py": "87c4ed37d05ee2ac1607c3880bd983d09915a05b2756c8bd62732618387d643b",
+    "tests/integration/test_local_demo.py": "308b54a2ba1df0d304990b10d31087ec96ec760422cbe37f625a71ab56999032",
+    "tests/integration/test_pipeline.py": "d18d8ac584010ccbae0e36a1e37660054c4e9d32f7de70d035b6e708b3dbcb8a",
+    "tests/integration/test_postgres_pipeline.py": "da74bfacfc463206aaec176a9553ae0ed73397457e1d111b0a3b73c96843d52c",
+    "tests/integration/test_staging_runtime_contract.py": "481cca7f0cda359fb98713b759fbccb0918eff399b890310f7f329d97c1822ae",
+    "tests/integration/test_thermal_authority.py": "6299ee2f7837446bd8aecf55d05058bdd03a455a6d03d0273555fb9b6582465f",
+    "tests/integration/test_thermal_command_migration.py": "1ee8590abccf6173b1fa8515f74ef309a9579d666de8e0346c7e3556f60938d9",
+    "tests/integration/test_thermal_contention.py": "a282c1e643fae6b10c978da2f72eed28ae93e358c4f339e54cd156b6f043828c",
+    "tests/integration/test_thermal_demo.py": "8bc79ea9380226cbed46fa815041a070163f664a86397277ce5c201ae1cfddf4",
+    "tests/integration/test_thermal_engine_container.py": "f1a376829cebaa1074f75edd93880892afdcbdcac732980cabdd43d0def7f239",
+    "tests/integration/test_thermal_multiuser.py": "3e1de742194f52e74c9fe456e106e8452faf79ee6900e80244b8c37e4641fa6e",
+    "tests/integration/test_thermostat_demo.py": "8f6be8b26d743a70e1b31b009b0ee6e5447cc6665ef560b958a3c3c11865868b",
+    "tests/test_reproduce_thermal_timeouts.py": "199020fd759e8d077792a24126a803ab56366b2fbdc22eea368ff8e13f331ed5",
+    "tests/unit/test_ci_scripts.py": "8a94c22611a2993a285150bda9dc21ff6214ab67840ba0844e85490a1b275ff8",
+    "tests/unit/test_domain.py": "4a58276b355a237d3c5d77a9684e7b8c690ce5f6289f55660ce6246b28f9ffd2",
+    "tests/unit/test_lambda_adapters.py": "4ee7ac444fc8d66cdfaad5cfa2033317f61fe787a6a04457488c6f36ff068546",
+    "tests/unit/test_migration_handler.py": "e0a18e08d3580a5156c681b58c33c697cae4d291e7c892119907d5a4256f39a7",
+    "tests/unit/test_package_lambdas.py": "de40504bb318627a248e6a6b631853c6f099c5cff7a8a19a2effcc82f7517e18",
+    "tests/unit/test_queue_observation.py": "116fc5a211b59cea8d8098c0ba0a4344d3905858959d0bd43fb31c927120c846",
+    "tests/unit/test_schemas.py": "b5074600052fd295cfa66c217a489aefeceec08b3f550fb6c6a741797e623655",
+    "tests/unit/test_secrets.py": "0fa151cca86a570a5effb9ed9bd876e9f26d6d1a721219d6b3342a8cc7c6ef97",
+    "tests/unit/test_settings.py": "a437f1a483039e0eb685b7394dacef78910f45b7f65a1518cb8ffbb03a9c5385",
+    "tests/unit/test_staging_auth.py": "c6bc5193a17c8c0e29f25297e3fac8f84e54aa24b6102a22ed62018e0681f87e",
+    "tests/unit/test_thermal.py": "466f89dd5d1e14ab7e309c1dd25b60ae279374cd0e2edaff0412385cf18f4ef6",
+    "tests/unit/test_thermal_authority_deadline.py": "21af3d08935abc1b2556f8ec5ee500e699eb5761f5f298c839d73ce29f3e8693",
+    "tests/unit/test_thermal_commands.py": "4f8797f89d015385f16a91552ebe3ea5b8c6241caf4cfe163df96392c3df3ea7",
+    "tests/unit/test_thermal_cooling.py": "b912ebe6e4f83e37adde18a4bf255f1b46e39cd9d278367a0aef59e8c409af8c",
+    "tests/unit/test_thermal_diagnostics.py": "9069df829e20b449ed34346829f7ea0a5fb5f1314a5d1cff0c42475bc8f6e403",
+    "tests/unit/test_thermal_engine.py": "46b7d9500551f1377cad655d4fc3bcc08e2dca40152f213c1aed0da2d809ac68",
+    "tests/unit/test_thermal_http.py": "5323abc9db936a18ff17befa7e07858b715c0dadcc6a8ef51d1c072e1f474790",
+    "tests/unit/test_thermal_lifecycle.py": "6ab4f6cacc35b2cb0f79bdf4e2d73bdf92ef243a154454ea9ab5bf5595b8a3ea",
+    "tests/unit/test_thermal_local.py": "bf112596ec61daa6dd440bc80695ce09788f24e945704c10db0c2ac7bf4e1554",
+    "tests/unit/test_thermal_runtime.py": "c96268ddbfe15ad7128c76308a9be70678e1ee6a66dfd81d5373b394d64ed443",
+    "tests/unit/test_thermostat.py": "bc14681439991e638770742253eff9f2730234be8211fb65793b8aa8560f2a93",
+    "tests/unit/test_tracking.py": "f2d6980288b332592d1acfd6a27a8d3295822b811603d5eaadcaa890ace46bf6",
+    "tests/unit/test_worker_lambda_handler.py": "3a957bdde6728998a1763cdece4a5b8474bfde7ed6f2e6b9357f073713196a22",
+    "uv.lock": "209824ce9776ae1f8f805049f8c4ed68aeff5589b6197ce0c0fcae3679bd1d04"
+  },
+  "local_evidence_sha256": {
+    ".run/demo/18401/api.log": "ed695d2d26b716b00cca4b5e892f04c6677af4123b639edf4a83aae0d23c0b79",
+    ".run/demo/18401/runtime.json": "11194cd312d92d563d93510da0880f0524d1907b0ba7097d729a1d43a841c59f",
+    ".run/demo/18401/thermal.log": "0bf98bd77aaec2da5c2abfd1bbbefcff80c7c91e92bbdbf798fe3602e201f70f",
+    ".run/demo/18401/thermostat-integration.json": "e691373b013dcd7d494b625dc328efe8f28888fc14e9f7948e9651e1688d554d",
+    ".run/demo/18401/worker.log": "8e299f915eee17ee73c7349602b01220c41c9626196977f81c797cbb5307b659",
+    ".run/demo/18410/api.log": "ee86c119ddd4f25a97d2edd388ceff4dcd4342ba50a7bc50b84eb5fffe373535",
+    ".run/demo/18410/process-exits.json": "61debca355a48c6bb0ca9449c2bee1f661f359ee6e429f1a329ef1fed33163e2",
+    ".run/demo/18410/runtime.json": "1b0f8d790208804e6a33658d51402e082fb3ca66987b562cb83e06852dab6f59",
+    ".run/demo/18410/thermal.log": "bfc34466a7d4884620a4284dce55365439980142e322d8ae2f511c6873bf76cb",
+    ".run/demo/18410/thermostat-integration.json": "9332e8305c2d7c8cca353e4b1ea8507f5d724cc8ecd52fb47c9764c25c44f2a8",
+    ".run/demo/18410/worker.log": "83e618a42acc58550766d8864e4cfc32e5683da21c3f1a02870ed663235bc027",
+    ".run/demo/18411/api.log": "e6d360015d6af8baa94c845416bc1815d14f61b79534ff12496c4400516f555a",
+    ".run/demo/18411/process-exits.json": "45e5b3376f07074fa03a44498d4bc35c9ba911cae701b2aeb44d184e5ebf39cb",
+    ".run/demo/18411/runtime.json": "27c15b8f55d6349cff955c34b54296421aafc2d678702abbf3e486768045ff44",
+    ".run/demo/18411/slice2-evidence.json": "025437d2c467ed3f278377a89815bdc25075f1e29676077a49ecc5387d1ae42b",
+    ".run/demo/18411/slice3-evidence.json": "090a7c005a51a2bb13b572d41ec9284725300baf5f018bd27e788c4a5fd4c51e",
+    ".run/demo/18411/temperature-22-evidence.json": "5611c99ebd10df60ac5571c40b6253d83e363e8a394a15121bcd7ba061915b07",
+    ".run/demo/18411/temperature-25.5-evidence.json": "bbeb4bbf26ebe3a9742cddb78545c229545706dbb21235b6d4104ff6ed9530a0",
+    ".run/demo/18411/temperature-25.6-evidence.json": "964c74f32f0537acd03777e2adde4b244a7d180d9dcad6ad662db5faf0ec4783",
+    ".run/demo/18411/temperature-29-evidence.json": "e6f692ff230dc7ae0b342b2089f3bc746dd6c42f0e2c3c22e713e1088faa9190",
+    ".run/demo/18411/thermal-cooling-nominal.json": "cd036178b4b79d8c3a4a60650217a8d720cd93ab0438a0207a9cedc624d7d883",
+    ".run/demo/18411/thermal-cooling-stop-before-publication.json": "1db16fbcf2b49d5eff4f5aabe32bd6627845c863801197dbfe134b3933679973",
+    ".run/demo/18411/thermal-expired.json": "57eb72601242e1c6971c41453087bfa8f35776b52abbfcfbb31cd081ce22f00c",
+    ".run/demo/18411/thermal-nominal.json": "6211d9207b839c63625bd9141414ba3bb64f217fc6e7c4c33f4cefdad8d00a77",
+    ".run/demo/18411/thermal-resume-cooling.json": "588ff1a2805e49fac96910b7edc8fd1deff504034a4958c7ab3ef407ed729ccd",
+    ".run/demo/18411/thermal-resume-heating.json": "23bf151881c3d4186eeb1ff35233d1b9201950f65be981d82ecc1bc795d3450d",
+    ".run/demo/18411/thermal-switch-cooling-heating.json": "b3a8b2c329ca995965bb2ad1f5ffe84bf7b281474bbb89b4b3068065857d2653",
+    ".run/demo/18411/thermal-switch-heating-cooling.json": "532f5a9b1d68f3a77dc90d4520abdce6a12fb4b6bc986c81726b31efd25dbdaa",
+    ".run/demo/18411/thermal.log": "e45ff6880b2a7624768aac51355f7e5d1f1ddf316d1713094ce8771dee28c51f",
+    ".run/demo/18411/worker.log": "a4aa7fe65fee80110d197d6c1bc8bde6443e103cb18095f173d55eeecc4b39cf",
+    ".run/demo/18412/api.log": "9a2a0b1c120be9bad7189c81a8bffe564b95deea1b3ee9863c5a4b469aa3adf5",
+    ".run/demo/18412/process-exits.json": "e668f629d56f23e8ae6565a3200988a4c29019604ab4e7283ec1d273ce47684d",
+    ".run/demo/18412/runtime.json": "a3cc0dcdae5bc3861f8fc11801134dada1dc5bab8073b598069be76f5e7dea2a",
+    ".run/demo/18412/thermal.log": "238db3901cf9b5e87f20c94b2555bc6cc7019b657060d709713d20882dc091ca",
+    ".run/demo/18412/thermostat-integration.json": "09462234df4cee95e1a5f160e2ca62557f2d34c4be23f28f70ba2cf108df5d7b",
+    ".run/demo/18412/worker.log": "5e287e38b2ff538f56da93bfc1d06a94a117e77304e2191a7ad61deac0afda44",
+    ".run/demo/18413/api.log": "873254d947a29a8366570fa933e826348229d6282e30fdb0576a071e4de42c9f",
+    ".run/demo/18413/process-exits.json": "c836ab8b05143c3df02f81f10ac3b95e53fd878f8cb5598b8a47f6b12e077f3d",
+    ".run/demo/18413/runtime.json": "6a1e8a37e46b764319381bedd1f20e99e6bec3fa2c1e1a91a119f796332876f0",
+    ".run/demo/18413/slice2-evidence.json": "4d14ffa4bd9e8f6a9d108471d1ba5790b9b131ea2bd08fb3f41cd636c732a82d",
+    ".run/demo/18413/slice3-evidence.json": "20f081a7511ef11815b0200bf97a1cef0c3d2bd60cb1acec5315a34eb7473f26",
+    ".run/demo/18413/temperature-22-evidence.json": "fddf977175df316240a40a2031134c7b954ec3a8f3a982739f146abb29fd0935",
+    ".run/demo/18413/temperature-25.5-evidence.json": "b277599386f418caa956dfb09e60d8c57c3fb6caa7ce4579b447e570dff94724",
+    ".run/demo/18413/temperature-25.6-evidence.json": "6791c2f438e06522f05ab432377d8d8b8d2dafebb73cfc6590368ae785477eac",
+    ".run/demo/18413/temperature-29-evidence.json": "636ae9eff30eade83d942961b02d25d7d14935daa8bdf94b5148f138156e1c59",
+    ".run/demo/18413/thermal-cooling-nominal.json": "b576a51052181728a5d2ca127c673f5575b88bead7194dc37af59398d8e85a50",
+    ".run/demo/18413/thermal-cooling-stop-before-publication.json": "f3dc9f81f990322be30347baf095b7e326852c887887870eabb4779cbd2ac9e7",
+    ".run/demo/18413/thermal-expired.json": "008f136493f18b872cba826ba4ce856454a18c3cab22e535f4961f7ee3ab8634",
+    ".run/demo/18413/thermal-nominal.json": "b7a039147ce0e02b4eb96c3046b230f764547a23f860cf5dfd7196c2a0d85016",
+    ".run/demo/18413/thermal-resume-cooling.json": "ae3103ca3418c5bc1f34b38a25d85498cb0abd4d3e219f8e49030e20108cd45e",
+    ".run/demo/18413/thermal-resume-heating.json": "9a2bd766879b620ff91106898229db5327681893f1faabef3e7d02fcf27d7b3a",
+    ".run/demo/18413/thermal-switch-cooling-heating.json": "bbcc21d06e50aabd5aeac9244dbec971a2c767647016781ec14d18f4352df47a",
+    ".run/demo/18413/thermal-switch-heating-cooling.json": "ab61f8a36e079aa88f72fd948a114a2be1b21c8c302a93d3031ac9911237edd1",
+    ".run/demo/18413/thermal.log": "68b6f90a42c668f8f3064b129d0929b2914b289e3328bdca204f527f9900ba6f",
+    ".run/demo/18413/worker.log": "492641bc4c781c61a37937c1371f00ab262842d8fe40040ff69fa19f3cfe3cc9",
+    ".run/demo/18414/api.log": "864c8b51d8e10bbe871d84de43dcd00c5e43b3c1c5358061d1ef8218b156e411",
+    ".run/demo/18414/process-exits.json": "2086872a0b45f16fd2de4be516223762520a5db6af413b2495149a38263786eb",
+    ".run/demo/18414/runtime.json": "2df5608a2b37305865986a528521a003e735fb726ee3e296e53c43cb68cda034",
+    ".run/demo/18414/thermal.log": "455d554084d400c724ab9bf225bfc225ae9dbbd48923e45a785cd94b184a7209",
+    ".run/demo/18414/thermostat-integration.json": "dfafc38a363f82231d3879d48e737befe44eb097f7a9263eeae07876fefcba18",
+    ".run/demo/18414/worker.log": "a96eeeb82bf4843a0d019f5357c84fee685a64f85f34148c3b75db76980ea9f6",
+    ".run/demo/18415/api.log": "080130e5b12b8f85d91ffd15b73498209f517b642fe1cbddb5436c1550a7c371",
+    ".run/demo/18415/process-exits.json": "e6fe4e5c00949dbe374b5a54cacb4707e653823d44ae70c4955765388c963d51",
+    ".run/demo/18415/runtime.json": "f957ed16c6e3a414481669806d3a34dc957a1a00f2a79ec18e22337c29fea819",
+    ".run/demo/18415/slice2-evidence.json": "a3d0c16e76486de25753171505de592ab7ee8ded827bdfc332f0f7d6b9e2da8c",
+    ".run/demo/18415/slice3-evidence.json": "73a07b2316da74456089bc80e8fdaf400b3fcc23401232bb7f9834c10b950541",
+    ".run/demo/18415/temperature-22-evidence.json": "5b92c599d2f19940570aca79177374b35eaf4f61dfd033c7b7893c14babf259e",
+    ".run/demo/18415/temperature-25.5-evidence.json": "a1fbf5d7e635667ecbe1440224da37ee5f3537b1b20991daab281d2a128f45f2",
+    ".run/demo/18415/temperature-25.6-evidence.json": "c23d612396d7e3daafb0784d6bcbeb0ee51f5b802d84bce8902c59acd7ad6d8e",
+    ".run/demo/18415/temperature-29-evidence.json": "6130f3ad2d2d89bf39c11c643001c245417e6e102f80671b9ce95fa6ba8ce47d",
+    ".run/demo/18415/thermal-cooling-nominal.json": "fa5e6f6626cb325a9abb4fc57fc2655dcecec0bc7a5d92f4d7ae7393e665aa93",
+    ".run/demo/18415/thermal-cooling-stop-before-publication.json": "ed8a6ac8ef4ee11edc5cf61e15db9a2afe201a3a232b9ac6365b341dc62b8da9",
+    ".run/demo/18415/thermal-expired.json": "ba6a4225d982f596412af68c335c7d0636a1fd0d0830a2669317caef1e7ab6fa",
+    ".run/demo/18415/thermal-nominal.json": "0912c120d966d1aa31f78eb02fcb91b333be38ff7a73f24e9bd964218534dff9",
+    ".run/demo/18415/thermal-resume-cooling.json": "28b8cc702aa92721361212486dd16baa33908321228643bf305633db79926dac",
+    ".run/demo/18415/thermal-resume-heating.json": "1aacccdfff5e7eb87436463139d5a85cf4490395c4153975caa20149abd12890",
+    ".run/demo/18415/thermal-switch-cooling-heating.json": "98daf65209f77f0e55e6930aea8c69c1d826a7c6afd87a2765a123a60a3a802e",
+    ".run/demo/18415/thermal-switch-heating-cooling.json": "b3cfca4228f1d0ae0cc649545b4cc99a36d9bc8829e3b9c673910c50f76598e6",
+    ".run/demo/18415/thermal.log": "a50e6166c880de07fda8af25eb7915d31e67ff8df53b38c68121ba232dc1b366",
+    ".run/demo/18415/worker.log": "9f7a15563fb6a32b2dae85dd8f6235eecf590d374601ee9f6849f72a245df6d3",
+    ".run/demo/18419/api.log": "5497e9e4d6803798473c2aa92445ca6ab03db864fa97b4db3dd3a862d9395e81",
+    ".run/demo/18419/process-exits.json": "0059e4c33dd65c987dc59f3603afe3eb6e7c627296abadc49018765eaf65a072",
+    ".run/demo/18419/runtime.json": "c40e7c14a93a246c3a230da2eaaf8e953c252a2bf7da4635ac7b37276baf402c",
+    ".run/demo/18419/thermal-crash-windows-cooling.json": "6c78ecd80b734866f4230dbf61b1c1eb5e1876c4290654f0ca39b843e9f1fed2",
+    ".run/demo/18419/thermal-crash-windows-heating.json": "41a7fbd73a077ba8c44cd24a2906415de15c28be6fcaa7a335c2e14d0defa574",
+    ".run/demo/18419/thermal.log": "de4bb16ea948b2187fff5e32a69e5ab1efc7143442330bcdd3174d26699ee634",
+    ".run/demo/18419/worker.log": "fc2c2858b7aa2bb912a694c531b33b8a7dd6ee6cddcbc1dfc26ae0bc3c90054c",
+    ".run/demo/18420/api.log": "d6da629d9a45fa93087360ab9ce6235ece056c2551be086d175c417160139892",
+    ".run/demo/18420/process-exits.json": "54d8ccd2986e73ba22bee9ad2bef92ed6a01a0f021034dde0390ea5c47af28e8",
+    ".run/demo/18420/runtime.json": "9e86d57ea30425d2f181c2436adf6c1660505fe22def4e770d1c038926a0e911",
+    ".run/demo/18420/thermal.log": "dfac918d97baf6559947cd8930726d485975357445008dbbadf254d0113dd95f",
+    ".run/demo/18420/thermostat-integration.json": "f9fc96d784ebcdea5142c0a70d2900ecdb8ff32471a901851edec842b0507e72",
+    ".run/demo/18420/worker.log": "45a028d0ed8fb6d34be512cacafc75771afd12994a29376662c26c1ecca087c3",
+    ".run/demo/18421/api.log": "f7214961a1f3d0368824ade068f30d4ce29001663aef1b405b27b62481bb82b5",
+    ".run/demo/18421/process-exits.json": "dafa994f87e0660d5dd72f4d09d8c55aeafba0241c6e799f83ea77557200affc",
+    ".run/demo/18421/runtime.json": "cf7eb28731c55e7806667a638edbb9c7d6a2cc407ecd59328ec4887e5d93f33b",
+    ".run/demo/18421/slice2-evidence.json": "0ef03569ae6abca5f7263849011583e6ad987f072c50a917153436b33b7fc519",
+    ".run/demo/18421/slice3-evidence.json": "24be27ae3fae00321d226cef509a263906c660914d209d006b182c55df991ed3",
+    ".run/demo/18421/temperature-22-evidence.json": "c634b33a8ba30cea3b63eb972d00be4e53caa1c8afdb32e492a77383debd18fe",
+    ".run/demo/18421/temperature-25.5-evidence.json": "6e2f8a96e6b41e66f678096423a879dad1049ceb70aed9cd6cf21a35927c1338",
+    ".run/demo/18421/temperature-25.6-evidence.json": "7a930b326017489a37533f7a5704622987bfd4e55c0d5c58f6c19823f09c3dc9",
+    ".run/demo/18421/temperature-29-evidence.json": "ea0b964edb3e0a2b86dc4bbb6407c050671db93dc563fd258fea345cbc7afad6",
+    ".run/demo/18421/thermal-cooling-nominal.json": "d0124785cbf5c8dc988e2d89361fd14fd3fb1983c80852bf16d78316722b1dcb",
+    ".run/demo/18421/thermal-cooling-stop-before-publication.json": "f86664165f148133f08824de8488deb64dce93e093e636c455e36dea962a71ec",
+    ".run/demo/18421/thermal-expired.json": "ec56861831d3042de6641ec3bb80b6ae844fd97372e3c959f0d80874e2017c40",
+    ".run/demo/18421/thermal-nominal.json": "5d5f4cc78fccaa8ecfd0041929a0b9328aac7f19aa5bb479a530a8dd8114b189",
+    ".run/demo/18421/thermal-resume-cooling.json": "bc5d250f3316be9a99177f0e0401497ad56347ac10e326cd38f29c3bd1c8c088",
+    ".run/demo/18421/thermal-resume-heating.json": "f693cbae7f4519b5db5cb920b0295d3dead81712bfab7d1ee03640a6b0c2171e",
+    ".run/demo/18421/thermal-switch-cooling-heating.json": "86c1ebee0fc96b2d0514c359fba5d9a5b0955156f3d3a273a902dcd1afce936c",
+    ".run/demo/18421/thermal-switch-heating-cooling.json": "a51e5b1aa4816804e4ac533355fe66b39d033049a027b28767ba0192cc94da30",
+    ".run/demo/18421/thermal.log": "2792af8b89f12d7ba1a14215df125e6d14f3551a54894565e552ba72a14468ed",
+    ".run/demo/18421/worker.log": "f01c54d0af14822748320f1e8d6e45149715d0dd81d98a47d232d52d2d61aee9",
+    ".run/demo/18422/api.log": "16d85cdeffb5527ea9c12d2fd11fcf0c27038ce5ba89b15509105ec330eb306e",
+    ".run/demo/18422/process-exits.json": "f35162ad47df576fdca87f3841a9d72f14ef0f4e5f26ba94185af2ab2aff205f",
+    ".run/demo/18422/runtime.json": "733fb3cc237ef7ef417dd58b59a48d2af25790b82987cfe61e6f59aa31c89eb6",
+    ".run/demo/18422/thermal.log": "ae20aec16186c9914c5a46e85cfa563e3408c89534b8ae541c385216f3346b74",
+    ".run/demo/18422/thermostat-integration.json": "b5ad297157a452a08c98273b4ba0b28fea95d272152f144a468bd2c154a324b4",
+    ".run/demo/18422/worker.log": "863fda4752815d8df339fda7e6d855bfe678892e62c745321c1e918ca7cc6d63",
+    ".run/demo/18423/api.log": "02419ce1f7e5464c50bfab53132096965743229717cfadb3646dc96ddc6b21fb",
+    ".run/demo/18423/process-exits.json": "6b291b4166e9599d9f95a9aca534d736311c04ad22acf28b9b933d8ecebf7257",
+    ".run/demo/18423/runtime.json": "8f21fd688ee7b87ac16a34505a127249e52703888b5b134516b08969641bf520",
+    ".run/demo/18423/slice2-evidence.json": "51a90e3e0c7b2dfa4a0f57ba30b560d1b9839428185f6feab9e8dfca060b8997",
+    ".run/demo/18423/slice3-evidence.json": "82c323b76deaf0867a7112c725da189b680fb5f023258f5d805f6338ad4be292",
+    ".run/demo/18423/temperature-22-evidence.json": "51c7dec4e1f51e19c7c54e7965df704e10f56a8989827d0d9e9165ed7321e149",
+    ".run/demo/18423/temperature-25.5-evidence.json": "95fa4d796dc7e33d4c3687dab989dae4e5cc05f2d1b42ce0e6032201546b9eb2",
+    ".run/demo/18423/temperature-25.6-evidence.json": "b5942756f6967165489abc865c775d95572df68a9698a799fc82456b7e2976e7",
+    ".run/demo/18423/temperature-29-evidence.json": "d8dde06f21e54d4518adc0d359c2fbf4167d56ea47cfdf1b1a857c8e934468e8",
+    ".run/demo/18423/thermal-cooling-nominal.json": "f8a7e386bf5675fbcf1675993550f2f980fbc611dd383ae9491df4709b55fa83",
+    ".run/demo/18423/thermal-cooling-stop-before-publication.json": "a5e432170f3cbfdc0d8c9c07df4839fade60ab8ac0016db917a4f40c1f70b5b7",
+    ".run/demo/18423/thermal-expired.json": "49f33fb313c18746a707cf70ab9e0048cbfc90e9a3ab92efc27c90b0cf6b853a",
+    ".run/demo/18423/thermal-nominal.json": "e0dd3e07bf14854be78b80a643181aaaad1a3a58fa0b6d2b29568e17dafe013c",
+    ".run/demo/18423/thermal-resume-cooling.json": "b15c510e838a625cb94e32688e0dcab1f17fa8a58ba1a4b68895543ce5f5143a",
+    ".run/demo/18423/thermal-resume-heating.json": "e41b7527443bdeb5beb18f6c9f907db87a1f43f008ed679838cf4a0405e08c7d",
+    ".run/demo/18423/thermal-switch-cooling-heating.json": "49e1c1ff89ee450f682432a26d7e6429d16db07598522c49174dd784a81d264c",
+    ".run/demo/18423/thermal-switch-heating-cooling.json": "607ba6cd5c474b4f496bd087a46174aa77f10b3086d243e06b2fddf55a3b59a8",
+    ".run/demo/18423/thermal.log": "68b0591305a954d69010c2a7970cdef7fe0aee0a7cd24fa72f30831e039910f6",
+    ".run/demo/18423/worker.log": "e3c878e59b35a313ea55343dc3be00eea5648b305603162d97c654c3ccf68a97",
+    ".run/demo/18424/api.log": "0f3be50af342d0fbd5f8f7d50fb9096262ad3f737e0cda2ef02797a2d69b1c7f",
+    ".run/demo/18424/process-exits.json": "61081fd6edc3bc88919b3da0d32e639e71865b50d8f89d68caa8e4d61e6bbd9c",
+    ".run/demo/18424/runtime.json": "f1470fa0c57cc2d7d53267ab8f00a69d8fac8f0bc152bb6b4c003157c2cc4997",
+    ".run/demo/18424/thermal.log": "4b3303674086a242a9e4fc62b582b48241f80118ae0cc8fa0942818cbcc84e0d",
+    ".run/demo/18424/worker.log": "b6006dad71b13e37276b3bafff359de5df25092b5db4bd6382c54099aa8a3296",
+    ".run/demo/18425/api.log": "64346d999931b5472ed5e0c9f43b06cb6d51b7d6714853515bdb8ea5ba2b003b",
+    ".run/demo/18425/process-exits.json": "84f0a031467b6d8be0586a0002fda3cced2a1215930174171edf6fe8a3c1f117",
+    ".run/demo/18425/runtime.json": "4f79d5ff3e68c40582a52b1434fa13501cf5cd71178576e12a24ef8e07d671bd",
+    ".run/demo/18425/slice2-evidence.json": "bad025c6226d036e0188edc90108851c980eda47188819b579bec94af984d5be",
+    ".run/demo/18425/slice3-evidence.json": "819c252df767e36b4161d298c4aa8025a665eea610f7ffc18b6ad80b65b273b2",
+    ".run/demo/18425/temperature-22-evidence.json": "18f642e9fb4b4a9ffe17b28106e09fae76c5a1aae67ebce460342b9b389d85e7",
+    ".run/demo/18425/temperature-25.5-evidence.json": "1aed7cbb73e94e70bcaabdf0f903747c3073b038da8c9e79d0468095ed5411d5",
+    ".run/demo/18425/temperature-25.6-evidence.json": "3dc4b9b66a1142ce495e9ad3a7e918393cb6c8b1fb9e890e3cdbe2d2f6e621e0",
+    ".run/demo/18425/temperature-29-evidence.json": "2471224ab3742f4b1edbd1b11bd14fd20dc32740650b0c73005ef3945e5cea48",
+    ".run/demo/18425/thermal-cooling-nominal.json": "d542ba4fb99b21c019f82ddf5f86fc4f2a8ebc4864c610dcba5abc877993add0",
+    ".run/demo/18425/thermal-cooling-stop-before-publication.json": "2666f6efed2235433da2a379819d6860ca994767aadbce4a2e7e188ceca26a34",
+    ".run/demo/18425/thermal-expired.json": "35535c67160b3f5019340b6d8af7ea4cd1b8f77cd56b2582557a4d146d6685dd",
+    ".run/demo/18425/thermal-nominal.json": "6b423a409bc1c3915a1f20fa009ebf7ca2adaed3566f5abd4a1586bd6ed1006e",
+    ".run/demo/18425/thermal-resume-cooling.json": "7e678092f9bd90f245d636d6b51eac2c93773bc65fe55c8291b1d285b65b9f7f",
+    ".run/demo/18425/thermal-resume-heating.json": "fcab40ab8b392bd507818b8131a6f18dd9f5898d8ef70674520b098a1440366c",
+    ".run/demo/18425/thermal-switch-cooling-heating.json": "3a15c48bf3c1ad8a14471f71c23b270ed3f6310028b5315b5b83910886b37712",
+    ".run/demo/18425/thermal-switch-heating-cooling.json": "e6651dbb26474f9d82fbe44ea16bdd8f6c342abd27e0e9a8d7d2904dec1ceaf9",
+    ".run/demo/18425/thermal.log": "d4205d694e473b55d002266a0729dd30a478120a0ee2a7f4c9190af16a984e5c",
+    ".run/demo/18425/worker.log": "555868a8aaf7db3d91a992052ff3b218bc78c3e827bdc5a6b644a83e21963cc5",
+    ".run/demo/18426/api.log": "53c0bbdf6b91933f625599ac196e05fbe9cd234d79f7d546a5f44609b606a9d3",
+    ".run/demo/18426/process-exits.json": "f4459569ae4923cc5367e658575d9c2248fe9325c93b9c60d198ee9d89179736",
+    ".run/demo/18426/runtime.json": "3b1c8549ba2831e80f409b5081a269ca267fee870447cb3eb8972e73a6f2e6f1",
+    ".run/demo/18426/thermal.log": "710304b6a3ef77a8ddf772c944a0331920ed5704ce7594e872111912f8a7aeff",
+    ".run/demo/18426/thermostat-integration.json": "aacc7d6231b1f05a9d90823da5d3b91f7dc69f723dcff47ccaa5bdf7ec8e7f6c",
+    ".run/demo/18426/worker.log": "d3ba74a990b76f0ee60b99f9738f89fed1efcd2b18367545fd48a5f239731861",
+    ".run/demo/18427/api.log": "c6232b6701d6eaff4ba8b07bf64bddb83bbdc71ccbc1a23096cb4984ae21d1e8",
+    ".run/demo/18427/process-exits.json": "7ff61b93b41aa0da19fe5d71b49e3c197d79aa8a5db07a7bcbbb32cf2bcd78a1",
+    ".run/demo/18427/runtime.json": "2d58e82793fb3d43589d45cf95f585e7d6357cc586c4eed859ebd5a36df18999",
+    ".run/demo/18427/slice2-evidence.json": "84eef6b4b3a6d6073ace1642b5d57ffbbe783ae063d4182c6803a9d3ed436e53",
+    ".run/demo/18427/slice3-evidence.json": "363d217b046d09cbbd52cd88dc8b3f60bcaf275841d9ea9639fe7f6319b5af53",
+    ".run/demo/18427/temperature-22-evidence.json": "2eff8df09fa16f2811b6bfa7113ddd3be05249cedb033a0429832484e941c334",
+    ".run/demo/18427/temperature-25.5-evidence.json": "39eb2cef67a136cf07e83bc556262e1f6eab0cc0486a4e737daab74e05165c2d",
+    ".run/demo/18427/temperature-25.6-evidence.json": "c76a64685c8df06afe8a97ef1f5424d7a190eff7a13ad007442010317c8283d9",
+    ".run/demo/18427/temperature-29-evidence.json": "e0406f93aa191b6896c4ad8efcef43c5e946f66905424fc3fbe8a75b6e453f55",
+    ".run/demo/18427/thermal-cooling-nominal.json": "8633089f7027f09ea5a61ec2a5ec7e8cd63df2002ae098f0e4190e33121087de",
+    ".run/demo/18427/thermal-cooling-stop-before-publication.json": "2d7cff39cb7d58f1ac3922d67e9ace837742f7f6fe4a537e537301b8c7898181",
+    ".run/demo/18427/thermal-expired.json": "748c72956cd39cbf6b3ce77a5f186b44233ae6e87eb73e1a66900c29bf8f02b4",
+    ".run/demo/18427/thermal-nominal.json": "ccccf8c13911a05ae8f6a85759917557113dfabd113fca5b3d8bb594ca705cad",
+    ".run/demo/18427/thermal-resume-cooling.json": "032cdcfd1491e2f29d4a361c69930a474bf3950b3ef48f2b3ead794f4a379ed0",
+    ".run/demo/18427/thermal-resume-heating.json": "4211da61f8d731bfcf6b30884e2ccdcf87002ccb970c3936b3b89ef3078235e5",
+    ".run/demo/18427/thermal-switch-cooling-heating.json": "a5fca89f53215dfa3eb40f06570c913e91604ef014fd4567a6855f4663dfbe43",
+    ".run/demo/18427/thermal-switch-heating-cooling.json": "98d93122fde1418e306941bfec9189096a14718322ddd4a6eec8aaeaea87ef6d",
+    ".run/demo/18427/thermal.log": "75172b4de184cb64ec0fb6278966f01ac2b4fd3c42571ede76b72100f6870035",
+    ".run/demo/18427/worker.log": "b205302210191b4845ee36f9f348a52ae0ac397d269dd1aabee50cf53c61e3ac",
+    ".run/demo/18430/api.log": "3eebc5261d44d580c489fbbe4b4b0f635ad4cc9bfad63af563bc2f71e0c9512a",
+    ".run/demo/18430/process-exits.json": "49b3be07622217884e10375056086dda757fb0c31a0144baa3c1d4eec58ecefb",
+    ".run/demo/18430/runtime.json": "c6f36c20b2d574ad19036f165b3181aae30e6546dd72c48c9f858dce28e4e805",
+    ".run/demo/18430/thermal.log": "dbff6bf6e150f066e89592e63965a490ee1aebccd10e92f8686dd331e02ba17b",
+    ".run/demo/18430/thermostat-integration.json": "a74aebb480667a1f16ad5448f793967f190faee1bc478e149ab534b2288dfd4b",
+    ".run/demo/18430/worker.log": "bd74c1ce0d8e216956bebeeaa23d2b41502c8d171a060a8515b9284ed0151740",
+    ".run/demo/18431/api.log": "de5da27117bd7eca8044586a354d8d115b592a4e5ac9d405a68bcc8c23e28d59",
+    ".run/demo/18431/process-exits.json": "765844f1016f074218c2a8061e6b2fba46ac69ed9097076eb0be2a7cd3a35642",
+    ".run/demo/18431/runtime.json": "8345abdd0bf6326264fe38e81680aab90b4b506b4972cb6a39558c5e29346935",
+    ".run/demo/18431/slice2-evidence.json": "f1cd47013e18a488a050e6bf2e901b66adffd28b0955ef34fbf62e4bd7f0d80e",
+    ".run/demo/18431/slice3-evidence.json": "f799442ec27112fe4f897d154415c0daf2b4f4586fcb6c848249f29a1f5498a1",
+    ".run/demo/18431/temperature-22-evidence.json": "9c694817985ada7a42e6fc70d084809279a00c7c008088cd7839836d94ab15ff",
+    ".run/demo/18431/temperature-25.5-evidence.json": "b5b87b79b28039777dd4e0f624a9c1664aa22c089e93e715d50cd9b5be587b63",
+    ".run/demo/18431/temperature-25.6-evidence.json": "d76dbb19408c17690dd798e8db129491b42b2734845517c2f8e476bded1c5870",
+    ".run/demo/18431/temperature-29-evidence.json": "cc6e9c02b318ebb559896a43c3da4069784e871eabab86d7ecb214b2729104e6",
+    ".run/demo/18431/thermal-cooling-nominal.json": "ab8ae1f715de144f202679b94688ee09ca33160eb9216275db361ac3e229e064",
+    ".run/demo/18431/thermal-cooling-stop-before-publication.json": "a59ba50479db9cb38f8f4791e5accbdb1091ac8c47f3ffa3ee35bd5029d94939",
+    ".run/demo/18431/thermal-expired.json": "281f53d9193beb263c804b0e99b25be0ded191346e82b317c2216686fdc70ff8",
+    ".run/demo/18431/thermal-nominal.json": "e1cf1d3e4d1fd8c0c45d561681aede9bd565ab5ec8b723a2697b2725347d6b95",
+    ".run/demo/18431/thermal-resume-cooling.json": "ad19db6b71d1e29de2c34fab15ed7243ded6aa60da2b90fe7f399e2e8fd9a8ff",
+    ".run/demo/18431/thermal-resume-heating.json": "4f9fc06fa5f373a970da1488bb6e5f8bd6b304d35770ad1ceb79c1249389db41",
+    ".run/demo/18431/thermal-switch-cooling-heating.json": "401960994f2dd0adc49df2ee10d9fa69ff42c777aee7368ae3f0dcf2d470e116",
+    ".run/demo/18431/thermal-switch-heating-cooling.json": "18a3023cb3ee0125a9f5d573554b63d22f6299c44875648d04db630eab3019d9",
+    ".run/demo/18431/thermal.log": "4e488d07d31e7078bbf70b8af5fe260a43752ab5f40dbf39b04a4bcc9a73452d",
+    ".run/demo/18431/worker.log": "7efeedf8219bff3ba3f8d16e96ee32be3ab91dfcc28f3603ffc695521818e25e",
+    ".run/demo/18432/api.log": "6fc466db4273fe177ab4a732cde227fa5021f9e1649af8a242b4e5e5ebed0521",
+    ".run/demo/18432/process-exits.json": "85abc6117fc4624ddce84baac89a2ce3502bc33cc9fb4f32f82cc01c97f49d44",
+    ".run/demo/18432/runtime.json": "e2c4e21ff18032c84c7ca063b9a160a9fa6fbff460949fb3cca50acc033b0306",
+    ".run/demo/18432/thermal.log": "6fb38bc0fde2e25933c5f0df9ca46308972f5c07f1361caf0b80b45e1269266d",
+    ".run/demo/18432/thermostat-integration.json": "19c773fc1bed491a3e437103c6d22dbc77abdd3ff693c7eae0d7236f8bcc3863",
+    ".run/demo/18432/worker.log": "c66cb32cc1bff731708913c17c094f57dde8ef0fe14d70e343ee0b77a384a387",
+    ".run/demo/18433/api.log": "92464e9f46b265d6d45dd2c5884754bb9f5c69e9eea9c17ab3bc0a7eb19cada3",
+    ".run/demo/18433/process-exits.json": "3525a55368548eea166dc0ca297d85deab9710ff76f68552c2d60cb66874de20",
+    ".run/demo/18433/runtime.json": "a7f17c5ed168784843ef130cd7147b574b1af7e22ff286331e27134895bbdbd8",
+    ".run/demo/18433/slice2-evidence.json": "7b0e277de917aebeba5a4e9944ee82bb373daf21931b98484b12c729a9f1926a",
+    ".run/demo/18433/slice3-evidence.json": "41882f4bef554b4530542d49839e3d41517de5c11ed7d1dba599a00295cfa85d",
+    ".run/demo/18433/temperature-22-evidence.json": "7275426bfb36bd584ffc7d7c9a2311cfa611be6d420b83874e1b8c7053131662",
+    ".run/demo/18433/temperature-25.5-evidence.json": "271fba4e46170e0d3f501f57b8377e33caba2bd3af4c15b16ee271d5b0e71712",
+    ".run/demo/18433/temperature-25.6-evidence.json": "20e3314bf3bb7486eb89146ea69ab937ab59563ec59cfcaa0e932baa6faa4214",
+    ".run/demo/18433/temperature-29-evidence.json": "eed94cff360a16aa4570ca18bbb19fcce3ba8716e2ecd5872b3f85c8fa4552a9",
+    ".run/demo/18433/thermal-cooling-nominal.json": "0e4c1387d56f4943ad90264766f0537def2a9afed7420bc808c2e57f3d4473bf",
+    ".run/demo/18433/thermal-cooling-stop-before-publication.json": "ee2b82be56ae219a3457b1a7e8b00de8f4765a6ca0a3c04975bd4a5f9a6ea987",
+    ".run/demo/18433/thermal-expired.json": "8599f2fe68f0e1726584b2bbb400ffb97cba0a02a6933c0e815725b0691e3c7b",
+    ".run/demo/18433/thermal-nominal.json": "1f14d29bbb1a721cec00824a1c00407bfd54180c1cd8b3f3f749af347d71917b",
+    ".run/demo/18433/thermal-resume-cooling.json": "3c876e6954e373b2a49f7a0a396178dda6b482e47e84fe7365e697bb90d7a88d",
+    ".run/demo/18433/thermal-resume-heating.json": "e5562a1dae6557bda77b50f2e07434b8b9e88be439f304f5954edcb781b2c806",
+    ".run/demo/18433/thermal-switch-cooling-heating.json": "7fc05cc9688a3926bfe25dd4466258966d8880631ef52ecbdecd37e3a6926c5e",
+    ".run/demo/18433/thermal-switch-heating-cooling.json": "9d43774b7d455a41de5c1de4aead5a273e25cf312fc10d13c4b1148951673320",
+    ".run/demo/18433/thermal.log": "c2707e10c55673b5a4e4280dd32bb22de72c3aeabb448abdbfb4ebde08bfbd99",
+    ".run/demo/18433/worker.log": "3beefd42d480eb3c4e3c659651ef9845531bea8801926fe8dc26f6fd7a5bcfe7",
+    ".run/demo/18434/api.log": "392c9d22192fd49b5510a3bc0ebc8e89902992d7a709b87e56680d0d018afa3b",
+    ".run/demo/18434/process-exits.json": "e70573826c5255894d00a53695a1ea0a2c2a9a361057e52afbbd8bca1731180a",
+    ".run/demo/18434/runtime.json": "b506e875a155560047d85db06588754fa36e68785fc036bb10c6f3705a54ce35",
+    ".run/demo/18434/thermal.log": "9e2fab8bd082027d9c523c65d28f3c9e0f5d4e636f84efb2bf30670541aba5ea",
+    ".run/demo/18434/thermostat-integration.json": "2e92fe0c7e65220fba5ce9b00c574062cad87ebafc674c141d5fe6aff75b7e35",
+    ".run/demo/18434/worker.log": "e41319cd12d4a7b4b8d517d8b50b36ef52d417d61a615562c4693211d0cd2f3e",
+    ".run/demo/18435/api.log": "2c09a6a3e45a60c5cb9c44c0df76520767090b53a06e29e602184af66e346e5a",
+    ".run/demo/18435/process-exits.json": "d2ea9dae942c7341716313d0b3fee996a71dc00731409301314f1b1017255e62",
+    ".run/demo/18435/runtime.json": "9c8388d60a5bc0290dfa7de41ee9b58d2e0f5162f23014a3e3782ee535dc9deb",
+    ".run/demo/18435/slice2-evidence.json": "9846db0e22b26ee3127aa4155dddf0d1bb0b56ac65c907c3f10c52b15bc82904",
+    ".run/demo/18435/slice3-evidence.json": "2b076a77f6b090c4653e87ded98843c82c7deb4c68d2b1b0647c8b26fe850ff7",
+    ".run/demo/18435/temperature-22-evidence.json": "8fd3aa3475f6daebcdeb6d7cdec530baefd41656d2ee91748092ad6d5dcb790f",
+    ".run/demo/18435/temperature-25.5-evidence.json": "0b80e6e795d6771ea71606b88b1d4dc2d3e2d1bb706ab6c4125401698c1ff173",
+    ".run/demo/18435/temperature-25.6-evidence.json": "ba2b9ccf24ebae11461b391b7be0f3acbe9157138651ab5e8c290667f0b0a0cc",
+    ".run/demo/18435/temperature-29-evidence.json": "51366f5194bf7bae2f007de076778ed2656a73c93170fd3eece2bd0a2105ad8f",
+    ".run/demo/18435/thermal-cooling-nominal.json": "ef44e079c410e1a7a4a9db51585e2cbc5c2cf8f68f5e941e73bb728f9302adf6",
+    ".run/demo/18435/thermal-cooling-stop-before-publication.json": "c349ae49f4f72844a48fc3d8e7df0ef99c7ec47831c4a77be98e047076b45f04",
+    ".run/demo/18435/thermal-expired.json": "ee9fb093e63217cb2ac1c0a235f704312bd59879d3a13d1db7f88477dfbc49b0",
+    ".run/demo/18435/thermal-nominal.json": "505312a693903a12c94a97b0684dd45ade808ce7f64674596edd6ae465f7a7a9",
+    ".run/demo/18435/thermal-resume-cooling.json": "69ffbd9ddd701ff3aa699446e910252aa42351b3ecf6942a0a5506259b339708",
+    ".run/demo/18435/thermal-resume-heating.json": "d6aa7626dca3ed3243d467e057c4c936825d7e00908afb2a6b4ec62087fedfd8",
+    ".run/demo/18435/thermal-switch-cooling-heating.json": "7904dae50f1cb84189cc7900d8dc127f0dcf5b540dc6c570a574fe06445e2842",
+    ".run/demo/18435/thermal-switch-heating-cooling.json": "a1f91f2456ec8966ade791f7303ed34dcb7cf98d64dae10c05d3857fe8644da8",
+    ".run/demo/18435/thermal.log": "48d8c77eba69b137e988b4fa426008fa24e500b82224694204e9baa9b1a5460c",
+    ".run/demo/18435/worker.log": "ef73d4ce18e1463f0aab5faadb8f868790956b27cf8b41e287356395d3b70355",
+    ".run/demo/18436/api.log": "600e274b117f94f773c12a4ff6c79a602fac73e32ebdee5cfb8253b8678d33d7",
+    ".run/demo/18436/process-exits.json": "820b4c9d646637ca488cadbde55efb31ac644daf31b208fb3fd43ecf62e56ca0",
+    ".run/demo/18436/runtime.json": "ec457bf302977f38fd1c15ae7e1f6c228ecc16bf975c482ba6b3a1d8330d42b1",
+    ".run/demo/18436/thermal.log": "ac44da043fd2618ef22adda98d0e617d64fd93bdf0585adf487d20f5d49cf2df",
+    ".run/demo/18436/thermostat-integration.json": "c295b5968089c21787d40ae434540e4c035c9399428b18a9f4e1df7a338f4df0",
+    ".run/demo/18436/worker.log": "9e6a84504c58795abc20d7bd0882ae9dd75456564d2dbad78af5bd24eba8e132",
+    ".run/demo/18437/api.log": "abf7a47357699e2cdae7600c40ae2f6acf98d717d7e1f61691c9508354904d2f",
+    ".run/demo/18437/process-exits.json": "46359e57393511040b72f282603c74b703f023f27b46b6f57424fe5df1edb594",
+    ".run/demo/18437/runtime.json": "57e7e95b75c26b1e0df147020f7ed87e46ca7dd4cb00454c9edb4ac2e87da693",
+    ".run/demo/18437/slice2-evidence.json": "01c8c431b98e267b6cfc28aaa3bc910b4db4e64fb49bbffc9df8cd875db4cb93",
+    ".run/demo/18437/slice3-evidence.json": "f3dd1e013a118313f42f1bb82e14f147ac0eab12705bb88ee5359a8070b59d80",
+    ".run/demo/18437/temperature-22-evidence.json": "1a063994fa0c009ee167a53b55d1dbc992ccea65f89e3e634c6b0de6645ea313",
+    ".run/demo/18437/temperature-25.5-evidence.json": "86823efecd5a48b105957098d521e1995f7bdc86f45c1309f34ed625f5938e1b",
+    ".run/demo/18437/temperature-25.6-evidence.json": "0977900ce2f4561ced5f88154efb4c2793a408269d1dd54c0a3e4dda4a11c0c5",
+    ".run/demo/18437/temperature-29-evidence.json": "608013c3655dfa0c311f5283f29d11354ce07e1569febe5f7b3b9605dcf8e645",
+    ".run/demo/18437/thermal-cooling-nominal.json": "e5e8389453b63202f6bc99d2b05ba1f22c94f845c937c2423f1cd65ce92a64c7",
+    ".run/demo/18437/thermal-cooling-stop-before-publication.json": "5c061998c66294edc505e45a48d6c54c7c261ac837cfc3eda9ac3d0057fc2ad4",
+    ".run/demo/18437/thermal-expired.json": "39bf80646367a718b924c0f3c6d8668bc05809f092a6c710992cd5286be019db",
+    ".run/demo/18437/thermal-nominal.json": "4d892d71d17dad7ae1387033a0857046cb91c7f5c42f07261af6c92d2dabfa18",
+    ".run/demo/18437/thermal-resume-cooling.json": "fdc12bf38504c99da36aaae660b677805b008c6bab161f88fa515740b8bd7179",
+    ".run/demo/18437/thermal-resume-heating.json": "3c464f330221914d550ed5c28378ab14bf92fd9c62088126420886eb582317f5",
+    ".run/demo/18437/thermal-switch-cooling-heating.json": "003761fbeb280f20c20d60ed9735c7907c77d2ede223ade1c0427cab5de571f1",
+    ".run/demo/18437/thermal-switch-heating-cooling.json": "f80c0b66a2802dc114808e2f88deb543a1f4e5f87dba39faafef36682f2df6d3",
+    ".run/demo/18437/thermal.log": "288b52eaea2f1df25181d78222961feb087e9309078622267d0a00bdc63b1297",
+    ".run/demo/18437/worker.log": "2a15eae73340f3a566f4eacde1908d85fe9e7276508350b05b4a20cd9c666fe0",
+    ".run/demo/18440/api.log": "3d1846c0722b3f9ca2607ff21ea9eaf7df835aa0662cc89df6962cb84772c16c",
+    ".run/demo/18440/process-exits.json": "509feb0b0c43a51111c30c7ee7408af94be82c2db88b1479484ea57bbfda37a9",
+    ".run/demo/18440/runtime.json": "98987c3d932e2d15dcb9dafec752996c92df7c78633cddfcb8141b515a829e0e",
+    ".run/demo/18440/thermal.log": "a09bc974fa9b52d57f0ade7a6cb4141dc15e235c3811927f1c28f5a0612b47b8",
+    ".run/demo/18440/thermostat-integration.json": "62e12bfb30eb8c478288db77ac054a9d0832f2127935dcac4121ae5ed2f76c58",
+    ".run/demo/18440/worker.log": "d10aeaef3c30a4c4f2d91f7e2e82457744c65a75a01029197ae6f8d44673bed0",
+    ".run/demo/18441/api.log": "f462ee780ce694086ef7d0dfabd1985c028b6caaba285c4964f1f114493748c0",
+    ".run/demo/18441/process-exits.json": "f372853da17e17ceeb7e4ebedc44e8a69a22cc742bf3b836b89818d8670ec090",
+    ".run/demo/18441/runtime.json": "9d79314be087bdbd8b5f9f3b8e50aff1d4d3f816ba59c8b34042b22591d4e8e8",
+    ".run/demo/18441/slice2-evidence.json": "2434247831bfbf2db56b6a255a08938624e0ec69b5b00899dd5f0403befe930f",
+    ".run/demo/18441/slice3-evidence.json": "03adf9838e998af2575b9014bc1d1393d6b61bf88dc93e8710c0da716ac2556d",
+    ".run/demo/18441/temperature-22-evidence.json": "6421d89e1a6eacd056eb067517f7f516250581dc74785db46f2c8e0441da7c45",
+    ".run/demo/18441/temperature-25.5-evidence.json": "4ad1d8596000113e419a0e4f79f13fa8ac5ddd6b491a956bc1dbfc23cb644a94",
+    ".run/demo/18441/temperature-25.6-evidence.json": "9d0ad023a88a65693af38609a73efcbbf4d2392af5f2346ce13507c1011213f4",
+    ".run/demo/18441/temperature-29-evidence.json": "f413e63c14ef3787a791d2e1526872bfc0fb82a4218207b148833abfddf8b10f",
+    ".run/demo/18441/thermal-cooling-nominal.json": "692bf493a0f63e5592b46f05904546b0c6dcb0bbcf6ac74a057d2ff171fac0f9",
+    ".run/demo/18441/thermal-cooling-stop-before-publication.json": "4d410624602720d24630e19aecd76a41219ec18793efdd6850673b0c79d113fd",
+    ".run/demo/18441/thermal-expired.json": "6b60ce73e1eb688854462645412e56db18607bd29c03d565f472e7934d8adde0",
+    ".run/demo/18441/thermal-nominal.json": "6150658c804d4aa1ffceb6bab36afc61faa31c55669e28b7429698a6f8845505",
+    ".run/demo/18441/thermal-resume-cooling.json": "781e8b2d3fa93607d6a1a7e9dae9a2a7d0ac1d1b28a8f44c44a32ac959039092",
+    ".run/demo/18441/thermal-resume-heating.json": "3ab97ea6e293014d35ca193609997976c61a2afc461fa922e32a7c57fa91bf38",
+    ".run/demo/18441/thermal-switch-cooling-heating.json": "8c264d069799b37e07be2e33b0564e0cf2cfea53c9b4cd5640fb87ba72a1e528",
+    ".run/demo/18441/thermal-switch-heating-cooling.json": "135f1fb0a8857bc7db66483af969180db6d2740312328957d17d5e3edef9583e",
+    ".run/demo/18441/thermal.log": "3c8c63113564e311e8f97425f064f084c9dca7b11999b19c68304ef503f0ad52",
+    ".run/demo/18441/worker.log": "3dcffaff6fc14ad093209462cd6328682e0284a31d4d8ad8669ceb80946f0e97",
+    ".run/demo/18442/api.log": "4495fa0900c5df2cf7df542f7bafa10bc7ade564d6bf8f5066a1e68f9b7ee620",
+    ".run/demo/18442/process-exits.json": "302344114a8e339e6cc93634c4dc3f5ca7a8e4913deb7351fc6ee2aea1b1388b",
+    ".run/demo/18442/runtime.json": "7888e04938ab040a15d37f002799179d77374f1bb819facc1c8efcacc643504c",
+    ".run/demo/18442/thermal.log": "63d3fa06a742228925db4fac01ff7a5e3d187a2c5f9e7ddac0808acf726bdcd3",
+    ".run/demo/18442/thermostat-integration.json": "1f5da90fd9c381b20c91ca17272459b4b505f64c98f8f0619ce0de4dbce0019f",
+    ".run/demo/18442/worker.log": "99e77abfca7f6fb16584877bf7bd2988459a07ae6d130075c03723b654d522a6",
+    ".run/demo/18443/api.log": "c874c28f79bba293010b1441cea90512ab8921fe7b692f225870eba5603bb63b",
+    ".run/demo/18443/process-exits.json": "29640322f1411983fd77e59780a47233c9d868778afb2ca34732d6c93dfceb5f",
+    ".run/demo/18443/runtime.json": "36be3be5621e9f6f0c80b6c7634ad3ab204b84d8e2f0cc210520a981da83f357",
+    ".run/demo/18443/slice2-evidence.json": "d559a41d5da6e816e17fe9d199e7487c64426eaeebcdf62598dc512bf6eb4070",
+    ".run/demo/18443/slice3-evidence.json": "e98b4f55932b8bf611569371292a5378ed18c207af2f7a838762cf0b3d8ed62a",
+    ".run/demo/18443/temperature-22-evidence.json": "c913a00c2850fbe0876e4d7c783dc043b3b9af86030c9f50aac2900bded0837b",
+    ".run/demo/18443/temperature-25.5-evidence.json": "7c5ab591d8a5c3dc98528a304d6da3db5c8e46eb323337597e2a54aa24deea2d",
+    ".run/demo/18443/temperature-25.6-evidence.json": "9ad7a0d46338554d3d0d7ab18351c19cb14c29ba8b275dc96b9fbaf02ab2274e",
+    ".run/demo/18443/temperature-29-evidence.json": "d85cfc7c4c70e041b881b74e67da3a06bb484503066c6e1d6e20402c6ec62765",
+    ".run/demo/18443/thermal-cooling-nominal.json": "99dd3b1879fdabed6f6e1bff582c5ff9db56266d051ce77de42391be85a875a6",
+    ".run/demo/18443/thermal-cooling-stop-before-publication.json": "2781bfc1ce5c9cfe5a2ac7642a5b21765f02cb706c304e41aafef37de9d9b69d",
+    ".run/demo/18443/thermal-expired.json": "c16967f9d1b3724896b85837c1e544f83059044e5457c9b8fa9663311bf7fb30",
+    ".run/demo/18443/thermal-nominal.json": "0aa339cf5440dbe769c919062ec2a6028c14ba6b1d83fb2f8f1baea40fd16bee",
+    ".run/demo/18443/thermal-resume-cooling.json": "9c141d04e9b6b0609c0423efef008044f54ed6840cbac3a3ecac41493c3111d6",
+    ".run/demo/18443/thermal-resume-heating.json": "1604524fc371f858ad62a884c86914f9c483b82ede3a81bacaec544232cef8a9",
+    ".run/demo/18443/thermal-switch-cooling-heating.json": "423f2f9b0bdcd4e702237c3352eaa294d0dcf9bcc283be244bcb48cbf923df29",
+    ".run/demo/18443/thermal-switch-heating-cooling.json": "14d2497c0b63c7a9aca099713c0cc9c8a4879f5ec69a9286c1a4b032ccd73bc7",
+    ".run/demo/18443/thermal.log": "4f3f3f5f9069b80ee6e3946657e5b8a90e6d0438c012d02095aa5707566fb8c2",
+    ".run/demo/18443/worker.log": "134b61ae6bc13372e4df3760554abebf6aad95ef6c0f87de5d0b8d431f03ba64",
+    ".run/demo/18450/api.log": "558d49d6ec79d5de3d0bb6582315dfb4f9d5493e561a50b385429f414661bb76",
+    ".run/demo/18450/process-exits.json": "db4542e4162b661e9aa8e35d11c69d3dd8b1a4a64c83e8358baafcd7aba22ab7",
+    ".run/demo/18450/runtime.json": "9d9563d783fc7cb75cc4fff8e2ed10f7fad897fda48e17fac28cb09b1aaec32a",
+    ".run/demo/18450/thermal.log": "f3e2f9cdbfe6e99f4340b80e813631f6f2fd54940cb0cda171ad46ba4ed8445c",
+    ".run/demo/18450/thermostat-integration.json": "d0f63b0e014e7d0bba1c225912cc8be02faf984125f676b1a871a456254098b4",
+    ".run/demo/18450/worker.log": "15470a8b96d61473e2c46749c74ad057d34f51f34e4b573486b84815ef3d50b3",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/api.log": "e6d360015d6af8baa94c845416bc1815d14f61b79534ff12496c4400516f555a",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/process-exits.json": "45e5b3376f07074fa03a44498d4bc35c9ba911cae701b2aeb44d184e5ebf39cb",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/runtime.json": "27c15b8f55d6349cff955c34b54296421aafc2d678702abbf3e486768045ff44",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/slice2-evidence.json": "025437d2c467ed3f278377a89815bdc25075f1e29676077a49ecc5387d1ae42b",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/slice3-evidence.json": "090a7c005a51a2bb13b572d41ec9284725300baf5f018bd27e788c4a5fd4c51e",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/temperature-22-evidence.json": "5611c99ebd10df60ac5571c40b6253d83e363e8a394a15121bcd7ba061915b07",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/temperature-25.5-evidence.json": "bbeb4bbf26ebe3a9742cddb78545c229545706dbb21235b6d4104ff6ed9530a0",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/temperature-25.6-evidence.json": "964c74f32f0537acd03777e2adde4b244a7d180d9dcad6ad662db5faf0ec4783",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/temperature-29-evidence.json": "e6f692ff230dc7ae0b342b2089f3bc746dd6c42f0e2c3c22e713e1088faa9190",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-cooling-nominal.json": "cd036178b4b79d8c3a4a60650217a8d720cd93ab0438a0207a9cedc624d7d883",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-cooling-stop-before-publication.json": "1db16fbcf2b49d5eff4f5aabe32bd6627845c863801197dbfe134b3933679973",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-expired.json": "57eb72601242e1c6971c41453087bfa8f35776b52abbfcfbb31cd081ce22f00c",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-nominal.json": "6211d9207b839c63625bd9141414ba3bb64f217fc6e7c4c33f4cefdad8d00a77",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-resume-cooling.json": "588ff1a2805e49fac96910b7edc8fd1deff504034a4958c7ab3ef407ed729ccd",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-resume-heating.json": "23bf151881c3d4186eeb1ff35233d1b9201950f65be981d82ecc1bc795d3450d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-switch-cooling-heating.json": "b3a8b2c329ca995965bb2ad1f5ffe84bf7b281474bbb89b4b3068065857d2653",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal-switch-heating-cooling.json": "532f5a9b1d68f3a77dc90d4520abdce6a12fb4b6bc986c81726b31efd25dbdaa",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/thermal.log": "e45ff6880b2a7624768aac51355f7e5d1f1ddf316d1713094ce8771dee28c51f",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/demo/worker.log": "a4aa7fe65fee80110d197d6c1bc8bde6443e103cb18095f173d55eeecc4b39cf",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/launcher.log": "40ca33d94fc80e0129895d824aece472ff4b3f5fa42386b22b18dde9abaa5e8f",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-legacy-00-18411/result.json": "45319d74254c22e0a9a58c1a497cf219a0c7c0fbde255e0d35529a80c158b390",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/api.log": "ee86c119ddd4f25a97d2edd388ceff4dcd4342ba50a7bc50b84eb5fffe373535",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/process-exits.json": "61debca355a48c6bb0ca9449c2bee1f661f359ee6e429f1a329ef1fed33163e2",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/runtime.json": "1b0f8d790208804e6a33658d51402e082fb3ca66987b562cb83e06852dab6f59",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/thermal.log": "bfc34466a7d4884620a4284dce55365439980142e322d8ae2f511c6873bf76cb",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/thermostat-integration.json": "9332e8305c2d7c8cca353e4b1ea8507f5d724cc8ecd52fb47c9764c25c44f2a8",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/demo/worker.log": "83e618a42acc58550766d8864e4cfc32e5683da21c3f1a02870ed663235bc027",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/launcher.log": "6441597ae6627cea383ff15fb7cfa6d0584fefc06f0a6ecf7ffdd1b8203e907a",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/baseline-thermostat-00-18410/result.json": "b9b2e3df5ee85d599a89d6ec78c36db1c9536352aae02d87898e94912f0a73a5",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/configuration.json": "5ce7540ee206ac0572cce96393dc2787c4c97612f18d652bd5dafcd6e00855bb",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/api.log": "873254d947a29a8366570fa933e826348229d6282e30fdb0576a071e4de42c9f",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/process-exits.json": "c836ab8b05143c3df02f81f10ac3b95e53fd878f8cb5598b8a47f6b12e077f3d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/runtime.json": "6a1e8a37e46b764319381bedd1f20e99e6bec3fa2c1e1a91a119f796332876f0",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/slice2-evidence.json": "4d14ffa4bd9e8f6a9d108471d1ba5790b9b131ea2bd08fb3f41cd636c732a82d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/slice3-evidence.json": "20f081a7511ef11815b0200bf97a1cef0c3d2bd60cb1acec5315a34eb7473f26",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/temperature-22-evidence.json": "fddf977175df316240a40a2031134c7b954ec3a8f3a982739f146abb29fd0935",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/temperature-25.5-evidence.json": "b277599386f418caa956dfb09e60d8c57c3fb6caa7ce4579b447e570dff94724",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/temperature-25.6-evidence.json": "6791c2f438e06522f05ab432377d8d8b8d2dafebb73cfc6590368ae785477eac",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/temperature-29-evidence.json": "636ae9eff30eade83d942961b02d25d7d14935daa8bdf94b5148f138156e1c59",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-cooling-nominal.json": "b576a51052181728a5d2ca127c673f5575b88bead7194dc37af59398d8e85a50",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-cooling-stop-before-publication.json": "f3dc9f81f990322be30347baf095b7e326852c887887870eabb4779cbd2ac9e7",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-expired.json": "008f136493f18b872cba826ba4ce856454a18c3cab22e535f4961f7ee3ab8634",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-nominal.json": "b7a039147ce0e02b4eb96c3046b230f764547a23f860cf5dfd7196c2a0d85016",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-resume-cooling.json": "ae3103ca3418c5bc1f34b38a25d85498cb0abd4d3e219f8e49030e20108cd45e",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-resume-heating.json": "9a2bd766879b620ff91106898229db5327681893f1faabef3e7d02fcf27d7b3a",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-switch-cooling-heating.json": "bbcc21d06e50aabd5aeac9244dbec971a2c767647016781ec14d18f4352df47a",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal-switch-heating-cooling.json": "ab61f8a36e079aa88f72fd948a114a2be1b21c8c302a93d3031ac9911237edd1",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/thermal.log": "68b6f90a42c668f8f3064b129d0929b2914b289e3328bdca204f527f9900ba6f",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/demo/worker.log": "492641bc4c781c61a37937c1371f00ab262842d8fe40040ff69fa19f3cfe3cc9",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/launcher.log": "0d4d91119284e467e20806a8610177b3a7306c08707b8e71c0334eda209de4bc",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-01-18413/result.json": "b00adf7a544ff6aa1a300e47924f760fec557dc20a795f1605fc29c938600266",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/api.log": "080130e5b12b8f85d91ffd15b73498209f517b642fe1cbddb5436c1550a7c371",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/process-exits.json": "e6fe4e5c00949dbe374b5a54cacb4707e653823d44ae70c4955765388c963d51",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/runtime.json": "f957ed16c6e3a414481669806d3a34dc957a1a00f2a79ec18e22337c29fea819",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/slice2-evidence.json": "a3d0c16e76486de25753171505de592ab7ee8ded827bdfc332f0f7d6b9e2da8c",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/slice3-evidence.json": "73a07b2316da74456089bc80e8fdaf400b3fcc23401232bb7f9834c10b950541",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/temperature-22-evidence.json": "5b92c599d2f19940570aca79177374b35eaf4f61dfd033c7b7893c14babf259e",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/temperature-25.5-evidence.json": "a1fbf5d7e635667ecbe1440224da37ee5f3537b1b20991daab281d2a128f45f2",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/temperature-25.6-evidence.json": "c23d612396d7e3daafb0784d6bcbeb0ee51f5b802d84bce8902c59acd7ad6d8e",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/temperature-29-evidence.json": "6130f3ad2d2d89bf39c11c643001c245417e6e102f80671b9ce95fa6ba8ce47d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-cooling-nominal.json": "fa5e6f6626cb325a9abb4fc57fc2655dcecec0bc7a5d92f4d7ae7393e665aa93",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-cooling-stop-before-publication.json": "ed8a6ac8ef4ee11edc5cf61e15db9a2afe201a3a232b9ac6365b341dc62b8da9",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-expired.json": "ba6a4225d982f596412af68c335c7d0636a1fd0d0830a2669317caef1e7ab6fa",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-nominal.json": "0912c120d966d1aa31f78eb02fcb91b333be38ff7a73f24e9bd964218534dff9",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-resume-cooling.json": "28b8cc702aa92721361212486dd16baa33908321228643bf305633db79926dac",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-resume-heating.json": "1aacccdfff5e7eb87436463139d5a85cf4490395c4153975caa20149abd12890",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-switch-cooling-heating.json": "98daf65209f77f0e55e6930aea8c69c1d826a7c6afd87a2765a123a60a3a802e",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal-switch-heating-cooling.json": "b3cfca4228f1d0ae0cc649545b4cc99a36d9bc8829e3b9c673910c50f76598e6",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/thermal.log": "a50e6166c880de07fda8af25eb7915d31e67ff8df53b38c68121ba232dc1b366",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/demo/worker.log": "9f7a15563fb6a32b2dae85dd8f6235eecf590d374601ee9f6849f72a245df6d3",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/launcher.log": "c582681da2a9264924eb88ffc51d174edfeda91e4b80ad85a47005a6e44d057d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-legacy-02-18415/result.json": "80bdc70d062af5e1c0911b6b3328c513368acecf5f5d9fe0062265dde0fd2c38",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/api.log": "9a2a0b1c120be9bad7189c81a8bffe564b95deea1b3ee9863c5a4b469aa3adf5",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/process-exits.json": "e668f629d56f23e8ae6565a3200988a4c29019604ab4e7283ec1d273ce47684d",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/runtime.json": "a3cc0dcdae5bc3861f8fc11801134dada1dc5bab8073b598069be76f5e7dea2a",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/thermal.log": "238db3901cf9b5e87f20c94b2555bc6cc7019b657060d709713d20882dc091ca",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/thermostat-integration.json": "09462234df4cee95e1a5f160e2ca62557f2d34c4be23f28f70ba2cf108df5d7b",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/demo/worker.log": "5e287e38b2ff538f56da93bfc1d06a94a117e77304e2191a7ad61deac0afda44",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/launcher.log": "b2b6917b085d4dc66e283610b5a285dd5cb627740e7aa60276105c678d981931",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-01-18412/result.json": "21e68e193db7e7c96e44d5e306935c37d939bd3269fd7baef8443a7d0aced1af",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/api.log": "864c8b51d8e10bbe871d84de43dcd00c5e43b3c1c5358061d1ef8218b156e411",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/process-exits.json": "2086872a0b45f16fd2de4be516223762520a5db6af413b2495149a38263786eb",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/runtime.json": "2df5608a2b37305865986a528521a003e735fb726ee3e296e53c43cb68cda034",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/thermal.log": "455d554084d400c724ab9bf225bfc225ae9dbbd48923e45a785cd94b184a7209",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/thermostat-integration.json": "dfafc38a363f82231d3879d48e737befe44eb097f7a9263eeae07876fefcba18",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/demo/worker.log": "a96eeeb82bf4843a0d019f5357c84fee685a64f85f34148c3b75db76980ea9f6",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/launcher.log": "720b44b8f240107b4010ea1353cf16cffd9b0d1a550b4acccb467a6664dbe57b",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/parallel-thermostat-02-18414/result.json": "dc4bb469c3bd8a3db6fc8019c5819d7560187f1272b06ae6db965bb9c84126a2",
+    ".run/validation/timeout-investigation/20261008T161119Z-5834883f/summary.json": "eb7af85610056d41553f82456e430187beb3213038efd7fa05fc70604ea6c065",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/configuration.json": "7ed2ba5815eeb073a2ef8f141cf5bc63c1b8a7753845a93bf4dde11391c72c6d",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/api.log": "f7214961a1f3d0368824ade068f30d4ce29001663aef1b405b27b62481bb82b5",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/process-exits.json": "dafa994f87e0660d5dd72f4d09d8c55aeafba0241c6e799f83ea77557200affc",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/runtime.json": "cf7eb28731c55e7806667a638edbb9c7d6a2cc407ecd59328ec4887e5d93f33b",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/slice2-evidence.json": "0ef03569ae6abca5f7263849011583e6ad987f072c50a917153436b33b7fc519",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/slice3-evidence.json": "24be27ae3fae00321d226cef509a263906c660914d209d006b182c55df991ed3",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/temperature-22-evidence.json": "c634b33a8ba30cea3b63eb972d00be4e53caa1c8afdb32e492a77383debd18fe",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/temperature-25.5-evidence.json": "6e2f8a96e6b41e66f678096423a879dad1049ceb70aed9cd6cf21a35927c1338",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/temperature-25.6-evidence.json": "7a930b326017489a37533f7a5704622987bfd4e55c0d5c58f6c19823f09c3dc9",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/temperature-29-evidence.json": "ea0b964edb3e0a2b86dc4bbb6407c050671db93dc563fd258fea345cbc7afad6",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-cooling-nominal.json": "d0124785cbf5c8dc988e2d89361fd14fd3fb1983c80852bf16d78316722b1dcb",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-cooling-stop-before-publication.json": "f86664165f148133f08824de8488deb64dce93e093e636c455e36dea962a71ec",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-expired.json": "ec56861831d3042de6641ec3bb80b6ae844fd97372e3c959f0d80874e2017c40",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-nominal.json": "5d5f4cc78fccaa8ecfd0041929a0b9328aac7f19aa5bb479a530a8dd8114b189",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-resume-cooling.json": "bc5d250f3316be9a99177f0e0401497ad56347ac10e326cd38f29c3bd1c8c088",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-resume-heating.json": "f693cbae7f4519b5db5cb920b0295d3dead81712bfab7d1ee03640a6b0c2171e",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-switch-cooling-heating.json": "86c1ebee0fc96b2d0514c359fba5d9a5b0955156f3d3a273a902dcd1afce936c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal-switch-heating-cooling.json": "a51e5b1aa4816804e4ac533355fe66b39d033049a027b28767ba0192cc94da30",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/thermal.log": "2792af8b89f12d7ba1a14215df125e6d14f3551a54894565e552ba72a14468ed",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/demo/worker.log": "f01c54d0af14822748320f1e8d6e45149715d0dd81d98a47d232d52d2d61aee9",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/launch.json": "439ec5d56322617a00b51fe32a22f0b7f73f9c5064e992549faa413d1d3a1a70",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/launcher.log": "e8f680467550a4946efcaf4e0796382655330a48f46b4c79c2e7f866376f3f68",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-01-18421/result.json": "70a798860bfaf4ffc20c58588bb6bae4edbaa21904b77ef1e4e760c73ffb4171",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/api.log": "02419ce1f7e5464c50bfab53132096965743229717cfadb3646dc96ddc6b21fb",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/process-exits.json": "6b291b4166e9599d9f95a9aca534d736311c04ad22acf28b9b933d8ecebf7257",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/runtime.json": "8f21fd688ee7b87ac16a34505a127249e52703888b5b134516b08969641bf520",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/slice2-evidence.json": "51a90e3e0c7b2dfa4a0f57ba30b560d1b9839428185f6feab9e8dfca060b8997",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/slice3-evidence.json": "82c323b76deaf0867a7112c725da189b680fb5f023258f5d805f6338ad4be292",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/temperature-22-evidence.json": "51c7dec4e1f51e19c7c54e7965df704e10f56a8989827d0d9e9165ed7321e149",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/temperature-25.5-evidence.json": "95fa4d796dc7e33d4c3687dab989dae4e5cc05f2d1b42ce0e6032201546b9eb2",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/temperature-25.6-evidence.json": "b5942756f6967165489abc865c775d95572df68a9698a799fc82456b7e2976e7",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/temperature-29-evidence.json": "d8dde06f21e54d4518adc0d359c2fbf4167d56ea47cfdf1b1a857c8e934468e8",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-cooling-nominal.json": "f8a7e386bf5675fbcf1675993550f2f980fbc611dd383ae9491df4709b55fa83",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-cooling-stop-before-publication.json": "a5e432170f3cbfdc0d8c9c07df4839fade60ab8ac0016db917a4f40c1f70b5b7",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-expired.json": "49f33fb313c18746a707cf70ab9e0048cbfc90e9a3ab92efc27c90b0cf6b853a",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-nominal.json": "e0dd3e07bf14854be78b80a643181aaaad1a3a58fa0b6d2b29568e17dafe013c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-resume-cooling.json": "b15c510e838a625cb94e32688e0dcab1f17fa8a58ba1a4b68895543ce5f5143a",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-resume-heating.json": "e41b7527443bdeb5beb18f6c9f907db87a1f43f008ed679838cf4a0405e08c7d",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-switch-cooling-heating.json": "49e1c1ff89ee450f682432a26d7e6429d16db07598522c49174dd784a81d264c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal-switch-heating-cooling.json": "607ba6cd5c474b4f496bd087a46174aa77f10b3086d243e06b2fddf55a3b59a8",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/thermal.log": "68b0591305a954d69010c2a7970cdef7fe0aee0a7cd24fa72f30831e039910f6",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/demo/worker.log": "e3c878e59b35a313ea55343dc3be00eea5648b305603162d97c654c3ccf68a97",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/launch.json": "54c3b569ca642c42ee28020abc35b46ab4be6eaf006498ec818e6b90d1c40f3b",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/launcher.log": "8cbe3602085e79d913fe82bf5f11c22c3c77e82cd860839e8bb7c91aaf502205",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-02-18423/result.json": "b488eeba5606b0e30a18a54b1bd23a9d47ea0894980bb73c243fc64d91f76f57",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/api.log": "64346d999931b5472ed5e0c9f43b06cb6d51b7d6714853515bdb8ea5ba2b003b",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/process-exits.json": "84f0a031467b6d8be0586a0002fda3cced2a1215930174171edf6fe8a3c1f117",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/runtime.json": "4f79d5ff3e68c40582a52b1434fa13501cf5cd71178576e12a24ef8e07d671bd",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/slice2-evidence.json": "bad025c6226d036e0188edc90108851c980eda47188819b579bec94af984d5be",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/slice3-evidence.json": "819c252df767e36b4161d298c4aa8025a665eea610f7ffc18b6ad80b65b273b2",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/temperature-22-evidence.json": "18f642e9fb4b4a9ffe17b28106e09fae76c5a1aae67ebce460342b9b389d85e7",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/temperature-25.5-evidence.json": "1aed7cbb73e94e70bcaabdf0f903747c3073b038da8c9e79d0468095ed5411d5",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/temperature-25.6-evidence.json": "3dc4b9b66a1142ce495e9ad3a7e918393cb6c8b1fb9e890e3cdbe2d2f6e621e0",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/temperature-29-evidence.json": "2471224ab3742f4b1edbd1b11bd14fd20dc32740650b0c73005ef3945e5cea48",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-cooling-nominal.json": "d542ba4fb99b21c019f82ddf5f86fc4f2a8ebc4864c610dcba5abc877993add0",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-cooling-stop-before-publication.json": "2666f6efed2235433da2a379819d6860ca994767aadbce4a2e7e188ceca26a34",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-expired.json": "35535c67160b3f5019340b6d8af7ea4cd1b8f77cd56b2582557a4d146d6685dd",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-nominal.json": "6b423a409bc1c3915a1f20fa009ebf7ca2adaed3566f5abd4a1586bd6ed1006e",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-resume-cooling.json": "7e678092f9bd90f245d636d6b51eac2c93773bc65fe55c8291b1d285b65b9f7f",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-resume-heating.json": "fcab40ab8b392bd507818b8131a6f18dd9f5898d8ef70674520b098a1440366c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-switch-cooling-heating.json": "3a15c48bf3c1ad8a14471f71c23b270ed3f6310028b5315b5b83910886b37712",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal-switch-heating-cooling.json": "e6651dbb26474f9d82fbe44ea16bdd8f6c342abd27e0e9a8d7d2904dec1ceaf9",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/thermal.log": "d4205d694e473b55d002266a0729dd30a478120a0ee2a7f4c9190af16a984e5c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/demo/worker.log": "555868a8aaf7db3d91a992052ff3b218bc78c3e827bdc5a6b644a83e21963cc5",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/launch.json": "a9329ec23298cd6bd703577c19b602417411ae116811f172fffd43b977c1c490",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/launcher.log": "5d41f53a41e8ffbba8f0df5b706af95fb8d0eb4cd3c9a02fd4c9662d5a0d324b",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-03-18425/result.json": "a293a1e1b907634460475ec3da865aa9e2132b38cfeab8f422102faaf311bc84",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/api.log": "c6232b6701d6eaff4ba8b07bf64bddb83bbdc71ccbc1a23096cb4984ae21d1e8",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/process-exits.json": "7ff61b93b41aa0da19fe5d71b49e3c197d79aa8a5db07a7bcbbb32cf2bcd78a1",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/runtime.json": "2d58e82793fb3d43589d45cf95f585e7d6357cc586c4eed859ebd5a36df18999",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/slice2-evidence.json": "84eef6b4b3a6d6073ace1642b5d57ffbbe783ae063d4182c6803a9d3ed436e53",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/slice3-evidence.json": "363d217b046d09cbbd52cd88dc8b3f60bcaf275841d9ea9639fe7f6319b5af53",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/temperature-22-evidence.json": "2eff8df09fa16f2811b6bfa7113ddd3be05249cedb033a0429832484e941c334",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/temperature-25.5-evidence.json": "39eb2cef67a136cf07e83bc556262e1f6eab0cc0486a4e737daab74e05165c2d",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/temperature-25.6-evidence.json": "c76a64685c8df06afe8a97ef1f5424d7a190eff7a13ad007442010317c8283d9",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/temperature-29-evidence.json": "e0406f93aa191b6896c4ad8efcef43c5e946f66905424fc3fbe8a75b6e453f55",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-cooling-nominal.json": "8633089f7027f09ea5a61ec2a5ec7e8cd63df2002ae098f0e4190e33121087de",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-cooling-stop-before-publication.json": "2d7cff39cb7d58f1ac3922d67e9ace837742f7f6fe4a537e537301b8c7898181",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-expired.json": "748c72956cd39cbf6b3ce77a5f186b44233ae6e87eb73e1a66900c29bf8f02b4",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-nominal.json": "ccccf8c13911a05ae8f6a85759917557113dfabd113fca5b3d8bb594ca705cad",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-resume-cooling.json": "032cdcfd1491e2f29d4a361c69930a474bf3950b3ef48f2b3ead794f4a379ed0",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-resume-heating.json": "4211da61f8d731bfcf6b30884e2ccdcf87002ccb970c3936b3b89ef3078235e5",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-switch-cooling-heating.json": "a5fca89f53215dfa3eb40f06570c913e91604ef014fd4567a6855f4663dfbe43",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal-switch-heating-cooling.json": "98d93122fde1418e306941bfec9189096a14718322ddd4a6eec8aaeaea87ef6d",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/thermal.log": "75172b4de184cb64ec0fb6278966f01ac2b4fd3c42571ede76b72100f6870035",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/demo/worker.log": "b205302210191b4845ee36f9f348a52ae0ac397d269dd1aabee50cf53c61e3ac",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/launch.json": "97f4e65c86bdf730c838734b46e90d65948d24434a0057a25aab1bdc9815e353",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/launcher.log": "147d98f4376047cb5615e43597cff8c43a9717b2eacd88f7ef45c372219dc40b",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-legacy-04-18427/result.json": "a53ec390e22bddc48551cb75b2b833c04a909e7c9299b93fb666929521a2b7b0",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/api.log": "d6da629d9a45fa93087360ab9ce6235ece056c2551be086d175c417160139892",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/process-exits.json": "54d8ccd2986e73ba22bee9ad2bef92ed6a01a0f021034dde0390ea5c47af28e8",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/runtime.json": "9e86d57ea30425d2f181c2436adf6c1660505fe22def4e770d1c038926a0e911",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/thermal.log": "dfac918d97baf6559947cd8930726d485975357445008dbbadf254d0113dd95f",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/thermostat-integration.json": "f9fc96d784ebcdea5142c0a70d2900ecdb8ff32471a901851edec842b0507e72",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/demo/worker.log": "45a028d0ed8fb6d34be512cacafc75771afd12994a29376662c26c1ecca087c3",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/launch.json": "d436ba931f581bc5443a3f1e08bbe0b7ca685f8354111322c6bd2450a159a904",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/launcher.log": "9701bc4b23fe7841fc2d37e44365003fe3168865ee7f933eea8a8905fd1f3cc5",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-01-18420/result.json": "45025d400414bb20745e5cc908d0fbc0b18b64d31ee8de236074b0dc4a95a08a",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/api.log": "16d85cdeffb5527ea9c12d2fd11fcf0c27038ce5ba89b15509105ec330eb306e",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/process-exits.json": "f35162ad47df576fdca87f3841a9d72f14ef0f4e5f26ba94185af2ab2aff205f",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/runtime.json": "733fb3cc237ef7ef417dd58b59a48d2af25790b82987cfe61e6f59aa31c89eb6",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/thermal.log": "ae20aec16186c9914c5a46e85cfa563e3408c89534b8ae541c385216f3346b74",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/thermostat-integration.json": "b5ad297157a452a08c98273b4ba0b28fea95d272152f144a468bd2c154a324b4",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/demo/worker.log": "863fda4752815d8df339fda7e6d855bfe678892e62c745321c1e918ca7cc6d63",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/launch.json": "a73c8cfba0cb860479a56023528502bbd71ec89ddcd3aa4e0e2bc7a013534461",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/launcher.log": "d2dc4462fa79726d01180e4d2a90f83dc1dd735481581af608a39c974b00a1e7",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-02-18422/result.json": "434485aebf3ddfb61a42a490ac03f07212ec05983ac6e0e37dba69e325852635",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/demo/api.log": "0f3be50af342d0fbd5f8f7d50fb9096262ad3f737e0cda2ef02797a2d69b1c7f",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/demo/process-exits.json": "61081fd6edc3bc88919b3da0d32e639e71865b50d8f89d68caa8e4d61e6bbd9c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/demo/runtime.json": "f1470fa0c57cc2d7d53267ab8f00a69d8fac8f0bc152bb6b4c003157c2cc4997",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/demo/thermal.log": "4b3303674086a242a9e4fc62b582b48241f80118ae0cc8fa0942818cbcc84e0d",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/demo/worker.log": "b6006dad71b13e37276b3bafff359de5df25092b5db4bd6382c54099aa8a3296",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/launch.json": "f3f0a2360e76c459a2a976f8c1d5cdbf608bfeda2555edf315282a6da19e540a",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/launcher.log": "fb47c7f28c7ddbca099e9e7a65f245630eea75d66aa6c3c457f1b4d68352a879",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-03-18424/result.json": "37ae8afbc5103fceeda44d51f83e4ee6c578ef26fde471ef95ec177a05cbee8c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/api.log": "53c0bbdf6b91933f625599ac196e05fbe9cd234d79f7d546a5f44609b606a9d3",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/process-exits.json": "f4459569ae4923cc5367e658575d9c2248fe9325c93b9c60d198ee9d89179736",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/runtime.json": "3b1c8549ba2831e80f409b5081a269ca267fee870447cb3eb8972e73a6f2e6f1",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/thermal.log": "710304b6a3ef77a8ddf772c944a0331920ed5704ce7594e872111912f8a7aeff",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/thermostat-integration.json": "aacc7d6231b1f05a9d90823da5d3b91f7dc69f723dcff47ccaa5bdf7ec8e7f6c",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/demo/worker.log": "d3ba74a990b76f0ee60b99f9738f89fed1efcd2b18367545fd48a5f239731861",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/launch.json": "6e61bcd65899f335e583d5d31c8894917477f350bd281b69f83e8f037f63849f",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/launcher.log": "f38bdbb46822734d5a3a58e0d1e602d913c0d3cdbaefb8bae815860f022a7473",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/parallel-thermostat-04-18426/result.json": "79e580445de19b0ebd5bd1d7f6deeca33cfcd5fa69e46a5ae7728f086f6673da",
+    ".run/validation/timeout-investigation/20261008T162118Z-a74972ff/summary.json": "a8cb61adb7657b0f2428caa68d56f496c49f9d2967b81f1722fa90ac2b2957fd",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/configuration.json": "c14f1fdf7d44e08e80e465f6b65fad627da538c1b544d7e33e132a15bd1776d0",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/api.log": "de5da27117bd7eca8044586a354d8d115b592a4e5ac9d405a68bcc8c23e28d59",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/process-exits.json": "765844f1016f074218c2a8061e6b2fba46ac69ed9097076eb0be2a7cd3a35642",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/runtime.json": "8345abdd0bf6326264fe38e81680aab90b4b506b4972cb6a39558c5e29346935",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/slice2-evidence.json": "f1cd47013e18a488a050e6bf2e901b66adffd28b0955ef34fbf62e4bd7f0d80e",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/slice3-evidence.json": "f799442ec27112fe4f897d154415c0daf2b4f4586fcb6c848249f29a1f5498a1",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/temperature-22-evidence.json": "9c694817985ada7a42e6fc70d084809279a00c7c008088cd7839836d94ab15ff",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/temperature-25.5-evidence.json": "b5b87b79b28039777dd4e0f624a9c1664aa22c089e93e715d50cd9b5be587b63",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/temperature-25.6-evidence.json": "d76dbb19408c17690dd798e8db129491b42b2734845517c2f8e476bded1c5870",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/temperature-29-evidence.json": "cc6e9c02b318ebb559896a43c3da4069784e871eabab86d7ecb214b2729104e6",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-cooling-nominal.json": "ab8ae1f715de144f202679b94688ee09ca33160eb9216275db361ac3e229e064",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-cooling-stop-before-publication.json": "a59ba50479db9cb38f8f4791e5accbdb1091ac8c47f3ffa3ee35bd5029d94939",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-expired.json": "281f53d9193beb263c804b0e99b25be0ded191346e82b317c2216686fdc70ff8",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-nominal.json": "e1cf1d3e4d1fd8c0c45d561681aede9bd565ab5ec8b723a2697b2725347d6b95",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-resume-cooling.json": "ad19db6b71d1e29de2c34fab15ed7243ded6aa60da2b90fe7f399e2e8fd9a8ff",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-resume-heating.json": "4f9fc06fa5f373a970da1488bb6e5f8bd6b304d35770ad1ceb79c1249389db41",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-switch-cooling-heating.json": "401960994f2dd0adc49df2ee10d9fa69ff42c777aee7368ae3f0dcf2d470e116",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal-switch-heating-cooling.json": "18a3023cb3ee0125a9f5d573554b63d22f6299c44875648d04db630eab3019d9",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/thermal.log": "4e488d07d31e7078bbf70b8af5fe260a43752ab5f40dbf39b04a4bcc9a73452d",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/demo/worker.log": "7efeedf8219bff3ba3f8d16e96ee32be3ab91dfcc28f3603ffc695521818e25e",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/launch.json": "c64400d45674355fd690ac54cd2d45940dba4f2319b1a5c2134f05082a3e44d3",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/launcher.log": "bd116e014cdec009bf65051a3928e5b84068d7e1117c640ee2ad66f56066d7cd",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-01-18431/result.json": "e19875ddd9d5f34b459effbbd5915627ba13902079d20ec4f7a44f1427eef262",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/api.log": "92464e9f46b265d6d45dd2c5884754bb9f5c69e9eea9c17ab3bc0a7eb19cada3",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/process-exits.json": "3525a55368548eea166dc0ca297d85deab9710ff76f68552c2d60cb66874de20",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/runtime.json": "a7f17c5ed168784843ef130cd7147b574b1af7e22ff286331e27134895bbdbd8",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/slice2-evidence.json": "7b0e277de917aebeba5a4e9944ee82bb373daf21931b98484b12c729a9f1926a",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/slice3-evidence.json": "41882f4bef554b4530542d49839e3d41517de5c11ed7d1dba599a00295cfa85d",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/temperature-22-evidence.json": "7275426bfb36bd584ffc7d7c9a2311cfa611be6d420b83874e1b8c7053131662",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/temperature-25.5-evidence.json": "271fba4e46170e0d3f501f57b8377e33caba2bd3af4c15b16ee271d5b0e71712",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/temperature-25.6-evidence.json": "20e3314bf3bb7486eb89146ea69ab937ab59563ec59cfcaa0e932baa6faa4214",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/temperature-29-evidence.json": "eed94cff360a16aa4570ca18bbb19fcce3ba8716e2ecd5872b3f85c8fa4552a9",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-cooling-nominal.json": "0e4c1387d56f4943ad90264766f0537def2a9afed7420bc808c2e57f3d4473bf",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-cooling-stop-before-publication.json": "ee2b82be56ae219a3457b1a7e8b00de8f4765a6ca0a3c04975bd4a5f9a6ea987",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-expired.json": "8599f2fe68f0e1726584b2bbb400ffb97cba0a02a6933c0e815725b0691e3c7b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-nominal.json": "1f14d29bbb1a721cec00824a1c00407bfd54180c1cd8b3f3f749af347d71917b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-resume-cooling.json": "3c876e6954e373b2a49f7a0a396178dda6b482e47e84fe7365e697bb90d7a88d",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-resume-heating.json": "e5562a1dae6557bda77b50f2e07434b8b9e88be439f304f5954edcb781b2c806",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-switch-cooling-heating.json": "7fc05cc9688a3926bfe25dd4466258966d8880631ef52ecbdecd37e3a6926c5e",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal-switch-heating-cooling.json": "9d43774b7d455a41de5c1de4aead5a273e25cf312fc10d13c4b1148951673320",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/thermal.log": "c2707e10c55673b5a4e4280dd32bb22de72c3aeabb448abdbfb4ebde08bfbd99",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/demo/worker.log": "3beefd42d480eb3c4e3c659651ef9845531bea8801926fe8dc26f6fd7a5bcfe7",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/launch.json": "ea7711dca4daeb047af6b380fedc1c9bb99260c146b108cae9f725381482aff9",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/launcher.log": "8cb49282a570ef77a3031c47776c5611dc1ce5362b2f1df5e02623df006e81c4",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-02-18433/result.json": "d879f66081f28d5a76877856f71f395eb871134370d9a7238550ea765d78543d",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/api.log": "2c09a6a3e45a60c5cb9c44c0df76520767090b53a06e29e602184af66e346e5a",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/process-exits.json": "d2ea9dae942c7341716313d0b3fee996a71dc00731409301314f1b1017255e62",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/runtime.json": "9c8388d60a5bc0290dfa7de41ee9b58d2e0f5162f23014a3e3782ee535dc9deb",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/slice2-evidence.json": "9846db0e22b26ee3127aa4155dddf0d1bb0b56ac65c907c3f10c52b15bc82904",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/slice3-evidence.json": "2b076a77f6b090c4653e87ded98843c82c7deb4c68d2b1b0647c8b26fe850ff7",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/temperature-22-evidence.json": "8fd3aa3475f6daebcdeb6d7cdec530baefd41656d2ee91748092ad6d5dcb790f",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/temperature-25.5-evidence.json": "0b80e6e795d6771ea71606b88b1d4dc2d3e2d1bb706ab6c4125401698c1ff173",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/temperature-25.6-evidence.json": "ba2b9ccf24ebae11461b391b7be0f3acbe9157138651ab5e8c290667f0b0a0cc",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/temperature-29-evidence.json": "51366f5194bf7bae2f007de076778ed2656a73c93170fd3eece2bd0a2105ad8f",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-cooling-nominal.json": "ef44e079c410e1a7a4a9db51585e2cbc5c2cf8f68f5e941e73bb728f9302adf6",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-cooling-stop-before-publication.json": "c349ae49f4f72844a48fc3d8e7df0ef99c7ec47831c4a77be98e047076b45f04",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-expired.json": "ee9fb093e63217cb2ac1c0a235f704312bd59879d3a13d1db7f88477dfbc49b0",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-nominal.json": "505312a693903a12c94a97b0684dd45ade808ce7f64674596edd6ae465f7a7a9",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-resume-cooling.json": "69ffbd9ddd701ff3aa699446e910252aa42351b3ecf6942a0a5506259b339708",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-resume-heating.json": "d6aa7626dca3ed3243d467e057c4c936825d7e00908afb2a6b4ec62087fedfd8",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-switch-cooling-heating.json": "7904dae50f1cb84189cc7900d8dc127f0dcf5b540dc6c570a574fe06445e2842",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal-switch-heating-cooling.json": "a1f91f2456ec8966ade791f7303ed34dcb7cf98d64dae10c05d3857fe8644da8",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/thermal.log": "48d8c77eba69b137e988b4fa426008fa24e500b82224694204e9baa9b1a5460c",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/demo/worker.log": "ef73d4ce18e1463f0aab5faadb8f868790956b27cf8b41e287356395d3b70355",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/launch.json": "609906b287df237c6d7ad2915535d6e7dee1e6319e61048c0059ee502d1f2ce6",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/launcher.log": "8fda496626a2085eed65396274366823e5ba103bdeb2a7297c4a7cf97ae7328b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-03-18435/result.json": "b429204d89e90cb3aad38615c16efbe44c7b4a6fee0b25d5ed06aede623e42bc",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/api.log": "abf7a47357699e2cdae7600c40ae2f6acf98d717d7e1f61691c9508354904d2f",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/process-exits.json": "46359e57393511040b72f282603c74b703f023f27b46b6f57424fe5df1edb594",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/runtime.json": "57e7e95b75c26b1e0df147020f7ed87e46ca7dd4cb00454c9edb4ac2e87da693",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/slice2-evidence.json": "01c8c431b98e267b6cfc28aaa3bc910b4db4e64fb49bbffc9df8cd875db4cb93",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/slice3-evidence.json": "f3dd1e013a118313f42f1bb82e14f147ac0eab12705bb88ee5359a8070b59d80",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/temperature-22-evidence.json": "1a063994fa0c009ee167a53b55d1dbc992ccea65f89e3e634c6b0de6645ea313",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/temperature-25.5-evidence.json": "86823efecd5a48b105957098d521e1995f7bdc86f45c1309f34ed625f5938e1b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/temperature-25.6-evidence.json": "0977900ce2f4561ced5f88154efb4c2793a408269d1dd54c0a3e4dda4a11c0c5",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/temperature-29-evidence.json": "608013c3655dfa0c311f5283f29d11354ce07e1569febe5f7b3b9605dcf8e645",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-cooling-nominal.json": "e5e8389453b63202f6bc99d2b05ba1f22c94f845c937c2423f1cd65ce92a64c7",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-cooling-stop-before-publication.json": "5c061998c66294edc505e45a48d6c54c7c261ac837cfc3eda9ac3d0057fc2ad4",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-expired.json": "39bf80646367a718b924c0f3c6d8668bc05809f092a6c710992cd5286be019db",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-nominal.json": "4d892d71d17dad7ae1387033a0857046cb91c7f5c42f07261af6c92d2dabfa18",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-resume-cooling.json": "fdc12bf38504c99da36aaae660b677805b008c6bab161f88fa515740b8bd7179",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-resume-heating.json": "3c464f330221914d550ed5c28378ab14bf92fd9c62088126420886eb582317f5",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-switch-cooling-heating.json": "003761fbeb280f20c20d60ed9735c7907c77d2ede223ade1c0427cab5de571f1",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal-switch-heating-cooling.json": "f80c0b66a2802dc114808e2f88deb543a1f4e5f87dba39faafef36682f2df6d3",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/thermal.log": "288b52eaea2f1df25181d78222961feb087e9309078622267d0a00bdc63b1297",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/demo/worker.log": "2a15eae73340f3a566f4eacde1908d85fe9e7276508350b05b4a20cd9c666fe0",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/launch.json": "f1497525b992c707738d1b709c1c94e2864976b83fc1f276a211d0c633755657",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/launcher.log": "99d5d70ca028a7df68a64863d5e2ec34112b367ecf1b807236594a4c2ab337e2",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-legacy-04-18437/result.json": "af0d27a2fdd0a74a904466502e7a7568e43aadea92589fee0f3fab628ecf624c",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/api.log": "3eebc5261d44d580c489fbbe4b4b0f635ad4cc9bfad63af563bc2f71e0c9512a",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/process-exits.json": "49b3be07622217884e10375056086dda757fb0c31a0144baa3c1d4eec58ecefb",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/runtime.json": "c6f36c20b2d574ad19036f165b3181aae30e6546dd72c48c9f858dce28e4e805",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/thermal.log": "dbff6bf6e150f066e89592e63965a490ee1aebccd10e92f8686dd331e02ba17b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/thermostat-integration.json": "a74aebb480667a1f16ad5448f793967f190faee1bc478e149ab534b2288dfd4b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/demo/worker.log": "bd74c1ce0d8e216956bebeeaa23d2b41502c8d171a060a8515b9284ed0151740",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/launch.json": "2744fed2f2588961aa3b5fd2bb6dc89f7556d7de4feb887e72f4e794a75b9507",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/launcher.log": "16af8acb4e06e0794a88b3dca1887933fe50e843d13c464f376740ee8f59cc6a",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-01-18430/result.json": "ff4c0ec1b2e4ba231aa124075dfb6968bd02a5b7a7698d13237b28e74787b57b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/api.log": "6fc466db4273fe177ab4a732cde227fa5021f9e1649af8a242b4e5e5ebed0521",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/process-exits.json": "85abc6117fc4624ddce84baac89a2ce3502bc33cc9fb4f32f82cc01c97f49d44",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/runtime.json": "e2c4e21ff18032c84c7ca063b9a160a9fa6fbff460949fb3cca50acc033b0306",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/thermal.log": "6fb38bc0fde2e25933c5f0df9ca46308972f5c07f1361caf0b80b45e1269266d",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/thermostat-integration.json": "19c773fc1bed491a3e437103c6d22dbc77abdd3ff693c7eae0d7236f8bcc3863",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/demo/worker.log": "c66cb32cc1bff731708913c17c094f57dde8ef0fe14d70e343ee0b77a384a387",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/launch.json": "c18b0a16c0f8a3737a7da4fbde753fcec546df5f03db963cb1e25da7b764b950",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/launcher.log": "d606f061ab26dfea72335733e72c4002035d1b6289e3c4bf6a0bc30ee92971e2",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-02-18432/result.json": "8e47abd4dc767031067217b984ecbfee50a10d858479799f6bd22267b2b8c93e",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/api.log": "392c9d22192fd49b5510a3bc0ebc8e89902992d7a709b87e56680d0d018afa3b",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/process-exits.json": "e70573826c5255894d00a53695a1ea0a2c2a9a361057e52afbbd8bca1731180a",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/runtime.json": "b506e875a155560047d85db06588754fa36e68785fc036bb10c6f3705a54ce35",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/thermal.log": "9e2fab8bd082027d9c523c65d28f3c9e0f5d4e636f84efb2bf30670541aba5ea",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/thermostat-integration.json": "2e92fe0c7e65220fba5ce9b00c574062cad87ebafc674c141d5fe6aff75b7e35",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/demo/worker.log": "e41319cd12d4a7b4b8d517d8b50b36ef52d417d61a615562c4693211d0cd2f3e",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/launch.json": "7a62fd0d9917aecd40352ef93dd7fd837a5a6fa2168e295c094ba8b30e0c54a4",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/launcher.log": "67dafb9ad6c11174902eb8850aab94256683afad9f5f719c8ce09b5cd1d07caf",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-03-18434/result.json": "17778bf0ae6597dc0b71adfd0b3c1e34362ddcb8613fa750b58d20b638e22c94",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/api.log": "600e274b117f94f773c12a4ff6c79a602fac73e32ebdee5cfb8253b8678d33d7",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/process-exits.json": "820b4c9d646637ca488cadbde55efb31ac644daf31b208fb3fd43ecf62e56ca0",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/runtime.json": "ec457bf302977f38fd1c15ae7e1f6c228ecc16bf975c482ba6b3a1d8330d42b1",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/thermal.log": "ac44da043fd2618ef22adda98d0e617d64fd93bdf0585adf487d20f5d49cf2df",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/thermostat-integration.json": "c295b5968089c21787d40ae434540e4c035c9399428b18a9f4e1df7a338f4df0",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/demo/worker.log": "9e6a84504c58795abc20d7bd0882ae9dd75456564d2dbad78af5bd24eba8e132",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/launch.json": "33f23e771a53857c62c8a50006e382a965d810082ba9c6995bc74c33164f5c09",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/launcher.log": "03093e9de03a47b564392aa99271206fcffd2824f87be2307d8dd463aca097c2",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/parallel-thermostat-04-18436/result.json": "13546de972d91bd58d261b4ccf72ca9bb4c671075f7abdf906f2ecb4cd1a3534",
+    ".run/validation/timeout-investigation/20261008T162739Z-42130507/summary.json": "0268a36abaf2bbf631c0f289b9fbafce5b8c8307e8f9824263d2c4bdd0e03ade",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/configuration.json": "07b70d5e8d6806712ac3ecb9326f7c945a9a3cc71f76f1a7e9bd3352b6879951",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/api.log": "f462ee780ce694086ef7d0dfabd1985c028b6caaba285c4964f1f114493748c0",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/process-exits.json": "f372853da17e17ceeb7e4ebedc44e8a69a22cc742bf3b836b89818d8670ec090",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/runtime.json": "9d79314be087bdbd8b5f9f3b8e50aff1d4d3f816ba59c8b34042b22591d4e8e8",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/slice2-evidence.json": "2434247831bfbf2db56b6a255a08938624e0ec69b5b00899dd5f0403befe930f",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/slice3-evidence.json": "03adf9838e998af2575b9014bc1d1393d6b61bf88dc93e8710c0da716ac2556d",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/temperature-22-evidence.json": "6421d89e1a6eacd056eb067517f7f516250581dc74785db46f2c8e0441da7c45",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/temperature-25.5-evidence.json": "4ad1d8596000113e419a0e4f79f13fa8ac5ddd6b491a956bc1dbfc23cb644a94",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/temperature-25.6-evidence.json": "9d0ad023a88a65693af38609a73efcbbf4d2392af5f2346ce13507c1011213f4",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/temperature-29-evidence.json": "f413e63c14ef3787a791d2e1526872bfc0fb82a4218207b148833abfddf8b10f",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-cooling-nominal.json": "692bf493a0f63e5592b46f05904546b0c6dcb0bbcf6ac74a057d2ff171fac0f9",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-cooling-stop-before-publication.json": "4d410624602720d24630e19aecd76a41219ec18793efdd6850673b0c79d113fd",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-expired.json": "6b60ce73e1eb688854462645412e56db18607bd29c03d565f472e7934d8adde0",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-nominal.json": "6150658c804d4aa1ffceb6bab36afc61faa31c55669e28b7429698a6f8845505",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-resume-cooling.json": "781e8b2d3fa93607d6a1a7e9dae9a2a7d0ac1d1b28a8f44c44a32ac959039092",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-resume-heating.json": "3ab97ea6e293014d35ca193609997976c61a2afc461fa922e32a7c57fa91bf38",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-switch-cooling-heating.json": "8c264d069799b37e07be2e33b0564e0cf2cfea53c9b4cd5640fb87ba72a1e528",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal-switch-heating-cooling.json": "135f1fb0a8857bc7db66483af969180db6d2740312328957d17d5e3edef9583e",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/thermal.log": "3c8c63113564e311e8f97425f064f084c9dca7b11999b19c68304ef503f0ad52",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/demo/worker.log": "3dcffaff6fc14ad093209462cd6328682e0284a31d4d8ad8669ceb80946f0e97",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/launch.json": "45383285257d90de844a3ecabd57c15035ad485e49d54e14e4a1892da7111045",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/launcher.log": "fa245128b070b04386f3c4086a8f70f0b32ae2a9348a22dcfc61d1b7c6d77750",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-01-18441/result.json": "b63489764439ee7ef898444fe5d4e8032d0869d82b10a5b688ca3eb33e81d0a4",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/api.log": "c874c28f79bba293010b1441cea90512ab8921fe7b692f225870eba5603bb63b",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/process-exits.json": "29640322f1411983fd77e59780a47233c9d868778afb2ca34732d6c93dfceb5f",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/runtime.json": "36be3be5621e9f6f0c80b6c7634ad3ab204b84d8e2f0cc210520a981da83f357",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/slice2-evidence.json": "d559a41d5da6e816e17fe9d199e7487c64426eaeebcdf62598dc512bf6eb4070",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/slice3-evidence.json": "e98b4f55932b8bf611569371292a5378ed18c207af2f7a838762cf0b3d8ed62a",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/temperature-22-evidence.json": "c913a00c2850fbe0876e4d7c783dc043b3b9af86030c9f50aac2900bded0837b",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/temperature-25.5-evidence.json": "7c5ab591d8a5c3dc98528a304d6da3db5c8e46eb323337597e2a54aa24deea2d",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/temperature-25.6-evidence.json": "9ad7a0d46338554d3d0d7ab18351c19cb14c29ba8b275dc96b9fbaf02ab2274e",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/temperature-29-evidence.json": "d85cfc7c4c70e041b881b74e67da3a06bb484503066c6e1d6e20402c6ec62765",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-cooling-nominal.json": "99dd3b1879fdabed6f6e1bff582c5ff9db56266d051ce77de42391be85a875a6",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-cooling-stop-before-publication.json": "2781bfc1ce5c9cfe5a2ac7642a5b21765f02cb706c304e41aafef37de9d9b69d",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-expired.json": "c16967f9d1b3724896b85837c1e544f83059044e5457c9b8fa9663311bf7fb30",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-nominal.json": "0aa339cf5440dbe769c919062ec2a6028c14ba6b1d83fb2f8f1baea40fd16bee",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-resume-cooling.json": "9c141d04e9b6b0609c0423efef008044f54ed6840cbac3a3ecac41493c3111d6",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-resume-heating.json": "1604524fc371f858ad62a884c86914f9c483b82ede3a81bacaec544232cef8a9",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-switch-cooling-heating.json": "423f2f9b0bdcd4e702237c3352eaa294d0dcf9bcc283be244bcb48cbf923df29",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal-switch-heating-cooling.json": "14d2497c0b63c7a9aca099713c0cc9c8a4879f5ec69a9286c1a4b032ccd73bc7",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/thermal.log": "4f3f3f5f9069b80ee6e3946657e5b8a90e6d0438c012d02095aa5707566fb8c2",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/demo/worker.log": "134b61ae6bc13372e4df3760554abebf6aad95ef6c0f87de5d0b8d431f03ba64",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/launch.json": "a66a54c7fbbd8ae6f70d21613c858698b0c867fdecf7daf287b6d451a258389a",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/launcher.log": "72686bfc3512f3b1c11e466ec86e58820e37ef68bac13669f354cc8ffc661019",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-legacy-02-18443/result.json": "9fb54c1c1dcc0828df4c27edf9813eab6027b5e79af4bcafc6257552cd87298d",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/api.log": "3d1846c0722b3f9ca2607ff21ea9eaf7df835aa0662cc89df6962cb84772c16c",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/process-exits.json": "509feb0b0c43a51111c30c7ee7408af94be82c2db88b1479484ea57bbfda37a9",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/runtime.json": "98987c3d932e2d15dcb9dafec752996c92df7c78633cddfcb8141b515a829e0e",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/thermal.log": "a09bc974fa9b52d57f0ade7a6cb4141dc15e235c3811927f1c28f5a0612b47b8",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/thermostat-integration.json": "62e12bfb30eb8c478288db77ac054a9d0832f2127935dcac4121ae5ed2f76c58",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/demo/worker.log": "d10aeaef3c30a4c4f2d91f7e2e82457744c65a75a01029197ae6f8d44673bed0",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/launch.json": "763a0510af5859c7ea0db3fd4e33106ca8dcb9d845a0b8eaca602d81e137bdd0",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/launcher.log": "faa7054ad30aa7b31fdd9a75f9fd12bd2ffe6a9db729f5b4df9d562b4f15f234",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-01-18440/result.json": "887167b4158e0d2bb8f4a13cdb4a3cc70d209cb81c062e8c1d892def7e60b117",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/api.log": "4495fa0900c5df2cf7df542f7bafa10bc7ade564d6bf8f5066a1e68f9b7ee620",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/process-exits.json": "302344114a8e339e6cc93634c4dc3f5ca7a8e4913deb7351fc6ee2aea1b1388b",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/runtime.json": "7888e04938ab040a15d37f002799179d77374f1bb819facc1c8efcacc643504c",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/thermal.log": "63d3fa06a742228925db4fac01ff7a5e3d187a2c5f9e7ddac0808acf726bdcd3",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/thermostat-integration.json": "1f5da90fd9c381b20c91ca17272459b4b505f64c98f8f0619ce0de4dbce0019f",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/demo/worker.log": "99e77abfca7f6fb16584877bf7bd2988459a07ae6d130075c03723b654d522a6",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/launch.json": "c975ed85c8b5e97409b62b3726736bf61a8e73fd548aabcc7dcdb3d080c2c80b",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/launcher.log": "389a6020c348c16523e7af41998618c7e9c24528582e11e9f099f16f3e76d9dd",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/parallel-thermostat-02-18442/result.json": "30e37161291d44213f5e2f9ce4b55bc9475ab7b00d170caedb5df877b754f569",
+    ".run/validation/timeout-investigation/20261008T163437Z-1ff9be88/summary.json": "0f82a8f80f2fe277af4a635b6a2be3d1b1aab56164c699427103a56337346a2b",
+    ".run/validation/timeout-investigation/authority-before.py": "4fa3ea8afad17e0381b0333e4c980fd190085887f8dfc418a71e6f86a1472c9b",
+    ".run/validation/timeout-investigation/baseline-18401.log": "74074c418540f9b1e91fab0474ada1ccfada9089a81242f589380032101cabf1",
+    ".run/validation/timeout-investigation/bundles/manifest.json": "ae52d748f9644eaae144153863af35c38efcc72adc4e7448ff44af81aefc59be",
+    ".run/validation/timeout-investigation/bundles-isolated-final/manifest.json": "c1689bd7d3d301ec648b0372b2fdbc53ef582e5e02a4a3f4b9ef9f464e05331e",
+    ".run/validation/timeout-investigation/bundles-qualified/manifest.json": "6c52bb34463cff870b66eb6e24807b70cbe4de62d9ca4cd924a69219cb563de3",
+    ".run/validation/timeout-investigation/container-delivery.log": "73a9dc3de7b32cf714c30aaa0f88faf41dece5b4d208bf1bdaf04a8dee4c02b9",
+    ".run/validation/timeout-investigation/container.log": "3547520786e7c6eb6e597b8b363f62771ad5b67699e34eb6c9eb2d974e4c6829",
+    ".run/validation/timeout-investigation/crash-windows.log": "b4921b8edc7601ac0b359455d21954eb3f3da77ff983442e58452fabf075a94e",
+    ".run/validation/timeout-investigation/injected-contention.json": "9d4352fc7a91da7581a0555abff6b0e5ed732c84ffae240e71daaa831c8318eb",
+    ".run/validation/timeout-investigation/injected-delivery-renewal-commit.json": "c3ef99e0446201a377e29e883cb48b6f572605bb2fd538b838389a0b4936ae45",
+    ".run/validation/timeout-investigation/injected-delivery.json": "c3a0025968ccc2d75882b0470584befdb3189446b018b576adf283ecc5ccf7f2",
+    ".run/validation/timeout-investigation/injected-final-renewal-commit.json": "9ead34404207e630a1ecee5efafef00fcb0b44b2789a4f7e35b43857db4dc2a4",
+    ".run/validation/timeout-investigation/injected-final.json": "65b21510bbb68fd0b49465e36d9ff391504faf5e48999ce18723e56a0e392c96",
+    ".run/validation/timeout-investigation/lambda-build-isolated-final.json": "a9cde4d480f0822edd1d36707a15bb7dcd795de75b1a8388ce3cc1db4a27f39d",
+    ".run/validation/timeout-investigation/lambda-build-isolated-final.log": "d7da87fcdc3232323105e534e1602abadf84f2d01b0f6d6c85be61f33116c517",
+    ".run/validation/timeout-investigation/lambda-build-isolated.json": "1fdc63da2f46fe76002dad2d4b712843cad915b08be989302762b6a9042dd5d9",
+    ".run/validation/timeout-investigation/lambda-build-isolated.log": "3ee1de5b976d355c04277296e461d5f4fd3ccce6890fb030571ffa22ca44c066",
+    ".run/validation/timeout-investigation/lambda-build-qualified.json": "fde2ca9aa3a631d851ec2ea3340d2561f1950960a9981320910505fe38da7eda",
+    ".run/validation/timeout-investigation/lambda-build-qualified.log": "1d76feb1cfa4504077e7ae8931418442129af0415aa9050733a47d797d51cb1c",
+    ".run/validation/timeout-investigation/lambda-build.log": "4559738a3c38a7056622bd0bf4307de10a49948c446c24571e7850684026e690",
+    ".run/validation/timeout-investigation/mypy-delivery.log": "a1051ec290fd198fdc01a84ce45195d00fd6617246598e305eb28ab300452773",
+    ".run/validation/timeout-investigation/mypy-final.log": "a1051ec290fd198fdc01a84ce45195d00fd6617246598e305eb28ab300452773",
+    ".run/validation/timeout-investigation/mypy.log": "a1051ec290fd198fdc01a84ce45195d00fd6617246598e305eb28ab300452773",
+    ".run/validation/timeout-investigation/observe-round2.py": "bcb15429d1eb9d7916c444c380d07a3ef61fb183b6b42630954fc2f28b119bd3",
+    ".run/validation/timeout-investigation/observe.py": "733fcbbdf490cb3721fc0a6904ceb9c7cea021cb6ba3f96558229a8a4cd8833f",
+    ".run/validation/timeout-investigation/postgres-delivery.log": "ba1a2c960867bd771b7cbda55b079c8d0693e373736bee5b13add6a8c70e4b22",
+    ".run/validation/timeout-investigation/postgres-final.log": "ba1a2c960867bd771b7cbda55b079c8d0693e373736bee5b13add6a8c70e4b22",
+    ".run/validation/timeout-investigation/postgres-first.log": "a586fa26d1f9c6c3a313a7490d52b232c6065b5355c053e6af64820d3a93f57b",
+    ".run/validation/timeout-investigation/postgres-waits-isolated.jsonl": "7d5f310a448ce3d717dec89aa8d3d2ab7cd044385c0f9f5f050e837f73c06f43",
+    ".run/validation/timeout-investigation/postgres-waits.jsonl": "5fa259c02f886adc4f7253cc37ecd438d3052964d10781b3a3d1eda136cd8ed3",
+    ".run/validation/timeout-investigation/postgres.log": "001266a6e5c64f29a820a9042855c0a1bd0f02e51f2c311133b68757c8dd02e7",
+    ".run/validation/timeout-investigation/process-before.py": "84a3b3b8b82213f509b7cc6b9bdb63fb248b19df3fd1810daa832f2bf477419b",
+    ".run/validation/timeout-investigation/pytest-delivery.log": "618100f572d46d8f5d1f12fe91c4e6ae6c2055cb66173907431e6a372bd429d3",
+    ".run/validation/timeout-investigation/pytest-final.log": "7ea29910e9185c03690b31031bc4e84ced0380f7817290957a6fd2b0f499518a",
+    ".run/validation/timeout-investigation/pytest.log": "781066f9966039c478496d513f5c388df489c281b6c6051a8f4f11bfd2cbc3a1",
+    ".run/validation/timeout-investigation/reproduction-final.log": "13aac924fb4984e945b940f778f7965f0969f68aa16aad58ae9b6e0a232c2ccf",
+    ".run/validation/timeout-investigation/reproduction-isolated-build.log": "1ba3e252850906d2530e6a51002ebdfbbe846751335abcbcfc856a55bf9a6d65",
+    ".run/validation/timeout-investigation/reproduction-round1.log": "b76c1b28a03a280f01eb092a5253907d21d198f5dce6096cfb329eb728c32196",
+    ".run/validation/timeout-investigation/reproduction-round2.log": "a945b79a3215e217af90efd62fa4711f92aed4a8cbfcec38a0ae1e9b84318d05",
+    ".run/validation/timeout-investigation/resource-samples.jsonl": "2422dd53d297d8e342407ebdeab36c55b85b0b9626fdd81a9968bc2e17391619",
+    ".run/validation/timeout-investigation/ruff-delivery.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    ".run/validation/timeout-investigation/ruff-final.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    ".run/validation/timeout-investigation/ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    ".run/validation/timeout-investigation/runtime-before.py": "b4689bb8f15a8264e6bd6a536bfcc1be996997909795a73c0fe8c6ffe00782ac",
+    ".run/validation/timeout-investigation/thermostat-delivery.log": "e4a39a9de38be08d56a406a63be4b33655f2b90e7473d614910703dc4bc57723",
+    ".run/validation/timeout-investigation/write-record.py": "3165a863c67f4beae8c5add3840b0b330223984c1b647a5bd01570b785ef49a5"
+  }
+}

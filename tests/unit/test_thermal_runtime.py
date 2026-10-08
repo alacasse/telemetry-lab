@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -25,6 +27,12 @@ class SQLiteAuthority:
 
     def guard(self, session: Session) -> None:
         self.check_active()
+
+    @contextmanager
+    def transaction(self, sessions: sessionmaker[Session]) -> Iterator[Session]:
+        with sessions() as session, session.begin():
+            self.guard(session)
+            yield session
 
     def heartbeat(self, session: Session) -> None:
         pass

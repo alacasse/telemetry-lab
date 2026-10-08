@@ -13,7 +13,10 @@ flowchart LR
     Browser -->|passive snapshots| API
 ```
 
-`demo/` composes the local browser experience and thermal runtime. `services/` contains ingestion, query, processing and simulator applications. `packages/` holds shared domain, database, configuration and queue code. `migrations/` owns the PostgreSQL schema.
+`demo/` composes the local browser experience. `services/` contains ingestion,
+query, processing, simulator and standalone thermal-engine applications.
+`packages/` holds shared domain, database, configuration, queue and thermal process
+code. `migrations/` owns the PostgreSQL schema.
 
 ### Shared thermostat and local composition
 
@@ -38,11 +41,23 @@ acknowledgement, and redelivery cannot repeat a committed effect.
 `demo/app.py` assembles the HTTP router and serves the existing static interface.
 `demo/thermal_local.py` validates the local multiplier and reads PostgreSQL authority
 through a separate bounded observation pool, without taking row locks. `demo/thermal_runtime.py` supplies the HTTPX publication adapter,
-local command queue, signals, threads and polling intervals. Startup atomically acquires authority, locks the existing creation advisory lock,
+local command queue and guarded configuration to `packages/thermal/process.py`.
+That module owns signals, threads and polling intervals. Startup atomically acquires authority, locks the existing creation advisory lock,
 recovers existing simulations and optionally initializes the shared room. Only
 after commit does it start the engine. Recovery requires explicit resume; HTTP reads stay passive.
 The shared modules import no local composition or transport clients and their
-package initialization starts no work. AWS adapters and execution remain future work.
+package initialization starts no work.
+
+`services/thermal-engine/thermal_engine/main.py` independently composes the same
+process and PostgreSQL authority with bounded HTTP and SQS adapters. Its
+`local-emulator` mode permits container DNS with explicitly synthetic credentials;
+its `aws` mode requires HTTPS, standard regional SQS URLs and the existing staging
+secrets contract. SDK clients use the standard credential provider chain. No
+queue is created by the engine. Configuration is validated before acquisition;
+the command queue must be distinct from the measurement queue, and both must be
+standard queues. FIFO is unsupported. See [configuration and execution](local-runbook.md#standalone-thermal-engine).
+The image and container validation do not select a hosting platform or establish
+AWS execution. HTTP routes and browser hosting remain separate work.
 
 The API accepting a measurement establishes receipt/publication evidence, not completion. The worker commits business results in PostgreSQL before acknowledging successful processing to the queue. A failed pre-commit attempt can be redelivered. A committed message can also be delivered again when acknowledgement fails.
 
@@ -56,6 +71,18 @@ then checks owner, generation and expiry against `clock_timestamp()` read after
 the lock. Recovery, initialization, tick, commands, publication selection, receipt
 persistence and final cleanup all participate. API and processing-worker business
 transactions remain independent.
+
+Within one engine, `PgAuthority.transaction()` admits only one protected
+transaction at a time, before constructing its session. The same admission gate
+covers renewal through commit and local confirmation, with priority for a waiting
+renewal. This queues sibling work outside the one-second pool/SQL-lock waits;
+it does not replace PostgreSQL fencing or relax any database timeout. Waiters
+recheck the five-second confirmed-renewal deadline. Normal stop cancels queued
+admissions without marking the authority failed; final cleanup still requires all
+threads to have stopped and a successful database guard. Acquisition and this
+joined cleanup have no sibling transactions and retain their atomic boundaries.
+Transport calls remain outside both local admission and the database transaction.
+See the [availability correction evidence](thermal-availability-2026-10-08.md).
 
 A transaction admitted before expiry may commit after expiry, while retaining the
 lock. A successor must wait for its completion. Once the successor's acquisition
@@ -75,8 +102,16 @@ The launcher waits for a passively observed free/expired lease before restarting
 unknown observation spends no attempt. Exit 75 ends automatic retries. A restarted
 simulation remains interrupted until explicit resume, with new monotonic anchors
 and no thermal catch-up. Normal shutdown joins all threads within a shared
-four-second budget and only then recovers/releases if authority remains valid.
+four-second budget covering joins, guarded recovery/release and transport closure.
+An independent process watchdog exits with code 1 at the deadline, including if
+cleanup or I/O remains blocked. Repeated signals do not extend it. Recovery/release
+only runs if the threads stopped and authority remains valid.
 Fatal or unfinished shutdown performs no late business cleanup.
+
+Fatal diagnostics retain the exception module/type and sanitized stack locations.
+Optional pool/action timing uses a bounded asynchronous sink so log backpressure
+cannot retain a pool connection or block renewal. These records are diagnostic,
+may be dropped, and never establish business completion or runtime availability.
 
 Availability is `available` only with a valid lease and successful clock pass no
 older than three seconds, including idle/interrupted passes. Missing, expired or

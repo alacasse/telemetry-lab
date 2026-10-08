@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
-from packages.thermal.authority import Authority
+from packages.thermal.authority import Authority, AuthorityStopping
 from packages.thermal.commands import CommandMessage, CommandRejected, parse_command_message
 from packages.thermal.models import ThermalCommand, ThermalReading, ThermalSimulation
 from packages.thermal.service import (
@@ -59,6 +59,8 @@ class RoomClock:
         with self.lock:
             try:
                 self._tick_transaction()
+            except AuthorityStopping:
+                raise
             except Exception:
                 self.authority.fail()
                 self.recovery_required = True
@@ -67,8 +69,7 @@ class RoomClock:
                 raise
 
     def _tick_transaction(self) -> None:
-        with self.sessions() as session, session.begin():
-            self.authority.guard(session)
+        with self.authority.transaction(self.sessions) as session:
             if self.recovery_required:
                 recover_simulations(session)
             anchors = dict(self.anchors)
@@ -113,7 +114,7 @@ class RoomClock:
         with self.lock:
             try:
                 return self._command_transaction(CommandMessage(sid, sequence, command_type))
-            except CommandRejected:
+            except (CommandRejected, AuthorityStopping):
                 raise
             except Exception:
                 self.authority.fail()
@@ -124,8 +125,7 @@ class RoomClock:
 
     def _command_transaction(self, message: CommandMessage) -> bool:
         sid, sequence = message.simulation_id, message.sequence
-        with self.sessions() as session, session.begin():
-            self.authority.guard(session)
+        with self.authority.transaction(self.sessions) as session:
             command = verify_command(session, message)
             if command.status != "pending":
                 return True
@@ -156,8 +156,7 @@ def _reading_publication(
     authority: Authority,
 ) -> None:
     # Oldest first prevents a slow transport from skipping causal measurements.
-    with sessions() as session, session.begin():
-        authority.guard(session)
+    with authority.transaction(sessions) as session:
         reading = session.scalar(
             select(ThermalReading)
             .join(
@@ -179,16 +178,14 @@ def _reading_publication(
     # No clock lock held across network I/O; final authority checked before initiating effect.
     authority.check_active()
     receipt = publish_reading(body, sid)
-    with sessions() as session, session.begin():
-        authority.guard(session)
+    with authority.transaction(sessions) as session:
         mark_published(session, sid, seq, receipt=receipt)
 
 
 def _command_publication(
     sessions: sessionmaker[Session], queue: CommandTransport, authority: Authority
 ) -> None:
-    with sessions() as session, session.begin():
-        authority.guard(session)
+    with authority.transaction(sessions) as session:
         command = session.scalar(
             select(ThermalCommand)
             .join(
@@ -212,8 +209,7 @@ def _command_publication(
     message_id = queue.publish(
         json.dumps({"simulation_id": sid, "sequence": seq, "command_type": command_type})
     )
-    with sessions() as session, session.begin():
-        authority.guard(session)
+    with authority.transaction(sessions) as session:
         command = session.get(ThermalCommand, (sid, seq))
         if command is not None and command.published_at is None:
             command.published_at = datetime.now(UTC)
@@ -224,8 +220,10 @@ def receive_commands(clock: RoomClock, queue: CommandTransport) -> None:
     """Discard permanently invalid deliveries; retry transaction and transport failures."""
     clock.authority.check_active()
     try:
-        with clock.sessions() as session, session.begin():
-            clock.authority.guard(session)
+        with clock.authority.transaction(clock.sessions):
+            pass
+    except AuthorityStopping:
+        raise
     except Exception:
         clock.authority.fail()
         clock.recovery_required = True

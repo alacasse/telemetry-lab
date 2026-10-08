@@ -56,6 +56,9 @@ def restart_thermal(
     exit_code = process.poll()
     if exit_code is None:
         return process
+    exits = state.setdefault("thermal_exits", [])
+    if not any(item["pid"] == process.pid for item in exits):
+        exits.append({"pid": process.pid, "exit_code": exit_code, "monotonic": time.monotonic()})
     if exit_code == 75:
         state["thermal_restart_refused"] = True
     if state.get("thermal_restart_refused") or state["thermal_restarts"] >= 3:
@@ -108,6 +111,7 @@ def main() -> int:
         help="Keep historical scenario initialization (also used by historical integration modes)",
     )
     parser.add_argument("--thermal-multiplier", type=float, default=1.0)
+    parser.add_argument("--thermal-diagnostics", action="store_true")
     parser.add_argument(
         "--startup-order", choices=("api-first", "runtime-first", "worker-first"),
         default="api-first", help="Process startup order for local recovery validation",
@@ -208,6 +212,7 @@ def main() -> int:
                 "THERMAL_QUEUE_NAME": "telemetry-lab-local-thermal-commands",
                 "THERMAL_RUNTIME_STATE": str(logs / "runtime.json"),
                 "THERMAL_TIME_MULTIPLIER": str(args.thermal_multiplier),
+                "THERMAL_DIAGNOSTICS": "1" if args.thermal_diagnostics else "0",
                 "THERMAL_INITIALIZE_THERMOSTAT": "0" if (
                     args.test or args.test_crash_windows or args.legacy_thermal
                 ) else "1",
@@ -416,6 +421,9 @@ def main() -> int:
             subprocess.run(
                 ["docker", "stop", "-t", "3", container], stdout=subprocess.DEVNULL, check=False
             )
+        (logs / "process-exits.json").write_text(json.dumps([
+            {"pid": process.pid, "exit_code": process.poll()} for process in processes
+        ], indent=2) + "\n")
 
 
 if __name__ == "__main__":

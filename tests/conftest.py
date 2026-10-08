@@ -10,5 +10,6 @@ for path in (
     ROOT / "services/query-service",
     ROOT / "services/processing-worker",
     ROOT / "services/simulator",
+    ROOT / "services/thermal-engine",
 ):
     sys.path.insert(0, str(path))

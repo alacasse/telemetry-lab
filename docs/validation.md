@@ -1,5 +1,154 @@
 # Validation
 
+## Engine availability correction — 8 October 2026
+
+The engine now coordinates its own protected transactions before database
+checkout, with renewal priority and admission held through commit/confirmation.
+This fixes the demonstrated sibling-contention mechanism without changing pool
+size, SQL limits, the 10/2/5-second authority contract or four-second shutdown.
+It remains permanently inactive after genuine database errors or authority loss.
+
+A new frozen-source comparison retains ordinary disk-backed SAM builds in both
+campaigns: **7/8** before compositions had fatal reports versus **0/8** corrected
+compositions, with **2/2 successful SAM builds in each**. The corrected engine
+survived a **3.213-second connection hold with same-backend WALSync observations**.
+The exact final PostgreSQL regression file fails all three cases before the fix
+and passes afterward: finite business/renewal commit retention and SIGTERM while
+other loops wait. This is engine correction evidence, separate from the earlier
+tmpfs mitigation below, and remains a finite local qualification.
+
+Ruff and mypy (122 sources) pass. The default suite passes **261 tests** with
+**37 opt-in skips** and 21 warnings; the dedicated PostgreSQL suite passes **17**,
+including external pool/SQL-lock failures, real connection loss, fencing,
+passive multiuser observation and the new availability/stop regressions.
+The focused tests pass **11** cases. General and import reviews found no actionable
+issues. All **792** historical local evidence hashes were rechecked unchanged.
+The separate crash-window composition passes both cases, and the rebuilt
+standalone container passes its pipeline, exclusion, replacement, resume and
+redelivery checks. SIGTERM/SIGINT complete in 1.141/1.133 seconds. Live PostgreSQL
+durability remains enabled on disk; the checks clean up only their own resources.
+
+See the [mechanism, deadlines and complete qualification](thermal-availability-2026-10-08.md)
+and [new evidence record](validation-availability-2026-10-08.json). No commit,
+push, AWS operation, upload or deployment was performed. Historical results below
+retain their original scope.
+
+## Concurrent timeout investigation — 8 October 2026
+
+New concurrent runs reproduced the symptom and captured PostgreSQL WALSync stalls
+retaining connections/authority locks beyond the existing one-second limits.
+A natural four-way batch had fatal runtime reports in **2/8** compositions; one
+functional suite still returned zero. Controlled PostgreSQL tests separately
+exercise pool starvation and a delayed renewal commit, including permanent
+inactivation and no late business effects.
+
+A local SAM build helper isolates temporary installation writes in bounded tmpfs,
+while leaving PostgreSQL and final artifacts on disk. Subsequent workload batches
+recorded **0/12** fatal compositions, including a successful complete build while
+four runtimes were active. This is finite local mitigation evidence, not a promise
+of storage latency or a retrospective diagnosis of the original 18381/18382 logs.
+The engine's pool size, timeouts, lease, renewal and expiry contracts are unchanged.
+
+See the [investigation and qualification](timeout-investigation-2026-10-08.md) and
+[separate evidence record](validation-timeouts-2026-10-08.json). Historical phase 3
+results and their original JSON remain preserved below.
+
+## Phase 3 standalone thermal engine — 8 October 2026
+
+Implemented on the working tree based on
+`38dfa09cbd0dda24b8eba694735e79b7b8ba9e2d`, without a new commit or push.
+The engine image and explicit dependency configuration are now runnable outside
+`demo`. Hosting, public HTTP routes and actual AWS execution remain unestablished.
+Source hashes, image identity and local log hashes are recorded in
+[the phase 3 evidence record](validation-phase3-2026-10-08.json). Raw logs and bundles
+remain under `.run/validation/phase3/`, excluded from Git.
+The [runbook](local-runbook.md#standalone-thermal-engine) documents the realized
+configuration; [AWS preparation](aws-preparation.md) lists the remaining decisions.
+
+| Check | Observed result |
+| --- | --- |
+| Ruff / mypy | Passed; 115 Python source files checked |
+| Default Python suite | 240 passed, 32 opt-in skips, 21 existing warnings |
+| JavaScript controller/DOM suites | 137 passed (27 + 52 + 23 + 35) |
+| Disposable PostgreSQL | 12 passed, including authority and multiuser cases |
+| Historical data / command migration | 1 passed |
+| Existing thermostat, runtime-first, port 18384 | 1 passed |
+| Existing historical scenarios, port 18385 | 15 passed; two crash-window cases excluded deliberately |
+| Existing outbox crash windows, port 18383 | 2 passed; eight other thermal cases excluded deliberately |
+| Four Lambda bundles | Rebuilt with frozen dependencies in SAM Python 3.12/x86_64; checksums and isolated handler/shared thermal imports passed in Lambda runtime image with networking disabled |
+| Runtime image isolation | Linux/amd64; UID/GID 10001, direct Python entrypoint, no `demo` package; standalone import passed with network disabled and read-only filesystem |
+| Standalone container composition | Passed: real processing/receipts, busy code 75 with unchanged business hash, crash/expiry/replacement, explicit resume/no catch-up, exact-body redelivery/new receipt |
+| Container signals | SIGTERM exit 0 in 0.864 s; SIGINT exit 0 in 1.147 s (host Docker timing includes CLI overhead) |
+| General and import reviews | No remaining actionable findings after follow-up |
+
+New unit coverage rejects incomplete/unsafe dependency configuration before DB
+work, including shared or unsupported FIFO queue URLs. It exercises standard SDK
+credential construction, exact UTF-8 request bodies and real receipt propagation,
+malformed-receipt retries, staging token resolution before authority, and busy
+startup without transport construction. Subprocess tests block transport closure
+or guarded cleanup, then send SIGTERM followed by SIGINT: the four-second watchdog
+terminates with code 1 without extending the original deadline. Existing authority
+and transport tests retain lost receipts, postcommit acknowledgement loss,
+redelivery, real PostgreSQL fencing and permanent disablement.
+
+The disposable container composition uses Docker DNS for PostgreSQL, ingestion and
+LocalStack, with no host ports, source mounts or credentials. It checks processed
+measurements, command receipts/application, a competing process's code 75 and
+unchanged business state, graceful SIGTERM/SIGINT, SIGKILL/lease expiry/replacement,
+stationary interruption, explicit resume without catch-up, and real adapter
+redelivery preserving body/message identity with a new receipt handle. The engine
+runs the production runtime image; fixture tooling lives in a separate image target.
+
+Initial parallel launcher validations (ports 18381/18382), running alongside
+container builds and other suites, encountered fatal exceptions logged only as
+`TimeoutError` (their module was not captured). The historical scenario composition
+exhausted its restart attempts; the thermostat composition recorded one restart.
+The unchanged sources passed the
+separate reruns above. The single-connection business pool and one-second checkout
+limit are unchanged. Contention is a plausible explanation, not a proven diagnosis
+of the exact holder; no load-resilience claim is made and no protection was relaxed.
+The first sandboxed default pytest run stalled in HTTP TestClient; the suite passed
+with local execution permissions. Early container test versions suspended the
+owner to compare busy-start state; the stronger graceful-exit assertion revealed
+that the suspension could itself trigger fail-closed behavior. The final fixture
+keeps the owner renewing while an interrupted room is stable, stops the fixture
+worker during the comparison, and checks all persisted thermal business columns.
+An intermediate attempt to drain every reading was also rejected: unpublished
+readings correctly remain pending during interruption. The final test preserves
+that contract rather than resuming or changing business expiry for convenience.
+
+Review identified acceptance of FIFO URLs although this adapter implements only
+standard SQS publication; rejection now occurs before DB sessions/acquisition,
+with four regression cases. Malformed HTTP receipt JSON is treated as a transport
+retry, preserving the pending body. No business expiry, lease, renewal interval or
+fail-closed deadline was changed.
+
+Reproduction commands:
+
+```sh
+.venv/bin/ruff check .
+.venv/bin/mypy .
+.venv/bin/pytest -ra
+node tests/ui/demo.test.cjs
+node tests/ui/thermal.test.cjs
+node tests/ui/thermostat.test.cjs
+node tests/ui/thermostat-flow.test.cjs
+PYTHON=.venv/bin/python sh scripts/test-postgres.sh
+PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
+.venv/bin/python scripts/demo-local.py --test-thermostat --startup-order runtime-first --port 18384
+.venv/bin/python scripts/demo-local.py --test --port 18385
+.venv/bin/python scripts/demo-local.py --test-crash-windows --port 18383
+PYTHON=.venv/bin/python sh scripts/test-thermal-engine.sh
+```
+
+The passing reruns above were sequential; this does not resolve the concurrent
+failure. CI now includes the standalone container check; no remote CI run is
+claimed. No existing unrelated demo was migrated or restarted. No AWS resources,
+uploads, deployments, account queries or destruction occurred. AWS roles/secrets,
+networking, scheduler replacement, browser access and cloud receipts still need
+an explicitly authorized cloud trial. Browser verification is automated; native
+visual inspection and load testing were not repeated.
+
 ## Phase 2 exclusive shared-room engine — 8 October 2026
 
 Implemented on the working tree based on `8b597ef12fea86b776ed67704e7835e2fef9fe6c`.
