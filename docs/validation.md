@@ -31,6 +31,10 @@ Initial attempts exposed two line-length errors from longer names and incomplete
 
 Raw logs and screenshots remain local under `.run/validation/`, excluded from Git. The JSON record stores their hashes and source hashes. Validation does not establish production readiness, prolonged-load behavior, multiple simultaneous thermal runtimes, physical equipment control or screen-reader compatibility.
 
+## Publication scan
+
+Scanning the evidence commit produced four generic API-key alerts on source-file SHA-256 strings. Each value was recomputed from its referenced source file and independently reviewed. `.gitleaksignore` contains only the four exact historical commit/path/rule/line fingerprints; no file or detection rule is broadly excluded. The qualified three-commit history scan found no remaining leaks. The original local record above is retained unchanged.
+
 ## GitHub Actions
 
 The workflow defines quality, disposable integration, Lambda bundle and Terraform jobs. Remote execution was pending when this local record was written. Consult [Actions](https://github.com/alacasse/telemetry-lab/actions) for the result associated with a published commit; workflow configuration alone is not execution evidence.
