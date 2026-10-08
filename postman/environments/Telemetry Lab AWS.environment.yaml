@@ -1,0 +1,68 @@
+name: Telemetry Lab AWS
+values:
+  - key: baseUrl
+    value: 'https://your-api-id.execute-api.ca-central-1.amazonaws.com'
+    enabled: true
+  - key: ingestionServicePrefix
+    value: /ingestion
+    enabled: true
+  - key: queryServicePrefix
+    value: /query
+    enabled: true
+  - key: authToken
+    value: ''
+    enabled: true
+  - key: useAuthHeader
+    value: 'false'
+    enabled: true
+  - key: telemetryBuildingId
+    value: building-001
+    enabled: true
+  - key: telemetryZoneId
+    value: floor-02-east
+    enabled: true
+  - key: telemetryTimestamp
+    value: '2026-04-09T18:30:00Z'
+    enabled: true
+  - key: temperatureC
+    value: '26.4'
+    enabled: true
+  - key: humidityPct
+    value: '43.1'
+    enabled: true
+  - key: occupancy
+    value: '12'
+    enabled: true
+  - key: co2Ppm
+    value: '780'
+    enabled: true
+  - key: hvacMode
+    value: cooling
+    enabled: true
+  - key: airflowPct
+    value: '65'
+    enabled: true
+  - key: buildingId
+    value: building-001
+    enabled: true
+  - key: zoneId
+    value: floor-02-east
+    enabled: true
+  - key: queryLimit
+    value: '20'
+    enabled: true
+  - key: createdEventId
+    value: ''
+    enabled: true
+  - key: correlationId
+    value: ''
+    enabled: true
+  - key: decisionId
+    value: ''
+    enabled: true
+  - key: latestEventId
+    value: ''
+    enabled: true
+  - key: latestProcessingStatus
+    value: ''
+    enabled: true

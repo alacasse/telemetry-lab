@@ -1,0 +1,3 @@
+$kind: collection
+description: Endpoints exposed by the ingestion service.
+order: 1000

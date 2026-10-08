@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetry Lab · Simulation locale</title><link rel="stylesheet" href="/style.css">
+<script src="/app.js" defer></script><script src="/thermal.js" defer></script></head>
+<body><main>
+<header><p class="eyebrow">TELEMETRY LAB / LABORATOIRE LOCAL</p>
+<h1>D’une mesure à une recommandation</h1>
+<p>Télémétrie synthétique · règles déterministes · aucun équipement commandé.</p>
+<p id="environment">Environnement : consultation en cours…</p></header>
+<section aria-labelledby="scenario"><h2 id="scenario">Une salle, une mesure de température</h2>
+<div id="room" class="room"><div class="metrics"><p><strong id="temperature">— °C</strong> température synthétique</p>
+<p><strong>700</strong> ppm CO₂</p><p><strong>8</strong> occupants</p><p><strong>40 %</strong> débit initial · ventilation</p><p><strong>45 %</strong> humidité</p></div>
+<p id="room-status" role="status" aria-live="polite">Aucune mesure envoyée. Aucun résultat confirmé.</p></div>
+<p>Chaque clic tire uniformément une température de 22,0 à 29,0 °C, par pas de 0,1 °C, et crée une nouvelle simulation avec son propre bâtiment. Aucun envoi périodique.</p>
+<p>Règle existante : au plus 25,5 °C, aucune décision attendue; au-dessus de 25,5 °C avec occupation, refroidissement et débit de 50 % recommandés.
+La réaction attend le résultat relu dans PostgreSQL. La couleur indique une recommandation enregistrée, jamais une commande appliquée ni une baisse de température.</p>
+<button id="send">Générer et envoyer une mesure</button> <button id="resend" disabled>Renvoyer la même mesure</button> <button id="continue" hidden>Continuer avec la seconde mesure</button> <button id="refresh" hidden>Relire les preuves</button>
+<p id="status" role="status" aria-live="polite">Prêt à générer une mesure. Aucun résultat confirmé.</p>
+<p id="identity" class="mono"></p><p id="resend-status">Le renvoi attend une mesure initiale et son résultat enregistré.</p>
+<details><summary>Inspecter le corps JSON exact à renvoyer</summary><pre id="payload">Aucun corps conservé.</pre></details></section>
+<section aria-labelledby="thermal-title"><h2 id="thermal-title">Scénario thermique · chauffage et refroidissement</h2>
+<p>Chauffer : 19 → 22 °C, à +0,3 °C par seconde simulée. Refroidir : 25 → 22 °C, à −0,3 °C par seconde simulée. L’actionneur est initialement arrêté; l’évolution commence après la décision persistée et la commande appliquée. Une bascule attend l’arrêt confirmé avant de créer un nouveau scénario. Le navigateur affiche uniquement les mesures traitées. Une lecture est produite chaque seconde réelle, avec une échéance de 30 secondes.</p>
+<label for="thermal-mode">Mode du scénario</label> <select id="thermal-mode"><option value="heating">Chauffer</option><option value="cooling">Refroidir</option></select>
+<p id="thermal-transition" role="status"></p>
+<div class="thermal-actions"><button id="thermal-abandon" disabled>Abandonner la bascule expirée</button><button id="thermal-continue" disabled>Continuer la bascule explicitement</button><button id="thermal-start">Lancer le chauffage</button><button id="thermal-refresh" disabled>Relire les preuves</button><button id="thermal-resume" disabled>Reprendre explicitement</button></div>
+<p id="thermal-status" role="status" aria-live="polite">Aucun scénario thermique lancé.</p><p id="thermal-identity" class="mono"></p>
+<div class="metrics"><p><strong id="thermal-temperature">— °C</strong> dernière mesure traitée</p><p id="thermal-timing">Multiplicateur serveur : — · cadence : 1 s réelle · durée maximale : 30 s</p></div>
+<div class="thermal-plot"><svg id="thermal-chart" viewBox="0 0 710 260" role="group" aria-label="Température des mesures traitées selon leur heure réelle d’observation"></svg></div>
+<p id="thermal-chart-note" class="thermal-caption"></p><p id="thermal-outcome" class="thermal-outcome">Aucune réussite confirmée.</p><p id="thermal-freshness" class="thermal-caption">Aucune preuve mesurée datée.</p>
+<details><summary>Mesures de la courbe · version texte et dates</summary><ol id="thermal-measurements"></ol></details>
+<h3>Les preuves de la boucle</h3><p class="thermal-caption">Décision enregistrée → commande appliquée dans la simulation → effet observé puis traité. Ces preuves ont leurs propres dates.</p>
+<ol id="thermal-milestones" aria-label="Chronologie des décisions, applications simulées et effet final"></ol>
+<details><summary>Identités des décisions et commandes</summary><p id="thermal-decision">Décision persistée : aucune preuve.</p><p id="thermal-command">Commande appliquée : aucune preuve.</p><p id="thermal-effect">Effet mesuré : aucune preuve.</p></details>
+<label for="thermal-reading">Mesure à inspecter et à renvoyer</label> <select id="thermal-reading"><option value="">Aucune mesure</option></select>
+<p id="thermal-selected" class="thermal-caption">Sélectionner un point par clic, Entrée ou Espace pour inspecter son corps exact ci-dessous.</p>
+<button id="thermal-replay" disabled>Renvoyer le corps exact</button><p id="thermal-replay-status" role="status"></p>
+<details><summary>Corps exact sélectionné</summary><pre id="thermal-body">Aucun corps disponible.</pre></details>
+<details><summary>Scénarios précédents · preuves conservées</summary><pre id="thermal-history">Aucun scénario précédent conservé.</pre></details>
+<details><summary>Preuves thermiques serveur</summary><pre id="thermal-proof">Aucune preuve.</pre></details></section>
+<section><h2>Le parcours réel</h2><p>Navigateur → ingestion HTTP → <b>SQS émulé avec LocalStack</b> →
+<b>worker Python séparé</b> → PostgreSQL → consultation HTTP.<br>
+Pour les deux modes thermiques : décision et commande persistées → file SQS de commandes → actionneur simulé serveur → nouvelles mesures HTTP → file SQS de télémétrie → worker → relevé final traité.</p>
+<p>Un reçu confirme la publication. Un début de tentative ne prouve pas que le worker est encore actif.
+Seul un résultat relu en base confirme son enregistrement; il ne prouve pas l’acquittement SQS.</p></section>
+<section aria-labelledby="queue-title"><h2 id="queue-title">La file · compteurs globaux approximatifs</h2>
+<p>Ces compteurs ne donnent ni la position ni le statut d’une mesure. Même zéro ne confirme aucun traitement. Lecture passive des attributs, sans consommation de message.</p>
+<p id="queue-counts">Aucun échantillon.</p><p id="queue-status" role="status">Lecture en cours…</p>
+<p id="queue-provenance"></p><button id="queue-refresh">Relire les compteurs</button>
+<details><summary>Inspecter la preuve de lecture des attributs</summary><pre id="queue-proof">Indisponible</pre></details></section>
+<div class="columns"><section><h2>Résultat enregistré</h2><div id="result">Aucun résultat observé.</div></section>
+<section><h2>Chronologie des observations</h2><p id="freshness"></p><div id="duplicates"></div><div id="timeline">Aucune observation.</div></section></div>
+<section><h2>Envois et tentatives</h2><p>Une simulation regroupe ses mesures. Chaque lancement crée une mesure. Les anciennes simulations CO₂ à deux mesures restent consultables; leurs corps exacts conservés peuvent être renvoyés. Chaque mesure conserve ses propres POST. Chaque POST reçoit un nouvel event_id et une nouvelle enveloppe, puis un message transport. Une redélivrance garde ces identités et crée une nouvelle tentative. Les observations ci-dessous peuvent être incomplètes.</p><div id="submissions">Aucun envoi observé.</div></section>
+<section><h2>Reçus des POST de cet onglet</h2><p id="receipt-status">Aucune publication confirmée.</p>
+<details><summary>Inspecter les réponses d’ingestion conservées</summary><pre id="receipt">Indisponible</pre></details></section>
+<footer>Les horaires du capteur, du serveur et du navigateur sont distincts. La durée du worker est monotone,
+mesurée avant commit, et n’est pas une latence de bout en bout. Aucune ressource AWS n’est utilisée par ce lancement.</footer>
+</main></body></html>

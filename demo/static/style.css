@@ -1,0 +1,68 @@
+:root{font-family:system-ui,sans-serif;color:#183630;background:#eff4f0;line-height:1.55}body{margin:0}main{max-width:1100px;margin:auto;padding:32px 22px}header{padding:24px 0}h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.15;max-width:800px}h2{font-size:1.2rem}section{background:white;padding:24px;border:1px solid #cad9ce;border-radius:12px;margin-bottom:20px}.eyebrow{letter-spacing:.12em;font-weight:700;font-size:.8rem}.metrics{display:flex;gap:26px;flex-wrap:wrap}.metrics strong{display:block;font-size:1.6rem}button{font:inherit;padding:12px 18px;border:2px solid #18594b;border-radius:6px;background:#18594b;color:white;cursor:pointer}button:disabled{opacity:.6;cursor:wait}button:focus-visible,summary:focus-visible{outline:3px solid #ae6200;outline-offset:4px}#refresh{background:white;color:#18594b}.columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.mono,pre{font-family:ui-monospace,monospace;font-size:.85rem;overflow-wrap:anywhere}pre{white-space:pre-wrap;background:#f0f4f2;padding:12px;max-height:420px;overflow:auto}summary{cursor:pointer;padding:8px 0}details{border-top:1px solid #dde5df;margin-top:12px}.recommendation{font-size:2rem;font-weight:750;color:#18594b}footer{font-size:.85rem;padding:12px;color:#456158}#status{font-weight:650}@media(max-width:720px){.columns{grid-template-columns:1fr;gap:0}main{padding:16px}section{padding:18px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+#environment{overflow-wrap:anywhere}.columns>section{min-width:0}
+
+#duplicates, #submissions{overflow-wrap:anywhere}a{color:#18594b}a:focus-visible{outline:3px solid #ae6200;outline-offset:4px}button{margin-bottom:8px}button:disabled{cursor:default}
+
+#timeline,#result,#queue-provenance{overflow-wrap:anywhere}h3{font-size:1rem}#timeline>div{border-bottom:1px solid #cad9ce;padding-bottom:16px}
+
+.room{border:2px solid #cad9ce;border-radius:8px;padding:16px;background:#f4f6f5}.room.cooling{border-color:#246bad;background:#e9f4ff;color:#123b62}.room.neutral{border-color:#61756d}.room.unknown{border-style:dashed}#room-status{font-weight:650;overflow-wrap:anywhere}
+
+.thermal-actions{display:flex;gap:10px;flex-wrap:wrap}#thermal-reading{font:inherit;max-width:100%;padding:10px;margin:8px;border:1px solid #61756d;border-radius:5px}#thermal-reading:focus-visible{outline:3px solid #ae6200;outline-offset:3px}#thermal-status{font-weight:650}#thermal-identity,#thermal-command,#thermal-decision,#thermal-replay-status{overflow-wrap:anywhere}
+
+.thermal-plot{background:#f4f8f6;border:1px solid #dde5df;border-radius:8px;margin-top:16px}#thermal-chart{display:block;width:100%;height:auto;min-height:180px}#thermal-chart text{font:12px system-ui;fill:#456158}.thermal-axis{stroke:#8ca399}.thermal-target{stroke:#9b650c;stroke-dasharray:5 4}.thermal-line{fill:none;stroke:#18594b;stroke-width:2}.thermal-point{fill:#18594b;stroke:white;stroke-width:2;cursor:pointer}.thermal-point:focus{outline:none;stroke:#ae6200;stroke-width:5}.thermal-caption{font-size:.85rem;color:#456158;overflow-wrap:anywhere}.thermal-outcome{border-left:4px solid #18594b;padding:8px 12px;background:#f0f4f2}#thermal-measurements{padding-left:22px;font-size:.85rem;overflow-wrap:anywhere}#thermal-measurements li{margin:8px 0}@media(max-width:480px){#thermal-chart text{font-size:13px}.thermal-actions button{flex:1 1 140px}#thermal-chart{min-height:160px}}
+#thermal-milestones{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.thermal-milestone{border-left:3px solid #61756d;background:#f4f8f6;padding:10px;font-size:.85rem;overflow-wrap:anywhere}.thermal-milestone.application{border-color:#ae6200}.thermal-milestone.effect{border-color:#18594b}
+@media(max-width:480px){.thermal-point{fill:#18594b;stroke:transparent;stroke-width:16;pointer-events:all}.thermal-point:focus{stroke:#ae6200;stroke-opacity:.4;stroke-width:16}}
+
+#thermal-mode{max-width:100%;margin:0.4rem 0}#thermal-transition{overflow-wrap:anywhere}.thermal-actions{flex-wrap:wrap}#thermal-history{white-space:pre-wrap;overflow-wrap:anywhere}
+input:focus-visible,select:focus-visible{outline:3px solid #ae6200;outline-offset:3px}
+
+/* Main thermostat page; historical workflows retain their existing styles. */
+.thermostat-page main{max-width:1100px;padding-top:20px}
+.thermostat-page header{padding:8px 0 18px}
+.thermostat-page header h1{font-size:clamp(1.8rem,3vw,2.4rem);margin:8px 0 12px}
+.thermostat-page header p{margin:4px 0}
+.thermostat-page .thermostat-provenance,.thermostat-page footer{color:#456158;font-size:.85rem}
+.thermostat-page .thermostat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.thermostat-page .thermostat-layout>section{min-width:0;margin-bottom:8px}
+.thermostat-page section h2{margin-top:0}
+.thermostat-page .thermostat-temperature{font-size:clamp(3rem,8vw,5.5rem);font-weight:700;margin:12px 0 24px;line-height:1.2}
+.thermostat-page .thermostat-settings{border:0;border-top:1px solid #dde5df;padding:16px 0 0;margin:0;min-width:0}
+.thermostat-page .thermostat-settings legend{font-size:.85rem;font-weight:650;padding:0 10px 0 0;color:#456158}
+.thermostat-page .thermostat-settings label,.thermostat-page #thermostat-mode-label{display:block;font-size:.9rem}
+.thermostat-page #thermostat-target{font:inherit;padding:10px 12px;max-width:100%;box-sizing:border-box;margin:6px 0 14px;border:1px solid #61756d;border-radius:5px}
+.thermostat-page #thermostat-target{width:110px;background:white;color:#183630}
+.thermostat-page #thermostat-mode{display:grid;grid-template-columns:1fr 1fr;max-width:320px;margin:6px 0 14px;padding:5px;gap:4px;border:1px solid #61756d;border-radius:9px;background:#edf0ee;box-shadow:inset 0 1px 3px #18363026}
+.thermostat-page #thermostat-mode button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:60px;min-width:0;margin:0;padding:12px 8px;border:2px solid transparent;border-radius:4px;font-weight:750;letter-spacing:.06em;box-shadow:0 2px 2px #18363026}
+.thermostat-page #thermostat-cooling{background:#e0eefb;color:#205b89}
+.thermostat-page #thermostat-heating{background:#fbe8d8;color:#8d420e}
+.thermostat-page #thermostat-cooling[aria-pressed=true]{background:#17659f;color:white;border-color:#104a77}
+.thermostat-page #thermostat-heating[aria-pressed=true]{background:#b64d0b;color:white;border-color:#873a0b}
+.thermostat-page #thermostat-mode button[aria-pressed=true]{box-shadow:inset 0 2px 3px #0003}
+.thermostat-page #thermostat-mode .mode-check{visibility:hidden;letter-spacing:0}
+.thermostat-page #thermostat-mode [aria-pressed=true] .mode-check{visibility:visible}
+.thermostat-page #thermostat-mode button:disabled{opacity:1;cursor:not-allowed}
+.thermostat-page #thermostat-mode button:focus-visible{outline:3px solid #183630;outline-offset:2px;position:relative;z-index:1}
+@media(forced-colors:active){.thermostat-page #thermostat-mode button[aria-pressed=true]{border-color:Highlight}.thermostat-page #thermostat-mode button:focus-visible{outline-color:Highlight}}
+.thermostat-page #thermostat-status{font-weight:650;margin-bottom:0;overflow-wrap:anywhere}
+.thermostat-page #all-details>summary{font-size:1rem;font-weight:650;padding:12px 0}
+.thermostat-page #all-details button,.thermostat-page #all-details select{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
+.thermostat-page input:focus-visible,.thermostat-page select:focus-visible{outline:3px solid #ae6200;outline-offset:3px}
+@media(max-width:760px){.thermostat-page .thermostat-layout{grid-template-columns:minmax(0,1fr);gap:12px}.thermostat-page main{padding:16px}.thermostat-page header{padding-top:0}.thermostat-page .thermostat-temperature{font-size:4.5rem}}
+
+/* Evidence-backed message flow; pulses are applied only for new evidence. */
+.thermostat-page .thermostat-measure-label{font-size:.85rem;color:#456158;margin:8px 0 0}
+.thermostat-page #thermostat-applied{font-size:.9rem;color:#456158;margin:8px 0 0;overflow-wrap:anywhere}
+.thermostat-page .thermostat-flow h3{margin:18px 0 10px;font-size:.95rem}
+.thermostat-page .flow-note{font-size:.8rem;color:#456158;overflow-wrap:anywhere;margin:8px 0}
+.thermostat-page .flow-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.thermostat-page .flow-step{position:relative;display:grid;grid-template-columns:minmax(0,135px) minmax(0,1fr);column-gap:12px;row-gap:2px;padding:10px 12px;border:1px dashed #8ca399;border-radius:6px;background:#f8faf9;font-size:.8rem;overflow-wrap:anywhere}
+.thermostat-page .flow-step strong{grid-row:1 / span 2;font-size:.85rem;align-self:center}
+.thermostat-page .flow-step span,.thermostat-page .flow-step time{grid-column:2;min-width:0}
+.thermostat-page .flow-step time{font-size:.75rem;color:#456158}
+.thermostat-page .flow-step+.flow-step::before{content:"";position:absolute;left:22px;top:-13px;height:12px;border-left:2px solid #cad9ce}
+.thermostat-page .flow-step.confirmed{border-style:solid;border-color:#8ca399;background:#f0f6f2}
+.thermostat-page .flow-step.flow-pulse{animation:thermostat-flow-evidence 800ms ease-out}
+@keyframes thermostat-flow-evidence{0%{background:#d3ebdc;box-shadow:0 0 0 2px #8cb89d}100%{background:#f0f6f2;box-shadow:0 0 0 0 transparent}}
+@media(max-width:480px){.thermostat-page .flow-step{grid-template-columns:minmax(0,1fr);gap:2px}.thermostat-page .flow-step strong{grid-row:auto}.thermostat-page .flow-step span,.thermostat-page .flow-step time{grid-column:1}}
+@media(prefers-reduced-motion:reduce){.thermostat-page .flow-step.flow-pulse{animation:none}}

@@ -1,0 +1,24 @@
+$kind: http-request
+description: Returns recent rule-based decisions for the selected building.
+url: "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/decisions?limi\
+  t={{queryLimit}}"
+method: GET
+queryParams:
+  limit: "{{queryLimit}}"
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Decisions response matches the selected building', function () {
+        pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));
+      });
+      pm.test('Decisions response contains an items array', function () {
+        pm.expect(json.items).to.be.an('array');
+      });
+      if (json.items.length > 0 && json.items[0].decision_id) {
+        pm.environment.set('decisionId', json.items[0].decision_id);
+      }
+    language: text/javascript
+order: 5000

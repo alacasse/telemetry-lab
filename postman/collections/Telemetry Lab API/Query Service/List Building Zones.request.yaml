@@ -1,0 +1,21 @@
+$kind: http-request
+description: Lists the latest known state per zone for a building.
+url: "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/zones"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Zones response matches the selected building', function () {
+        pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));
+      });
+      pm.test('Zones response contains an items array', function () {
+        pm.expect(json.items).to.be.an('array');
+      });
+      if (json.items.length > 0 && json.items[0].zone_id) {
+        pm.environment.set('zoneId', json.items[0].zone_id);
+      }
+    language: text/javascript
+order: 4000

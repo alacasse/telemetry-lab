@@ -1,0 +1,23 @@
+$kind: http-request
+description: Returns the latest aggregate state for a building.
+url: "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/state"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Response matches the selected building', function () {
+        pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));
+      });
+      pm.test('Aggregate fields are present', function () {
+        pm.expect(json.zone_count).to.be.a('number');
+        pm.expect(json.avg_temperature_c).to.be.a('number');
+        pm.expect(json.avg_humidity_pct).to.be.a('number');
+        pm.expect(json.total_occupancy).to.be.a('number');
+        pm.expect(json.dominant_hvac_mode).to.be.a('string');
+        pm.expect(json.active_alerts).to.be.a('number');
+      });
+    language: text/javascript
+order: 3000

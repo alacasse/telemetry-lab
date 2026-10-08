@@ -1,0 +1,25 @@
+$kind: collection
+description: Postman collection for the Telemetry Lab ingestion and query APIs.
+  URLs are built from environment variables so the same requests can target
+  Local or AWS without editing the requests themselves.
+variables:
+  collectionName: Telemetry Lab API
+scripts:
+  - type: http:beforeRequest
+    code: >-
+      const requiresAuth = String(pm.variables.get('requiresAuth') ||
+      'false').toLowerCase() === 'true';
+
+      if (requiresAuth) {
+        const token = pm.environment.get('authToken') || '';
+        pm.request.headers.upsert({ key: 'Authorization', value: `Bearer ${token}` });
+      } else {
+        pm.request.headers.remove('Authorization');
+      }
+    language: text/javascript
+  - type: http:afterResponse
+    code: |-
+      pm.test('Status code is 2xx', function () {
+        pm.expect(pm.response.code).to.be.within(200, 299);
+      });
+    language: text/javascript

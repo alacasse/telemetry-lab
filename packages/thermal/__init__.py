@@ -1,0 +1,1 @@
+"""Authoritative thermal simulation domain."""

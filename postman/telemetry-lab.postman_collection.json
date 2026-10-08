@@ -1,0 +1,671 @@
+{
+  "info": {
+    "_postman_id": "1e56ec0a-0a29-4c8a-bc88-2cbe1b030001",
+    "name": "Telemetry Lab API",
+    "description": "Postman collection for the Telemetry Lab ingestion and query APIs. URLs are built from environment variables so the same requests can target Local or AWS without editing the requests themselves.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const stagingToken = pm.environment.get('stagingToken') || '';",
+          "if (stagingToken) {",
+          "  pm.request.headers.upsert({ key: 'X-Staging-Token', value: stagingToken });",
+          "} else {",
+          "  pm.request.headers.remove('X-Staging-Token');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const allowRetryableStatus = String(pm.variables.get('allowRetryableStatus') || 'false').toLowerCase() === 'true';",
+          "const retryableStatusCodes = String(pm.variables.get('retryableStatusCodes') || '')",
+          "  .split(',')",
+          "  .map(function (value) { return Number.parseInt(value.trim(), 10); })",
+          "  .filter(function (value) { return Number.isFinite(value); });",
+          "if (allowRetryableStatus && retryableStatusCodes.includes(pm.response.code)) {",
+          "  return;",
+          "}",
+          "pm.test('Status code is 2xx', function () {",
+          "  pm.expect(pm.response.code).to.be.within(200, 299);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "collectionName",
+      "value": "Telemetry Lab API"
+    }
+  ],
+  "item": [
+    {
+      "name": "Ingestion Service",
+      "description": "Endpoints exposed by the ingestion service.",
+      "item": [
+        {
+          "name": "Health",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{ingestionServicePrefix}}/health",
+            "description": "Lightweight health probe for the ingestion service."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Health status is ok', function () {",
+                  "  pm.expect(json.status).to.eql('ok');",
+                  "});",
+                  "pm.test('Service name is ingestion-service', function () {",
+                  "  pm.expect(json.service).to.eql('ingestion-service');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ingest Telemetry",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}",
+                "disabled": true,
+                "description": "Enable to force a caller-provided correlation ID."
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"building_id\": \"{{telemetryBuildingId}}\",\n  \"zone_id\": \"{{telemetryZoneId}}\",\n  \"timestamp\": \"{{telemetryTimestamp}}\",\n  \"temperature_c\": {{temperatureC}},\n  \"humidity_pct\": {{humidityPct}},\n  \"occupancy\": {{occupancy}},\n  \"co2_ppm\": {{co2Ppm}},\n  \"hvac_mode\": \"{{hvacMode}}\",\n  \"airflow_pct\": {{airflowPct}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}{{ingestionServicePrefix}}/telemetry",
+            "description": "Submits a telemetry event to the queue-backed ingestion pipeline."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Telemetry is accepted', function () {",
+                  "  pm.expect(json.status).to.eql('accepted');",
+                  "});",
+                  "pm.test('Response contains event and correlation identifiers', function () {",
+                  "  pm.expect(json.event_id).to.be.a('string').and.not.empty;",
+                  "  pm.expect(json.correlation_id).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.environment.set('createdEventId', json.event_id);",
+                  "pm.environment.set('correlationId', json.correlation_id);",
+                  "pm.environment.set('buildingId', pm.environment.get('telemetryBuildingId'));",
+                  "pm.environment.set('zoneId', pm.environment.get('telemetryZoneId'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Query Service",
+      "description": "Read-only endpoints exposed by the query service.",
+      "item": [
+        {
+          "name": "Health",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/health",
+            "description": "Lightweight health probe for the query service."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Health status is ok', function () {",
+                  "  pm.expect(json.status).to.eql('ok');",
+                  "});",
+                  "pm.test('Service name is query-service', function () {",
+                  "  pm.expect(json.service).to.eql('query-service');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Buildings",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/buildings",
+            "description": "Lists all known building identifiers."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Buildings response contains an items array', function () {",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "});",
+                  "if (json.items.length > 0 && json.items[0].building_id) {",
+                  "  pm.environment.set('buildingId', json.items[0].building_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Building State",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/state",
+            "description": "Returns the latest aggregate state for a building."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Aggregate fields are present', function () {",
+                  "  pm.expect(json.zone_count).to.be.a('number');",
+                  "  pm.expect(json.avg_temperature_c).to.be.a('number');",
+                  "  pm.expect(json.avg_humidity_pct).to.be.a('number');",
+                  "  pm.expect(json.total_occupancy).to.be.a('number');",
+                  "  pm.expect(json.dominant_hvac_mode).to.be.a('string');",
+                  "  pm.expect(json.active_alerts).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Building Zones",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/zones",
+            "description": "Lists the latest known state per zone for a building."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Zones response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Zones response contains an items array', function () {",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "});",
+                  "if (json.items.length > 0 && json.items[0].zone_id) {",
+                  "  pm.environment.set('zoneId', json.items[0].zone_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Building Decisions",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/decisions?limit={{queryLimit}}",
+            "description": "Returns recent rule-based decisions for the selected building."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Decisions response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Decisions response contains an items array', function () {",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "});",
+                  "if (json.items.length > 0 && json.items[0].decision_id) {",
+                  "  pm.environment.set('decisionId', json.items[0].decision_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Building Events",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/events?limit={{queryLimit}}",
+            "description": "Returns recent processed telemetry events for the selected building."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Events response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Events response contains an items array', function () {",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "});",
+                  "if (json.items.length > 0) {",
+                  "  const eventItem = json.items[0];",
+                  "  if (eventItem.event_id) pm.environment.set('latestEventId', eventItem.event_id);",
+                  "  if (eventItem.processing_status) pm.environment.set('latestProcessingStatus', eventItem.processing_status);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AWS Smoke",
+      "description": "Post-deploy contract smoke flow for the staging endpoint.",
+      "item": [
+        {
+          "name": "Health",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/health",
+            "description": "Verifies the public staging health endpoint exposed through the query Lambda."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Health status is ok', function () {",
+                  "  pm.expect(json.status).to.eql('ok');",
+                  "});",
+                  "pm.test('Health endpoint is served by query-service', function () {",
+                  "  pm.expect(json.service).to.eql('query-service');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ingest Telemetry",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"building_id\": \"{{telemetryBuildingId}}\",\n  \"zone_id\": \"{{telemetryZoneId}}\",\n  \"timestamp\": \"{{telemetryTimestamp}}\",\n  \"temperature_c\": {{temperatureC}},\n  \"humidity_pct\": {{humidityPct}},\n  \"occupancy\": {{occupancy}},\n  \"co2_ppm\": {{co2Ppm}},\n  \"hvac_mode\": \"{{hvacMode}}\",\n  \"airflow_pct\": {{airflowPct}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/telemetry",
+            "description": "Creates a fresh telemetry event for the contract smoke run."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Telemetry is accepted', function () {",
+                  "  pm.expect(json.status).to.eql('accepted');",
+                  "});",
+                  "pm.test('Response contains event and correlation identifiers', function () {",
+                  "  pm.expect(json.event_id).to.be.a('string').and.not.empty;",
+                  "  pm.expect(json.correlation_id).to.be.a('string').and.not.empty;",
+                  "});",
+                  "pm.environment.set('createdEventId', json.event_id);",
+                  "pm.environment.set('correlationId', json.correlation_id);",
+                  "pm.environment.set('buildingId', pm.environment.get('telemetryBuildingId'));",
+                  "pm.environment.set('zoneId', pm.environment.get('telemetryZoneId'));",
+                  "pm.environment.set('smokeStateAttempt', '0');",
+                  "pm.environment.set('smokeEventAttempt', '0');",
+                  "pm.environment.set('smokeDecisionAttempt', '0');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Building State",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            },
+            {
+              "key": "allowRetryableStatus",
+              "value": "true"
+            },
+            {
+              "key": "retryableStatusCodes",
+              "value": "404"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/buildings/{{buildingId}}/state",
+            "description": "Polls until the newly ingested telemetry is visible through the state projection."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const attemptKey = 'smokeStateAttempt';",
+                  "const maxAttempts = Number.parseInt(pm.environment.get('smokeMaxAttempts') || '20', 10);",
+                  "const currentAttempt = Number.parseInt(pm.environment.get(attemptKey) || '0', 10);",
+                  "const retry = function (message) {",
+                  "  if (currentAttempt + 1 >= maxAttempts) {",
+                  "    pm.environment.unset(attemptKey);",
+                  "    throw new Error(message);",
+                  "  }",
+                  "  pm.environment.set(attemptKey, String(currentAttempt + 1));",
+                  "  postman.setNextRequest(pm.info.requestName);",
+                  "};",
+                  "if (pm.response.code === 404) {",
+                  "  retry('Building state did not become available before the smoke timeout');",
+                  "  return;",
+                  "}",
+                  "const json = pm.response.json();",
+                  "const telemetryTimestamp = Date.parse(pm.environment.get('telemetryTimestamp') || '');",
+                  "const lastProcessedAt = json.last_processed_at ? Date.parse(json.last_processed_at) : Number.NaN;",
+                  "if (!Number.isFinite(lastProcessedAt) || lastProcessedAt < telemetryTimestamp) {",
+                  "  retry('Building state did not reflect the new telemetry event before the smoke timeout');",
+                  "  return;",
+                  "}",
+                  "pm.environment.unset(attemptKey);",
+                  "pm.test('Response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('State reflects the current smoke event', function () {",
+                  "  pm.expect(lastProcessedAt).to.be.at.least(telemetryTimestamp);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Building Events",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/buildings/{{buildingId}}/events?limit={{queryLimit}}",
+            "description": "Polls until the event list contains the freshly ingested telemetry event."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const attemptKey = 'smokeEventAttempt';",
+                  "const maxAttempts = Number.parseInt(pm.environment.get('smokeMaxAttempts') || '20', 10);",
+                  "const currentAttempt = Number.parseInt(pm.environment.get(attemptKey) || '0', 10);",
+                  "const json = pm.response.json();",
+                  "const items = Array.isArray(json.items) ? json.items : [];",
+                  "const latestItem = items[0];",
+                  "const createdEventId = pm.environment.get('createdEventId');",
+                  "const isReady = Boolean(latestItem) && latestItem.event_id === createdEventId && latestItem.processing_status === 'processed';",
+                  "if (!isReady) {",
+                  "  if (currentAttempt + 1 >= maxAttempts) {",
+                  "    pm.environment.unset(attemptKey);",
+                  "    throw new Error('Event list did not expose the processed smoke event before the timeout');",
+                  "  }",
+                  "  pm.environment.set(attemptKey, String(currentAttempt + 1));",
+                  "  postman.setNextRequest(pm.info.requestName);",
+                  "  return;",
+                  "}",
+                  "pm.environment.unset(attemptKey);",
+                  "pm.environment.set('latestEventId', latestItem.event_id);",
+                  "pm.environment.set('latestProcessingStatus', latestItem.processing_status);",
+                  "pm.test('Events response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Latest event matches the ingested telemetry event', function () {",
+                  "  pm.expect(latestItem.event_id).to.eql(createdEventId);",
+                  "  pm.expect(latestItem.zone_id).to.eql(pm.environment.get('zoneId'));",
+                  "  pm.expect(latestItem.processing_status).to.eql('processed');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Building Decisions",
+          "variable": [
+            {
+              "key": "requiresAuth",
+              "value": "false"
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/buildings/{{buildingId}}/decisions?limit={{queryLimit}}",
+            "description": "Polls until a decision produced by the worker is visible for the smoke event building."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const attemptKey = 'smokeDecisionAttempt';",
+                  "const maxAttempts = Number.parseInt(pm.environment.get('smokeMaxAttempts') || '20', 10);",
+                  "const currentAttempt = Number.parseInt(pm.environment.get(attemptKey) || '0', 10);",
+                  "const json = pm.response.json();",
+                  "const items = Array.isArray(json.items) ? json.items : [];",
+                  "const latestItem = items[0];",
+                  "const telemetryTimestamp = Date.parse(pm.environment.get('telemetryTimestamp') || '');",
+                  "const generatedAt = latestItem && latestItem.generated_at ? Date.parse(latestItem.generated_at) : Number.NaN;",
+                  "const isReady = Boolean(latestItem) && latestItem.zone_id === pm.environment.get('zoneId') && Number.isFinite(generatedAt) && generatedAt >= telemetryTimestamp;",
+                  "if (!isReady) {",
+                  "  if (currentAttempt + 1 >= maxAttempts) {",
+                  "    pm.environment.unset(attemptKey);",
+                  "    throw new Error('Decision list did not expose a fresh worker decision before the timeout');",
+                  "  }",
+                  "  pm.environment.set(attemptKey, String(currentAttempt + 1));",
+                  "  postman.setNextRequest(pm.info.requestName);",
+                  "  return;",
+                  "}",
+                  "pm.environment.unset(attemptKey);",
+                  "pm.environment.set('decisionId', latestItem.decision_id);",
+                  "pm.test('Decisions response matches the selected building', function () {",
+                  "  pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));",
+                  "});",
+                  "pm.test('Latest decision matches the smoke event zone', function () {",
+                  "  pm.expect(latestItem.decision_id).to.be.a('string').and.not.empty;",
+                  "  pm.expect(latestItem.zone_id).to.eql(pm.environment.get('zoneId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+$kind: http-request
+description: Returns recent processed telemetry events for the selected building.
+url: "{{baseUrl}}{{queryServicePrefix}}/buildings/{{buildingId}}/events?limit={\
+  {queryLimit}}"
+method: GET
+queryParams:
+  limit: "{{queryLimit}}"
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: >-
+      const json = pm.response.json();
+
+      pm.test('Events response matches the selected building', function () {
+        pm.expect(json.building_id).to.eql(pm.environment.get('buildingId'));
+      });
+
+      pm.test('Events response contains an items array', function () {
+        pm.expect(json.items).to.be.an('array');
+      });
+
+      if (json.items.length > 0) {
+        const eventItem = json.items[0];
+        if (eventItem.event_id) pm.environment.set('latestEventId', eventItem.event_id);
+        if (eventItem.processing_status) pm.environment.set('latestProcessingStatus', eventItem.processing_status);
+      }
+    language: text/javascript
+order: 6000

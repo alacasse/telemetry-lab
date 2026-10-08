@@ -1,0 +1,8 @@
+aws_region               = "ca-central-1"
+lambda_artifact_bucket   = "telemetry-lab-artifacts"
+lambda_artifact_revision = "replace-with-git-sha"
+create_kms_key           = false
+skip_final_snapshot      = false
+
+budget_notification_emails = []
+budget_notification_sns_topic_arns = []

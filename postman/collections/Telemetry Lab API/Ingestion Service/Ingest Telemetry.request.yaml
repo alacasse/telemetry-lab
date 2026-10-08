@@ -1,0 +1,52 @@
+$kind: http-request
+description: Submits a telemetry event to the queue-backed ingestion pipeline.
+url: "{{baseUrl}}{{ingestionServicePrefix}}/telemetry"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: X-Correlation-Id
+    value: "{{correlationId}}"
+    disabled: true
+    description: Enable to force a caller-provided correlation ID.
+body:
+  type: json
+  content: |-
+    {
+      "building_id": "{{telemetryBuildingId}}",
+      "zone_id": "{{telemetryZoneId}}",
+      "timestamp": "{{telemetryTimestamp}}",
+      "temperature_c": {{temperatureC}},
+      "humidity_pct": {{humidityPct}},
+      "occupancy": {{occupancy}},
+      "co2_ppm": {{co2Ppm}},
+      "hvac_mode": "{{hvacMode}}",
+      "airflow_pct": {{airflowPct}}
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: >-
+      const json = pm.response.json();
+
+      pm.test('Telemetry is accepted', function () {
+        pm.expect(json.status).to.eql('accepted');
+      });
+
+      pm.test('Response contains event and correlation identifiers', function ()
+      {
+        pm.expect(json.event_id).to.be.a('string').and.not.empty;
+        pm.expect(json.correlation_id).to.be.a('string').and.not.empty;
+      });
+
+      pm.environment.set('createdEventId', json.event_id);
+
+      pm.environment.set('correlationId', json.correlation_id);
+
+      pm.environment.set('buildingId',
+      pm.environment.get('telemetryBuildingId'));
+
+      pm.environment.set('zoneId', pm.environment.get('telemetryZoneId'));
+    language: text/javascript
+order: 2000

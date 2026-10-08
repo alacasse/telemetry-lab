@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: telemetry_lab
+      POSTGRES_USER: telemetry_lab
+      POSTGRES_PASSWORD: telemetry_lab
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  localstack:
+    image: localstack/localstack:3.4
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: ${AWS_REGION:-ca-central-1}
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-data:/var/lib/localstack
+
+  ingestion-service:
+    build:
+      context: .
+      dockerfile: services/ingestion-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql+psycopg://telemetry_lab:telemetry_lab@postgres:5432/telemetry_lab
+      AWS_ENDPOINT_URL: http://localstack:4566
+      INGESTION_BASE_URL: http://ingestion-service:8000
+      QUERY_BASE_URL: http://query-service:8001
+    depends_on:
+      - postgres
+      - localstack
+    ports:
+      - "8000:8000"
+
+  query-service:
+    build:
+      context: .
+      dockerfile: services/query-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql+psycopg://telemetry_lab:telemetry_lab@postgres:5432/telemetry_lab
+      AWS_ENDPOINT_URL: http://localstack:4566
+    depends_on:
+      - postgres
+    ports:
+      - "8001:8001"
+
+  processing-worker:
+    build:
+      context: .
+      dockerfile: services/processing-worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql+psycopg://telemetry_lab:telemetry_lab@postgres:5432/telemetry_lab
+      AWS_ENDPOINT_URL: http://localstack:4566
+    depends_on:
+      - postgres
+      - localstack
+
+  simulator:
+    build:
+      context: .
+      dockerfile: services/simulator/Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      DATABASE_URL: postgresql+psycopg://telemetry_lab:telemetry_lab@postgres:5432/telemetry_lab
+      AWS_ENDPOINT_URL: http://localstack:4566
+      INGESTION_BASE_URL: http://ingestion-service:8000
+      QUERY_BASE_URL: http://query-service:8001
+    depends_on:
+      - ingestion-service
+    profiles:
+      - demo
+
+volumes:
+  postgres-data:
+  localstack-data:

@@ -1,0 +1,18 @@
+$kind: http-request
+description: Lists all known building identifiers.
+url: "{{baseUrl}}{{queryServicePrefix}}/buildings"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Buildings response contains an items array', function () {
+        pm.expect(json.items).to.be.an('array');
+      });
+      if (Array.isArray(json.items) && json.items.length > 0 && json.items[0].building_id) {
+        pm.environment.set('buildingId', json.items[0].building_id);
+      }
+    language: text/javascript
+order: 2000

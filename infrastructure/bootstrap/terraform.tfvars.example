@@ -1,0 +1,9 @@
+aws_region           = "ca-central-1"
+state_bucket_name    = "telemetry-lab-tf-state"
+artifact_bucket_name = "telemetry-lab-artifacts"
+lock_table_name      = "telemetry-lab-tf-locks"
+create_kms_key       = false
+
+gitlab_oidc_provider_arn = "arn:aws:iam::<account-id>:oidc-provider/gitlab.com"
+gitlab_project_path      = "group/project"
+gitlab_default_branch    = "main"

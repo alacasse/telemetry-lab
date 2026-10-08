@@ -1,0 +1,18 @@
+$kind: http-request
+description: Lightweight health probe for the query service.
+url: "{{baseUrl}}{{queryServicePrefix}}/health"
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Health status is ok', function () {
+        pm.expect(json.status).to.eql('ok');
+      });
+      pm.test('Service name is query-service', function () {
+        pm.expect(json.service).to.eql('query-service');
+      });
+    language: text/javascript
+order: 1000

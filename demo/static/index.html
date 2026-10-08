@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetry Lab · Simulation locale</title><link rel="stylesheet" href="/style.css?v=thermostat-mode-1">
+<script src="/thermostat.js?v=thermostat-mode-1" defer></script></head>
+<body class="thermostat-page"><main>
+<header><p class="eyebrow">TELEMETRY LAB / LABORATOIRE LOCAL</p>
+<h1>Thermostat interactif</h1>
+<p>Télémétrie synthétique · règles déterministes · aucun équipement commandé.</p>
+<p class="thermostat-provenance">Simulation locale persistante.</p></header>
+<div class="thermostat-layout">
+<section aria-labelledby="thermostat-title"><h2 id="thermostat-title">Thermostat</h2>
+<p class="thermostat-measure-label">Dernière mesure traitée</p>
+<p id="thermostat-temperature" class="thermostat-temperature">— °C</p>
+<fieldset class="thermostat-settings"><legend>Réglages demandés</legend>
+<label for="thermostat-target">Consigne (°C)</label>
+<input id="thermostat-target" type="number" min="15" max="30" step="0.5" value="22" disabled>
+<span id="thermostat-mode-label">Mode demandé</span>
+<div id="thermostat-mode" role="group" aria-labelledby="thermostat-mode-label">
+<button id="thermostat-cooling" type="button" aria-pressed="false" disabled><span class="mode-check" aria-hidden="true">✓</span><span lang="en">COOL</span></button>
+<button id="thermostat-heating" type="button" aria-pressed="false" disabled><span class="mode-check" aria-hidden="true">✓</span><span lang="en">HEAT</span></button>
+</div>
+</fieldset>
+<p id="thermostat-status" role="status" aria-live="polite">En attente d’une mesure traitée.</p>
+<p id="thermostat-applied">Action mesurée : inconnue.</p>
+</section>
+<section class="thermostat-flow" aria-labelledby="flow-title"><h2 id="flow-title">Parcours des messages</h2>
+<p id="flow-status" class="flow-note">En attente des preuves.</p>
+<h3 id="flow-reading-label">Dernière mesure traitée</h3>
+<ol id="flow-reading" class="flow-list" aria-labelledby="flow-reading-label"></ol>
+<h3 id="flow-command-label">Dernière commande</h3>
+<p id="flow-command-origin" class="flow-note"></p>
+<ol id="flow-command" class="flow-list" aria-labelledby="flow-command-label"></ol>
+<p class="flow-note">Une impulsion signale une nouvelle preuve reçue, pas la position du message. Au repos, le parcours reste immobile. SQS est simulé localement par LocalStack.</p>
+</section>
+</div>
+<details id="all-details"><summary>Détails</summary>
+<section><h2>Demandes et preuves du thermostat</h2><p id="thermostat-date"></p>
+<button id="thermostat-refresh">Relire l’état et la demande incertaine</button>
+<button id="thermostat-resume" disabled>Reprendre explicitement</button>
+<button id="thermostat-stop" disabled>Arrêter la session</button>
+<button id="thermostat-new" disabled>Nouvelle session thermostat</button>
+<button id="thermostat-retry" disabled>Renvoyer explicitement la même demande incertaine</button><button id="thermostat-abandon" disabled>Abandonner la demande rejetée</button><pre id="thermostat-operation">Aucune demande locale.</pre><pre id="thermostat-proof">Aucune preuve.</pre>
+<label for="thermostat-kind">Historique</label><select id="thermostat-kind"><option value="readings">Mesures datées et corps exacts</option><option value="decisions">Décisions</option><option value="commands">Commandes</option><option value="settings">Demandes de réglage</option></select>
+<button id="thermostat-history">Lire la première page</button><button id="thermostat-next" disabled>Page suivante</button><label for="thermostat-reading">Mesure de cette page à renvoyer</label><select id="thermostat-reading"></select><button id="thermostat-replay" disabled>Renvoyer le corps exact sélectionné</button><pre id="thermostat-history-proof">Aucune page consultée.</pre>
+</section>
+<p><a href="/legacy.html">Parcours historiques température et CO₂</a></p>
+</details><footer>Les dates d’observation et de traitement sont conservées dans Détails.</footer>
+</main></body></html>
