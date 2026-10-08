@@ -14,7 +14,7 @@ sh scripts/demo-local.sh --port 8088
 
 Open [http://127.0.0.1:8088](http://127.0.0.1:8088). The launcher starts disposable PostgreSQL and LocalStack containers, applies migrations, and starts the API, processing worker and thermal simulator in separate processes. It uses loopback endpoints and explicit dummy AWS credentials rather than host AWS credentials or the repository `.env`.
 
-Choose COOL or HEAT and a setpoint between 15 and 30 °C in 0.5 °C steps. Inspect **Details** for measurements, commands and processing evidence. The existing interface retains its French explanatory text.
+Choose COOL or HEAT and a setpoint between 15 and 30 °C in 0.5 °C steps. Follow the dated measurement and command evidence beside the thermostat. Recovery actions appear next to its status only when needed. The interface retains its French explanatory text.
 
 **Ctrl-C stops the composition and destroys its database and queues.** State survives a browser reload while that composition remains running. Reloading performs passive reads; recovery and retries require explicit actions.
 

@@ -22,7 +22,7 @@ input:focus-visible,select:focus-visible{outline:3px solid #ae6200;outline-offse
 .thermostat-page header{padding:8px 0 18px}
 .thermostat-page header h1{font-size:clamp(1.8rem,3vw,2.4rem);margin:8px 0 12px}
 .thermostat-page header p{margin:4px 0}
-.thermostat-page .thermostat-provenance,.thermostat-page footer{color:#456158;font-size:.85rem}
+.thermostat-page .thermostat-provenance{color:#456158;font-size:.85rem}
 .thermostat-page .thermostat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
 .thermostat-page .thermostat-layout>section{min-width:0;margin-bottom:8px}
 .thermostat-page section h2{margin-top:0}
@@ -45,8 +45,10 @@ input:focus-visible,select:focus-visible{outline:3px solid #ae6200;outline-offse
 .thermostat-page #thermostat-mode button:focus-visible{outline:3px solid #183630;outline-offset:2px;position:relative;z-index:1}
 @media(forced-colors:active){.thermostat-page #thermostat-mode button[aria-pressed=true]{border-color:Highlight}.thermostat-page #thermostat-mode button:focus-visible{outline-color:Highlight}}
 .thermostat-page #thermostat-status{font-weight:650;margin-bottom:0;overflow-wrap:anywhere}
-.thermostat-page #all-details>summary{font-size:1rem;font-weight:650;padding:12px 0}
-.thermostat-page #all-details button,.thermostat-page #all-details select{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+.thermostat-page .thermostat-recovery{margin-top:12px;padding:12px;border-left:3px solid #ae6200;background:#fff8ed;border-radius:4px}
+.thermostat-page .thermostat-recovery p{font-size:.85rem;margin:0 0 10px}
+.thermostat-page .thermostat-recovery button{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;padding:8px 12px;font-size:.9rem}
 .thermostat-page input:focus-visible,.thermostat-page select:focus-visible{outline:3px solid #ae6200;outline-offset:3px}
 @media(max-width:760px){.thermostat-page .thermostat-layout{grid-template-columns:minmax(0,1fr);gap:12px}.thermostat-page main{padding:16px}.thermostat-page header{padding-top:0}.thermostat-page .thermostat-temperature{font-size:4.5rem}}
 

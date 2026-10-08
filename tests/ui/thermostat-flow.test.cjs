@@ -148,7 +148,7 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const browserScript = fs.readFileSync(require.resolve('../../demo/static/thermostat.js'), 'utf8');
 
-function browserHarness(initial, {post = null} = {}) {
+function browserHarness(initial, {post = null, get = null, cached = null, storageFails = false} = {}) {
   class Element {
     constructor(tag) { this.tagName = tag; this.children = []; this.style = {}; this.listeners = {}; this.attributes = {}; this.textContent = ''; this.value = ''; }
     append(...children) { this.children.push(...children); }
@@ -156,26 +156,38 @@ function browserHarness(initial, {post = null} = {}) {
     setAttribute(name, value) { this.attributes[name] = value; }
     addEventListener(name, callback) { this.listeners[name] = callback; }
   }
-  const elements = new Map();
+  const html = fs.readFileSync(require.resolve('../../demo/static/index.html'), 'utf8');
+  const elements = new Map([...html.matchAll(/<([\w-]+)\b([^>]*\bid="([^"]+)"[^>]*)>/g)].map(match => {
+    const node = new Element(match[1]);
+    node.hidden = /\bhidden\b/.test(match[2]);
+    node.disabled = /\bdisabled\b/.test(match[2]);
+    return [match[3], node];
+  }));
   const element = id => {
-    if (!elements.has(id)) elements.set(id, new Element('div'));
+    assert(elements.has(id), 'Missing HTML element: ' + id);
     return elements.get(id);
   };
   let response = initial, scheduled;
   const calls = [];
-  const storage = new Map();
+  const storage = new Map(cached ? [['telemetry-lab:thermostat-v1', JSON.stringify(cached)]] : []);
   vm.runInNewContext(browserScript, {
     document: {getElementById: element, createElement: tag => new Element(tag),
       hidden: false, activeElement: null, addEventListener() {}},
     window: {
-      localStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value)},
+      localStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => {
+        if (storageFails) throw Error('Storage unavailable');
+        storage.set(key, value);
+      }},
       fetch: async (url, options) => {
         calls.push({url, options});
         if (options.method === 'POST') {
-          assert.equal(url, '/thermal-simulations/session-1/settings');
           if (post) return post(url, options);
+          assert.equal(url, '/thermal-simulations/session-1/settings');
           response = {...response, ...JSON.parse(options.body), settings_revision: response.settings_revision + 1};
-        } else assert.equal(url, '/thermal-simulations/current');
+        } else {
+          if (get) { const result = get(url); if (result) return result; }
+          assert.equal(url, '/thermal-simulations/current');
+        }
         assert.equal(options.cache, 'no-store');
         if (response instanceof Error) throw response;
         return {ok: true, json: async () => structuredClone(response)};
@@ -186,7 +198,7 @@ function browserHarness(initial, {post = null} = {}) {
     clearTimeout: () => { scheduled = null; },
   });
   return {
-    element, calls,
+    element, calls, storage,
     click(mode) { return element('thermostat-' + mode).listeners.click(); },
     changeTarget(value) { element('thermostat-target').value = value; return element('thermostat-target').listeners.change(); },
     async settle() { await new Promise(resolve => setImmediate(resolve)); },
@@ -334,4 +346,199 @@ test('in-flight settings lock all controls and preserve requested selection unti
   await pending;
   controlsDisabled(browser, false);
   selected(browser, 'heating');
+});
+
+const recoveryNames = ['refresh', 'resume', 'new', 'retry', 'abandon'];
+function recoveryActions(browser) {
+  return recoveryNames.filter(name => !browser.element('thermostat-' + name).hidden);
+}
+function recoveryText(browser) {
+  return browser.element('thermostat-recovery-message').textContent;
+}
+function settingOperation(overrides = {}) {
+  return {simulation_id: 'session-1', operation_id: 'saved-operation', expected_revision: 4,
+    mode: 'heating', target_c: 24, ...overrides};
+}
+const missing = () => ({ok: false, status: 404, json: async () => ({})});
+
+test('healthy page has no recovery panel or focusable recovery controls', async () => {
+  const browser = browserHarness(thermostatEvidence());
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+  await browser.settle();
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+  assert.deepEqual(recoveryActions(browser), []);
+  for (const name of recoveryNames) assert.equal(browser.element('thermostat-' + name).disabled, true);
+});
+
+test('interrupted session shows only explicit resume then disappears after recovery', async () => {
+  const browser = browserHarness(thermostatEvidence({status: 'interrupted'}), {
+    post: (url, options) => {
+      assert.equal(url, '/thermal-simulations/session-1/resume');
+      assert.equal(options.body, '{}');
+      return {ok: true, json: async () => ({})};
+    },
+  });
+  await browser.settle();
+  assert.match(recoveryText(browser), /interrompue/);
+  assert.deepEqual(recoveryActions(browser), ['resume']);
+  assert.equal(posts(browser).length, 0);
+  await browser.click('resume');
+  assert.equal(posts(browser).length, 1);
+  await browser.refresh(thermostatEvidence());
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+});
+
+for (const status of ['completed', 'stopped', 'expired']) test(status + ' session offers a new simulation only', async () => {
+  const browser = browserHarness(thermostatEvidence({status}));
+  await browser.settle();
+  assert.match(recoveryText(browser), /terminée|arrêtée|expiré/);
+  assert.deepEqual(recoveryActions(browser), ['new']);
+  assert.equal(browser.element('thermostat-new').textContent, 'Démarrer une nouvelle simulation');
+  assert.equal(posts(browser).length, 0);
+});
+
+test('confirmed missing session offers creation but first network failure does not', async () => {
+  const absent = browserHarness(null, {get: missing});
+  await absent.settle();
+  assert.deepEqual(recoveryActions(absent), ['new']);
+  assert.equal(absent.element('thermostat-new').textContent, 'Démarrer une simulation');
+  const failed = browserHarness(new Error('offline'));
+  await failed.settle();
+  assert.deepEqual(recoveryActions(failed), ['refresh']);
+  assert.match(recoveryText(failed), /indisponible|impossible/);
+  await failed.click('new'); // Even programmatic activation must be guarded.
+  assert.equal(posts(failed).length, 0);
+});
+
+test('failed read retains evidence without offering creation from stale terminal state', async () => {
+  const browser = browserHarness(thermostatEvidence({status: 'stopped'}));
+  await browser.settle();
+  await browser.refresh(new Error('offline'));
+  assert.deepEqual(recoveryActions(browser), ['refresh']);
+  assert.match(browser.element('thermostat-temperature').textContent, /21.5/);
+  assert.match(recoveryText(browser), /conserv/);
+  await browser.click('new');
+  assert.equal(posts(browser).length, 0);
+  await browser.refresh(thermostatEvidence());
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+});
+
+test('unavailable runtime blocks resume and offers only a passive read', async () => {
+  const browser = browserHarness(thermostatEvidence({status: 'interrupted', runtime: {status: 'unavailable'}}));
+  await browser.settle();
+  assert.deepEqual(recoveryActions(browser), ['refresh']);
+  controlsDisabled(browser, true);
+  await browser.click('resume');
+  assert.equal(posts(browser).length, 0);
+});
+
+test('cached uncertain setting offers a checked exact retry and resolves by passive lookup', async () => {
+  const operation = settingOperation();
+  let found = false;
+  const browser = browserHarness(thermostatEvidence(), {
+    cached: {operation},
+    get: url => url.endsWith('/settings/saved-operation') ?
+      found ? {ok: true, json: async () => ({operation_id: 'saved-operation'})} : missing() : null,
+    post: (url, options) => { assert.equal(url, '/thermal-simulations/session-1/settings');
+      assert.deepEqual(JSON.parse(options.body), {operation_id: operation.operation_id,
+        expected_revision: 4, mode: 'heating', target_c: 24}); throw Error('lost response'); },
+  });
+  await browser.settle();
+  assert.equal(posts(browser).length, 0);
+  assert.deepEqual(recoveryActions(browser), ['refresh', 'retry']);
+  assert.equal(browser.element('thermostat-refresh').textContent, 'Vérifier la demande');
+  await browser.click('retry');
+  assert.equal(posts(browser).length, 1);
+  found = true;
+  await browser.refresh(thermostatEvidence());
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+});
+
+test('rejected request closes locally without undoing any server setting', async () => {
+  const browser = browserHarness(thermostatEvidence(), {
+    cached: {operation: settingOperation({rejected: true})},
+    get: url => url.includes('/settings/') ? missing() : null,
+  });
+  await browser.settle();
+  assert.deepEqual(recoveryActions(browser), ['refresh', 'abandon']);
+  assert.match(recoveryText(browser), /conflit|rejet/);
+  assert.match(recoveryText(browser), /serveur/);
+  await browser.click('abandon');
+  assert.equal(JSON.parse(browser.storage.get('telemetry-lab:thermostat-v1')).operation, null);
+  assert.equal(posts(browser).length, 0);
+  await browser.refresh(thermostatEvidence());
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+});
+
+test('storage failure explains blocked settings without a fake repair action', async () => {
+  const browser = browserHarness(thermostatEvidence(), {storageFails: true});
+  await browser.settle();
+  assert.match(recoveryText(browser), /stockage.*indisponible/i);
+  assert.match(recoveryText(browser), /bloqu/);
+  assert.deepEqual(recoveryActions(browser), []);
+  controlsDisabled(browser, true);
+  await browser.changeTarget('25');
+  assert.equal(posts(browser).length, 0);
+});
+
+test('cached old stop survives reload and explicitly retries the same session action', async () => {
+  const pendingAction = {kind: 'stop', simulation_id: 'session-1', predecessor_id: 'session-1', prior_status: 'active'};
+  const browser = browserHarness(thermostatEvidence(), {
+    cached: {pendingAction},
+    post: (url, options) => { assert.equal(url, '/thermal-simulations/session-1/stop');
+      assert.equal(options.body, '{}'); return {ok: true, json: async () => ({})}; },
+  });
+  await browser.settle();
+  assert.equal(posts(browser).length, 0);
+  assert.deepEqual(recoveryActions(browser), ['refresh', 'retry']);
+  await browser.click('retry');
+  assert.equal(posts(browser).length, 1);
+  await browser.refresh(thermostatEvidence({status: 'stopped'}));
+  assert.deepEqual(recoveryActions(browser), ['new']);
+});
+
+test('polling keeps recovery controls visible but disabled until the read completes', async () => {
+  let delayed = false, release;
+  const proof = thermostatEvidence({status: 'interrupted'});
+  const browser = browserHarness(proof, {get: () => delayed ? new Promise(resolve => { release = resolve; }) : null});
+  await browser.settle();
+  assert.deepEqual(recoveryActions(browser), ['resume']);
+  delayed = true;
+  const pending = browser.refresh(proof, true);
+  assert.deepEqual(recoveryActions(browser), ['resume']);
+  assert.equal(browser.element('thermostat-resume').disabled, true);
+  await browser.click('resume');
+  assert.equal(posts(browser).length, 0);
+  release({ok: true, json: async () => proof});
+  await pending;
+  assert.equal(browser.element('thermostat-resume').disabled, false);
+});
+
+test('stale revision of a missing request can receive a rejection and be closed', async () => {
+  const proof = thermostatEvidence({settings_revision: 5});
+  const browser = browserHarness(proof, {
+    cached: {operation: settingOperation()},
+    get: url => url.includes('/settings/') ? missing() : null,
+    post: (url, options) => {
+      assert.equal(JSON.parse(options.body).expected_revision, 4);
+      return {ok: false, status: 409};
+    },
+  });
+  await browser.settle();
+  assert.deepEqual(recoveryActions(browser), ['refresh', 'retry']);
+  await browser.click('retry');
+  assert.deepEqual(recoveryActions(browser), ['refresh', 'abandon']);
+  await browser.click('abandon');
+  await browser.refresh(proof);
+  assert.equal(browser.element('thermostat-recovery').hidden, true);
+});
+
+test('a cached missing request cannot be retried against a different current session', async () => {
+  const browser = browserHarness(thermostatEvidence({simulation_id: 'different'}), {
+    cached: {operation: settingOperation({missing: true})},
+  });
+  await browser.settle();
+  assert.deepEqual(recoveryActions(browser), ['refresh']);
+  await browser.click('retry');
+  assert.equal(posts(browser).length, 0);
 });

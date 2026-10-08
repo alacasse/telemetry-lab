@@ -14,6 +14,14 @@ The launcher writes process logs and `runtime.json` under `.run/demo/<port>/`. I
 
 A browser reload preserves the stored room within the same running environment. It performs passive reads. A new tab can inspect server evidence but may lack exact submitted bodies and receipts from another tab, so retry availability can differ.
 
+## Technical inspection
+
+The main page shows dated evidence for the latest processed measurement and command alongside the thermostat. Recovery controls appear only when needed; there is no Details panel or normal session-stop button.
+
+The historical interface remains directly available at `/legacy.html` on the launcher's printed URL (for example, `http://127.0.0.1:8088/legacy.html`). Its scenario and replay controls can submit requests; it is not a read-only history viewer.
+
+For passive technical inspection, `GET /thermal-simulations/current` returns the current session snapshot and its `simulation_id`. `GET /thermal-simulations/{simulation_id}/history?kind=readings&cursor=0` returns a page of dated measurements and their exact bodies. The other supported kinds are `decisions`, `commands` and `settings`; use the response's `next_cursor` for subsequent pages, until it is null. These API routes remain available even though their controls have been removed from the main page.
+
 ## Integration checks
 
 Use separate free ports; each test mode creates and removes its own composition:

@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Telemetry Lab · Simulation locale</title><link rel="stylesheet" href="/style.css?v=thermostat-mode-1">
-<script src="/thermostat.js?v=thermostat-mode-1" defer></script></head>
+<title>Telemetry Lab · Simulation locale</title><link rel="stylesheet" href="/style.css?v=thermostat-recovery-2">
+<script src="/thermostat.js?v=thermostat-recovery-2" defer></script></head>
 <body class="thermostat-page"><main>
 <header><p class="eyebrow">TELEMETRY LAB / LABORATOIRE LOCAL</p>
 <h1>Thermostat interactif</h1>
@@ -22,6 +22,14 @@
 </div>
 </fieldset>
 <p id="thermostat-status" role="status" aria-live="polite">En attente d’une mesure traitée.</p>
+<div id="thermostat-recovery" class="thermostat-recovery" hidden>
+<p id="thermostat-recovery-message" hidden></p>
+<button id="thermostat-refresh" type="button" hidden disabled>Réessayer la lecture</button>
+<button id="thermostat-resume" type="button" hidden disabled>Reprendre la simulation</button>
+<button id="thermostat-new" type="button" hidden disabled>Démarrer une simulation</button>
+<button id="thermostat-retry" type="button" hidden disabled>Renvoyer la même demande</button>
+<button id="thermostat-abandon" type="button" hidden disabled>Fermer la demande rejetée</button>
+</div>
 <p id="thermostat-applied">Action mesurée : inconnue.</p>
 </section>
 <section class="thermostat-flow" aria-labelledby="flow-title"><h2 id="flow-title">Parcours des messages</h2>
@@ -34,16 +42,4 @@
 <p class="flow-note">Une impulsion signale une nouvelle preuve reçue, pas la position du message. Au repos, le parcours reste immobile. SQS est simulé localement par LocalStack.</p>
 </section>
 </div>
-<details id="all-details"><summary>Détails</summary>
-<section><h2>Demandes et preuves du thermostat</h2><p id="thermostat-date"></p>
-<button id="thermostat-refresh">Relire l’état et la demande incertaine</button>
-<button id="thermostat-resume" disabled>Reprendre explicitement</button>
-<button id="thermostat-stop" disabled>Arrêter la session</button>
-<button id="thermostat-new" disabled>Nouvelle session thermostat</button>
-<button id="thermostat-retry" disabled>Renvoyer explicitement la même demande incertaine</button><button id="thermostat-abandon" disabled>Abandonner la demande rejetée</button><pre id="thermostat-operation">Aucune demande locale.</pre><pre id="thermostat-proof">Aucune preuve.</pre>
-<label for="thermostat-kind">Historique</label><select id="thermostat-kind"><option value="readings">Mesures datées et corps exacts</option><option value="decisions">Décisions</option><option value="commands">Commandes</option><option value="settings">Demandes de réglage</option></select>
-<button id="thermostat-history">Lire la première page</button><button id="thermostat-next" disabled>Page suivante</button><label for="thermostat-reading">Mesure de cette page à renvoyer</label><select id="thermostat-reading"></select><button id="thermostat-replay" disabled>Renvoyer le corps exact sélectionné</button><pre id="thermostat-history-proof">Aucune page consultée.</pre>
-</section>
-<p><a href="/legacy.html">Parcours historiques température et CO₂</a></p>
-</details><footer>Les dates d’observation et de traitement sont conservées dans Détails.</footer>
 </main></body></html>
