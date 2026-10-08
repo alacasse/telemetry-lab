@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-08",
+  "base_revision": "8b597ef12fea86b776ed67704e7835e2fef9fe6c",
+  "source_dirty": true,
+  "scope": "Local phase2 shared-room fencing; no publication or AWS execution",
+  "checks": {
+    "ruff": "passed",
+    "mypy": {
+      "passed": true,
+      "sources": 106
+    },
+    "python": {
+      "passed": 199,
+      "skipped_opt_in": 31,
+      "warnings": 21
+    },
+    "javascript": {
+      "passed": 137,
+      "script_counts": [
+        27,
+        52,
+        23,
+        35
+      ]
+    },
+    "postgres": {
+      "passed": 12
+    },
+    "historical_migration": {
+      "passed": 1
+    },
+    "thermostat_runtime_first": {
+      "passed": 1,
+      "port": 18282
+    },
+    "historical_scenarios": {
+      "passed": 15,
+      "deselected_crash_cases": 2,
+      "port": 18285
+    },
+    "crash_windows": {
+      "passed": 2,
+      "deselected_other_cases": 8,
+      "port": 18286
+    },
+    "thermostat_api_first_final": {
+      "passed": 1,
+      "port": 18287
+    },
+    "lambda_bundles": {
+      "passed": 4,
+      "runtime": "python3.12",
+      "architecture": "x86_64",
+      "verification_network": "none"
+    },
+    "reviews": {
+      "general": "no remaining actionable findings after final cache fix",
+      "imports": "no actionable findings"
+    }
+  },
+  "limits": [
+    "No previously running demo migrated or restarted; migrations applied before engines in disposable compositions.",
+    "Historical and crash compositions passed before final identity-map hardening; final PostgreSQL and API-first thermostat cover that change.",
+    "No AWS deployment, uploads, live load qualification, native browser visual rerun or shared-tab storage correction."
+  ],
+  "initial_failures": [
+    "Migration-head assertions, duplicate test basename and fixture lease isolation corrected.",
+    "PostgreSQL bootstrap readiness race fixed with host TCP probe.",
+    "Historical crash cases separated to retain three-restart budget.",
+    "Crash relay timing tightened using only per-message test visibility; unchanged30s business expiration.",
+    "Renewal confirmation gap and retained ORM-authority state corrected with regression coverage."
+  ],
+  "source_sha256": {
+    "docs/phase2-proposal.md": "554b8167d5cbf4197611baba16c602e543ecf143a403510b56ade4ac85de0004",
+    "migrations/versions/0007_shared_room_authority.py": "da3cd38bfe0d8d989ad6036d80934f95fc36daaadcc3d35975b5642ba75e19cc",
+    "packages/thermal/authority.py": "4fa3ea8afad17e0381b0333e4c980fd190085887f8dfc418a71e6f86a1472c9b",
+    "tests/integration/test_thermal_authority.py": "ab6b7547fee2e7c07535dfd266014fc0290ec935a6189d10f5d934c03bd0824d",
+    "tests/integration/test_thermal_multiuser.py": "3e1de742194f52e74c9fe456e106e8452faf79ee6900e80244b8c37e4641fa6e",
+    "tests/unit/test_thermal_authority_deadline.py": "21af3d08935abc1b2556f8ec5ee500e699eb5761f5f298c839d73ce29f3e8693",
+    "tests/unit/test_thermal_lifecycle.py": "3ef26de8630a1c7dbcdba18c081c351d55b80f6274ed8341a934073e613770a0",
+    ".github/workflows/ci.yml": "f39eeb74928068119ae4b19ad1b99bef0aab595e45acb41d39178910e728a76f",
+    "CONTRIBUTING.md": "4a0de62a8ed89c33f4c1e63edd0911ee26a98b124e9777ea432f4f06cb7b90ea",
+    "demo/thermal_local.py": "256274b3a36a8e6af5ad0cf61b3a045957ad7e1a7916cd9792e4b564533f8933",
+    "demo/thermal_runtime.py": "799b0380cd5c8c83cb0ae88a8b605ca119cea8c8e68387e4c57c76af9d4bec21",
+    "docs/README.md": "1b7d9f02bbcd70caeff7dcd0f32ab19b56673f89478c60af3d29e6eefe4ff4c3",
+    "docs/architecture.md": "ad87a8d03dcc4b0fe8e206f0142d31f4081c020c6fe2caf23feb7098b4c0b6c9",
+    "docs/local-runbook.md": "42fa620f52a2ccd3c2f51267a667f27ce6d065d22d31c9e5c615ca223d491de3",
+    "docs/validation.md": "6f7d818158eb351c65d4be98d851c02f01d7ab8f26371ca3d63c321c4f5486b6",
+    "packages/thermal/models.py": "c38199b0eeddddeb0f89ca91e89b8c90ff7cf4203c4c8da20b83a5bbe067b253",
+    "packages/thermal/runtime.py": "b4689bb8f15a8264e6bd6a536bfcc1be996997909795a73c0fe8c6ffe00782ac",
+    "scripts/demo-local.py": "bd83c6450df453fa3adb59074eafdb923df2da18bfe25e6fc72a73327923c8b4",
+    "scripts/test-postgres.sh": "b9037b8d162ffbe3f0b67b9fc74d9ad33551160a724a215aa32b0e0f43e7ccf7",
+    "tests/integration/test_thermal_command_migration.py": "1ee8590abccf6173b1fa8515f74ef309a9579d666de8e0346c7e3556f60938d9",
+    "tests/integration/test_thermal_demo.py": "8bc79ea9380226cbed46fa815041a070163f664a86397277ce5c201ae1cfddf4",
+    "tests/integration/test_thermostat_demo.py": "8f6be8b26d743a70e1b31b009b0ee6e5447cc6665ef560b958a3c3c11865868b",
+    "tests/unit/test_migration_handler.py": "e0a18e08d3580a5156c681b58c33c697cae4d291e7c892119907d5a4256f39a7",
+    "tests/unit/test_thermal_local.py": "bf112596ec61daa6dd440bc80695ce09788f24e945704c10db0c2ac7bf4e1554",
+    "tests/unit/test_thermal_runtime.py": "c96268ddbfe15ad7128c76308a9be70678e1ee6a66dfd81d5373b394d64ed443"
+  },
+  "log_sha256": {
+    ".run/validation/phase2/bundle-build.log": "534454fd650dd0c92fb77ed4e23879dc43939c1a6d5e0d16f91c65f3d30433b5",
+    ".run/validation/phase2/bundle-verify.log": "8572010eb4df92e198aedea1ec8ad12a31e4d63b4e160e83107084363d65bbd0",
+    ".run/validation/phase2/command-migration.log": "c2fdb0565841b493ac78a0de62f619d0addb2b6fa52b6c35a8c6a8d50aa62637",
+    ".run/validation/phase2/crash-windows-final.log": "e311c3e02494451b73cda4e40791196f50b82d8d72f7ec08fe992a81d69ab506",
+    ".run/validation/phase2/crash-windows.log": "c741501de98c4e77137ec54113cf26119d16d3ac088b24231e1ce3a0a1ca9e89",
+    ".run/validation/phase2/historical-split.log": "dce5c9986173d343e9294d87eef27d7213d5f753079263d59cadbf8774844a5e",
+    ".run/validation/phase2/historical.log": "4d6dc7906594fd6e1ba39576519b1247dad7306d4d04e7823a9e7135b1c7cb09",
+    ".run/validation/phase2/javascript-demo.log": "b136f915102a1ec4575d2d1770ac1266c4f4d7833a4d9787315cccfabe43a00b",
+    ".run/validation/phase2/javascript-thermal.log": "4f2bb8927c2ba7fc66a48f57d5c3aaf2fb19287bcfb682664ecc69c5b52c1665",
+    ".run/validation/phase2/javascript-thermostat-flow.log": "f3d3b7ac3f879d2c82add65ac40a26bca6f85e7f05dc300805edc5ef4b523fe3",
+    ".run/validation/phase2/javascript-thermostat.log": "aa718208873a3d819d661a42b0e2105319c7111ac4b51170ca63455a55beedc9",
+    ".run/validation/phase2/javascript.log": "fe08dcd96c697cf752393434433273a98b32f17ba0fb9223ff113e68e8347879",
+    ".run/validation/phase2/mypy.log": "e4831d3dfc91583c9acc8600e3dc57cf4cd84986bafb3ca533dcc0aa17f965aa",
+    ".run/validation/phase2/postgres-cache-regression.log": "07923b54d0e5e50ea4d01f6050ab04e31ffe459290761e15115c9ebf5b6e9f48",
+    ".run/validation/phase2/postgres.log": "d84c146b7a02adbf4285fe62785ff2c3b2635cda26358cab2039a8070dffd788",
+    ".run/validation/phase2/pytest.log": "d16b1629e5862d6f1e4fc67b1d61d2edfa0ab7f51344902e20a41ba79be0d9b0",
+    ".run/validation/phase2/ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    ".run/validation/phase2/thermostat-api-first.log": "9e349b3505cfa21b09f68c706db8aa78045815e800fe8a1200b1d91a36d6c90e",
+    ".run/validation/phase2/thermostat-runtime-first.log": "1b20b7206e10af7fd84b7b151f79ce34138c44c1723bf0c36d9352246b751d91"
+  },
+  "bundle_manifest": {
+    "source_dirty": true,
+    "targets": [
+      {
+        "service": "ingestion",
+        "artifact_path": "/out/lambdas/ingestion.zip",
+        "artifact_key": "lambdas/8b597ef12fea86b776ed67704e7835e2fef9fe6c/ingestion.zip",
+        "handler": "ingestion_service.lambda_handler.handler",
+        "runtime": "python3.12",
+        "architecture": "x86_64",
+        "git_revision": "8b597ef12fea86b776ed67704e7835e2fef9fe6c",
+        "sha256": "70c2bbd598fe974aa513f895c6bb86658545ab9cf06637e89f2a6210e5b2cb15",
+        "compressed_size_bytes": 35220903,
+        "uncompressed_size_bytes": 92030832
+      },
+      {
+        "service": "query",
+        "artifact_path": "/out/lambdas/query.zip",
+        "artifact_key": "lambdas/8b597ef12fea86b776ed67704e7835e2fef9fe6c/query.zip",
+        "handler": "query_service.lambda_handler.handler",
+        "runtime": "python3.12",
+        "architecture": "x86_64",
+        "git_revision": "8b597ef12fea86b776ed67704e7835e2fef9fe6c",
+        "sha256": "d241ce64584e257dca15190a15a05dd29e5b4a87ebd479baf3684099615b9212",
+        "compressed_size_bytes": 35221062,
+        "uncompressed_size_bytes": 92033168
+      },
+      {
+        "service": "worker",
+        "artifact_path": "/out/lambdas/worker.zip",
+        "artifact_key": "lambdas/8b597ef12fea86b776ed67704e7835e2fef9fe6c/worker.zip",
+        "handler": "processing_worker.lambda_handler.handler",
+        "runtime": "python3.12",
+        "architecture": "x86_64",
+        "git_revision": "8b597ef12fea86b776ed67704e7835e2fef9fe6c",
+        "sha256": "8f66ef0d0559a92ea10e177d9a4dc2eeeac1c27762863c6a86ac86177dfbb96b",
+        "compressed_size_bytes": 35222466,
+        "uncompressed_size_bytes": 92036751
+      },
+      {
+        "service": "migration",
+        "artifact_path": "/out/lambdas/migration.zip",
+        "artifact_key": "lambdas/8b597ef12fea86b776ed67704e7835e2fef9fe6c/migration.zip",
+        "handler": "packages.db.migration_handler.handler",
+        "runtime": "python3.12",
+        "architecture": "x86_64",
+        "git_revision": "8b597ef12fea86b776ed67704e7835e2fef9fe6c",
+        "sha256": "1d047628f74fa8401c665046da4cd8bdd34605c54c24d07b3c3bf384c443d1a7",
+        "compressed_size_bytes": 35225840,
+        "uncompressed_size_bytes": 92046678
+      }
+    ]
+  }
+}

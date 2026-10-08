@@ -17,6 +17,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.orm import sessionmaker
 
 from packages.db.migration_handler import run_migrations
+from packages.thermal.authority import PgAuthority
 from packages.thermal.commands import parse_command_message
 from packages.thermal.models import ThermalCommand, ThermalSimulation
 from packages.thermal.runtime import RoomClock
@@ -38,9 +39,9 @@ def test_legacy_command_survives_real_upgrade_and_redelivery() -> None:
         aws_secret_access_key="test",
     )
     queue = sqs.create_queue(QueueName=f"telemetry-lab-local-migration-{uuid4().hex}")["QueueUrl"]
-    expired_queue = sqs.create_queue(
-        QueueName=f"telemetry-lab-local-expired-{uuid4().hex}"
-    )["QueueUrl"]
+    expired_queue = sqs.create_queue(QueueName=f"telemetry-lab-local-expired-{uuid4().hex}")[
+        "QueueUrl"
+    ]
     engine = create_engine(url)
     sessions = sessionmaker(bind=engine)
     ids = [str(uuid4()), str(uuid4())]
@@ -216,9 +217,7 @@ def test_legacy_command_survives_real_upgrade_and_redelivery() -> None:
                 .values(legacy_wire_allowed=False)
             )
             typed_before = rows(connection)
-        evidence["cooling_migration"] = run_migrations(
-            "0005_cooling_and_stop", database_url=url
-        )
+        evidence["cooling_migration"] = run_migrations("0005_cooling_and_stop", database_url=url)
         metadata = MetaData()
         metadata.reflect(bind=engine)
         with engine.connect() as connection:
@@ -256,16 +255,20 @@ def test_legacy_command_survives_real_upgrade_and_redelivery() -> None:
             assert row["stop_request_id"] is None
             assert row["final_reading_sequence"] is None
         assert [c["legacy_wire_allowed"] for c in after["thermal_commands"]] == [
-            True, True, False,
+            True,
+            True,
+            False,
         ] * 2
         assert [c["command_type"] for c in after["thermal_commands"]] == [
             "heating.start",
             "heating.start",
             "heating.stop",
         ] * 2
+        authority = PgAuthority(sessions, monotonic=lambda: 0.0)
         with sessions() as session, session.begin():
+            authority.acquire(session)
             recover_simulations(session)
-        clock = RoomClock(sessions, monotonic=lambda: 0.0)
+        clock = RoomClock(sessions, authority, monotonic=lambda: 0.0)
         assert clock.command(ids[0], 1) is False
         with sessions() as session, session.begin():
             resumed = resume_simulation(session, ids[0])

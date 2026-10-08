@@ -168,7 +168,7 @@ def test_runtime_restart_requires_explicit_resume_without_catchup(mode: str) -> 
         heating = wait_snapshot(client, identity, lambda s: s[actuator], seconds=8)
         before = json.loads(runtime_file.read_text())
         os.kill(before["thermal_pid"], signal.SIGKILL)
-        interrupted = wait_snapshot(client, identity, lambda s: s["status"] == "interrupted", 8)
+        interrupted = wait_snapshot(client, identity, lambda s: s["status"] == "interrupted", 18)
         time.sleep(1.4)
         still = client.get(f"/thermal-simulations/{identity}").json()
         assert still["status"] == "interrupted"
@@ -214,11 +214,12 @@ def test_real_outbox_crash_windows_and_command_redelivery(tmp_path: Path, mode: 
     identity = str(uuid4())
 
     def child(code: str, expected: int = 0) -> None:
-        result = subprocess.run([sys.executable, "-c", code], cwd=tmp_path, timeout=10)
+        result = subprocess.run([sys.executable, "-c", code], cwd=tmp_path, timeout=20)
         assert result.returncode == expected
 
     setup = """
-import os, json, httpx
+import os, json, httpx, time
+from packages.thermal.authority import PgAuthority, AuthorityBusy
 from packages.config import get_settings
 from packages.db.session import create_session_factory
 from demo.thermal_queue import ThermalQueue
@@ -226,10 +227,23 @@ from demo.thermal_runtime import publish_reading
 from packages.thermal import runtime as rt
 from functools import partial
 sessions = create_session_factory(get_settings())
+authority = PgAuthority(sessions)
+deadline = time.monotonic() + 15
+while True:
+    try:
+        with sessions() as session, session.begin():
+            authority.acquire(session)
+        break
+    except AuthorityBusy:
+        assert time.monotonic() < deadline
+        time.sleep(0.1)
 """
     with httpx.Client(base_url=BASE, timeout=5) as client:
         os.kill(thermal_pid, signal.SIGSTOP)
         try:
+            # Let the existing lease expire before starting this 30-second
+            # business scenario; each relay acquires its own fenced generation.
+            time.sleep(10.2)
             response = client.post(
                 "/thermal-simulations", json={"simulation_id": identity, "mode": mode}
             )
@@ -243,7 +257,7 @@ def crash(*args, **kwargs): os._exit(42)
 rt.mark_published = crash
 with httpx.Client(timeout=3) as client:
     rt.reading_publication(
-        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL'])
+        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL']), authority
     )
 """,
                 42,
@@ -258,17 +272,23 @@ with httpx.Client(timeout=3) as client:
                 + """
 with httpx.Client(timeout=3) as client:
     rt.reading_publication(
-        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL'])
+        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL']), authority
     )
 queue = ThermalQueue(get_settings())
-rt.command_publication(sessions, queue)
+rt.command_publication(sessions, queue, authority)
 for _ in range(5):
-    messages = queue.receive()
+    # Speed only this intentionally unacknowledged transport delivery; the
+    # simulation's original 30-second business deadline stays unchanged.
+    messages = queue.client.receive_message(
+        QueueUrl=queue.url, MaxNumberOfMessages=1, WaitTimeSeconds=1, VisibilityTimeout=1,
+    ).get('Messages', [])
     if messages:
         body = json.loads(messages[0]['Body'])
-        assert rt.RoomClock(sessions).command(
+        assert rt.RoomClock(sessions, authority).command(
             body['simulation_id'], body['sequence'], body['command_type']
         )
+        with sessions() as session, session.begin():
+            authority.release(session)
         os._exit(43)  # applied transaction committed; no DeleteMessage
 raise RuntimeError('No command received')
 """,
@@ -277,7 +297,8 @@ raise RuntimeError('No command received')
             applied = client.get(f"/thermal-simulations/{identity}").json()
             assert applied["commands"][0]["applied_at"]
             assert applied["readings"][0]["transport_receipt"]["status"] == "accepted"
-            time.sleep(3.2)
+            # Child startup overlaps the one-second SQS visibility timeout;
+            # its bounded receive loop waits for redelivery if necessary.
             child(
                 setup
                 + """
@@ -286,12 +307,14 @@ for _ in range(5):
     messages = queue.receive()
     if messages:
         body = json.loads(messages[0]['Body'])
-        assert rt.RoomClock(sessions).command(
+        assert rt.RoomClock(sessions, authority).command(
             body['simulation_id'], body['sequence'], body['command_type']
         )
         queue.acknowledge(messages[0]['ReceiptHandle'])
         break
 else: raise RuntimeError('Command was not redelivered')
+with sessions() as session, session.begin():
+    authority.release(session)
 """
             )
             duplicate = client.get(f"/thermal-simulations/{identity}").json()
@@ -304,8 +327,12 @@ else: raise RuntimeError('Command was not redelivered')
             )
         finally:
             os.kill(thermal_pid, signal.SIGCONT)
+        wait_snapshot(client, identity, lambda s: s["status"] == "interrupted", 18)
+        resumed = client.post(f"/thermal-simulations/{identity}/resume")
+        assert resumed.status_code == 200, resumed.text
         final = wait_snapshot(client, identity, lambda s: s["status"] in ("completed", "expired"))
         assert final["status"] == "completed", final
+        assert final["expires_at"] == pending["expires_at"]
         record(
             f"crash-windows-{mode}",
             {
@@ -420,7 +447,10 @@ def test_real_mode_switch_and_concurrent_successor_admission(mode: str, next_mod
         )
         assert final["status"] == "completed", final
         assert_stop_confirmation(final, next_mode)
-        assert client.get(f"/thermal-simulations/{identity}").json() == stopped
+        unchanged = client.get(f"/thermal-simulations/{identity}").json()
+        assert {k: v for k, v in unchanged.items() if k != "runtime"} == {
+            k: v for k, v in stopped.items() if k != "runtime"
+        }
         record(f"switch-{mode}-{next_mode}", {"predecessor": stopped, "successor": final})
 
 

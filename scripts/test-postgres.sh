@@ -20,4 +20,23 @@ until docker exec "$CONTAINER" pg_isready -U telemetry_lab -d telemetry_lab_test
 done
 PORT=$(docker port "$CONTAINER" 5432/tcp | sed 's/.*://')
 export TELEMETRY_LAB_TEST_POSTGRES_URL="postgresql+psycopg://telemetry_lab:local-test%3A%25%40@127.0.0.1:$PORT/telemetry_lab_test"
-"$PYTHON" -m pytest tests/integration/test_postgres_pipeline.py -q
+# pg_isready inside the container can see the temporary bootstrap server.
+# Verify the published TCP endpoint before starting migrations and process tests.
+"$PYTHON" - <<'PY'
+import os
+import time
+
+import psycopg
+
+url = os.environ["TELEMETRY_LAB_TEST_POSTGRES_URL"].replace("postgresql+psycopg:", "postgresql:")
+for attempt in range(30):
+    try:
+        with psycopg.connect(url, connect_timeout=2) as connection:
+            connection.execute("SELECT 1")
+        break
+    except psycopg.OperationalError:
+        if attempt == 29:
+            raise
+        time.sleep(1)
+PY
+"$PYTHON" -m pytest tests/integration/test_postgres_pipeline.py tests/integration/test_thermal_authority.py tests/integration/test_thermal_multiuser.py -q

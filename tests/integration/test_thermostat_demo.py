@@ -235,12 +235,15 @@ def test_persistent_room_settings_proofs_backpressure_and_explicit_recovery() ->
         endpoint = os.environ["AWS_ENDPOINT_URL"]
         assert endpoint.startswith("http://127.0.0.1:")
         queue = boto3.client(
-            "sqs", endpoint_url=endpoint, region_name="ca-central-1",
-            aws_access_key_id="test", aws_secret_access_key="test",
+            "sqs",
+            endpoint_url=endpoint,
+            region_name="ca-central-1",
+            aws_access_key_id="test",
+            aws_secret_access_key="test",
         )
-        queue_url = queue.get_queue_url(
-            QueueName="telemetry-lab-local-thermal-commands"
-        )["QueueUrl"]
+        queue_url = queue.get_queue_url(QueueName="telemetry-lab-local-thermal-commands")[
+            "QueueUrl"
+        ]
         queue.set_queue_attributes(QueueUrl=queue_url, Attributes={"DelaySeconds": "5"})
         try:
             setting(client, identity, "heating", 30)
@@ -248,7 +251,7 @@ def test_persistent_room_settings_proofs_backpressure_and_explicit_recovery() ->
             os.kill(thermal_pid, signal.SIGKILL)
         finally:
             queue.set_queue_attributes(QueueUrl=queue_url, Attributes={"DelaySeconds": "0"})
-        interrupted = wait(client, identity, lambda s: s["status"] == "interrupted", 10)
+        interrupted = wait(client, identity, lambda s: s["status"] == "interrupted", 18)
         time.sleep(1.2)
         still = snapshot(client, identity)
         assert still["temperature_c"] == interrupted["temperature_c"]

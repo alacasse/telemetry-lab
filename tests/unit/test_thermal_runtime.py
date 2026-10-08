@@ -16,6 +16,23 @@ from packages.thermal.models import ThermalCommand, ThermalSimulation
 from packages.thermal.runtime import RoomClock, reading_publication
 from packages.thermal.service import create_simulation, recover_simulations, resume_simulation
 
+
+class SQLiteAuthority:
+    """Explicit test authority: SQLite cannot provide PostgreSQL fencing."""
+
+    def check_active(self) -> None:
+        pass
+
+    def guard(self, session: Session) -> None:
+        self.check_active()
+
+    def heartbeat(self, session: Session) -> None:
+        pass
+
+    def fail(self) -> None:
+        pass
+
+
 Room = tuple[sessionmaker[Session], str, list[float], RoomClock]
 
 
@@ -45,7 +62,7 @@ def room() -> Room:
             )
         )
     now = [100.0]
-    return sessions, sid, now, RoomClock(sessions, lambda: now[0])
+    return sessions, sid, now, RoomClock(sessions, SQLiteAuthority(), lambda: now[0])
 
 
 def test_command_duplicate_does_not_lose_physical_elapsed(room: Room) -> None:
@@ -106,6 +123,7 @@ def test_sensor_publishes_exact_durable_http_body(room: Room) -> None:
             lambda body, sid: publish_reading(
                 client, "http://localhost/ingestion/telemetry", body, sid
             ),
+            SQLiteAuthority(),
         )
     from packages.thermal.models import ThermalReading
 
@@ -130,8 +148,8 @@ def test_reading_transport_receipt_and_identity_are_preserved(room: Room) -> Non
         deliveries.append((body, simulation_id))
         return receipt
 
-    reading_publication(sessions, publish)
-    reading_publication(sessions, publish)
+    reading_publication(sessions, publish, SQLiteAuthority())
+    reading_publication(sessions, publish, SQLiteAuthority())
     assert deliveries == [(persisted_body, sid)]
     with sessions() as session:
         reading = required(session, ThermalReading, (sid, 1))
@@ -217,6 +235,7 @@ def test_http_acceptance_before_receipt_commit_retries_exact_body(
                 lambda body, sid: publish_reading(
                     client, "http://localhost/ingestion/telemetry", body, sid
                 ),
+                SQLiteAuthority(),
             )
         monkeypatch.setattr(runtime, "mark_published", original)
         reading_publication(
@@ -224,6 +243,7 @@ def test_http_acceptance_before_receipt_commit_retries_exact_body(
             lambda body, sid: publish_reading(
                 client, "http://localhost/ingestion/telemetry", body, sid
             ),
+            SQLiteAuthority(),
         )
     assert len(requests) == 2
     assert requests[0] == requests[1]
@@ -277,6 +297,7 @@ def test_publication_failure_does_not_stop_clock_or_expiry(room: Room) -> None:
                 lambda body, sid: publish_reading(
                     client, "http://localhost/ingestion/telemetry", body, sid
                 ),
+                SQLiteAuthority(),
             )
     now[0] += 1
     clock.tick()
@@ -312,11 +333,16 @@ def test_runtime_availability_is_separate_from_persisted_snapshot(
         )
     )
     monkeypatch.setenv("THERMAL_RUNTIME_STATE", str(state))
+    monkeypatch.setattr(
+        "demo.thermal_local.observe_authority",
+        lambda session: {"status": "unavailable", "revision": "tested-revision"},
+    )
+    monkeypatch.setattr("demo.thermal_local.observation_sessions", lambda: sessions)
     with sessions() as session:
         result = snapshot(session, required(session, ThermalSimulation, sid))
         result["runtime"] = runtime_observation()
     assert result["runtime"]["status"] == "unavailable"
-    assert result["runtime"]["release_revision"] == "tested-revision"
+    assert result["runtime"]["revision"] == "tested-revision"
     assert result["status"] == "active"
     assert result["reading_sequence"] == 1
     with sessions() as session:
@@ -538,7 +564,7 @@ def test_publication_emits_persisted_type(room: Room) -> None:
             bodies.append(body)
             return "message-id"
 
-    command_publication(sessions, Publisher())  # type: ignore[arg-type]
+    command_publication(sessions, Publisher(), SQLiteAuthority())  # type: ignore[arg-type]
     assert json.loads(bodies[0]) == {
         "simulation_id": sid,
         "sequence": 1,
@@ -639,7 +665,7 @@ def test_command_publication_receipt_commit_failure_retries_same_identity(room: 
     event.listen(sessions.class_, "before_commit", fail_receipt_commit)
     try:
         with pytest.raises(RuntimeError, match="command receipt commit failed"):
-            command_publication(sessions, Publisher())  # type: ignore[arg-type]
+            command_publication(sessions, Publisher(), SQLiteAuthority())  # type: ignore[arg-type]
     finally:
         event.remove(sessions.class_, "before_commit", fail_receipt_commit)
     with sessions() as session:
@@ -647,7 +673,7 @@ def test_command_publication_receipt_commit_failure_retries_same_identity(room: 
         assert command.published_at is None
         assert command.transport_message_id is None
         assert command.status == "pending"
-    command_publication(sessions, Publisher())  # type: ignore[arg-type]
+    command_publication(sessions, Publisher(), SQLiteAuthority())  # type: ignore[arg-type]
     assert len(bodies) == 2 and bodies[0] == bodies[1]
     assert json.loads(bodies[0]) == {
         "simulation_id": sid,
@@ -716,7 +742,7 @@ def test_reading_receipt_commit_failure_retries_same_body_and_identity(room: Roo
     event.listen(sessions.class_, "before_commit", fail_receipt_commit)
     try:
         with pytest.raises(RuntimeError, match="reading receipt commit failed"):
-            reading_publication(sessions, publish)
+            reading_publication(sessions, publish, SQLiteAuthority())
     finally:
         event.remove(sessions.class_, "before_commit", fail_receipt_commit)
     with sessions() as session:
@@ -724,10 +750,72 @@ def test_reading_receipt_commit_failure_retries_same_body_and_identity(room: Roo
         assert reading.publication_status == "pending"
         assert reading.published_at is None
         assert reading.transport_receipt is None
-    reading_publication(sessions, publish)
+    reading_publication(sessions, publish, SQLiteAuthority())
     assert deliveries == [(original_body, sid), (original_body, sid)]
     with sessions() as session:
         reading = required(session, ThermalReading, (sid, 1))
         assert reading.publication_status == "published"
         assert reading.published_at is not None
         assert reading.transport_receipt == {"message_id": "accepted-2", "duplicate": True}
+
+
+def test_production_authority_requires_postgresql(room: Room) -> None:
+    from packages.thermal.authority import PgAuthority
+
+    sessions, _, _, _ = room
+    authority = PgAuthority(sessions)
+    with pytest.raises(ValueError, match="requires PostgreSQL"):
+        with sessions() as session, session.begin():
+            authority.acquire(session)
+    assert not authority.active
+
+
+def test_reading_in_flight_cannot_record_receipt_after_authority_loss(room: Room) -> None:
+    from packages.thermal.authority import AuthorityLost
+    from packages.thermal.models import ThermalReading
+
+    sessions, sid, _, _ = room
+
+    class FencedAuthority(SQLiteAuthority):
+        lost = False
+
+        def check_active(self) -> None:
+            if self.lost:
+                raise AuthorityLost("replacement committed")
+
+    authority = FencedAuthority()
+    sent: list[tuple[str, str]] = []
+
+    def accepted_before_transfer(body: str, simulation_id: str) -> dict:
+        sent.append((body, simulation_id))
+        authority.lost = True
+        return {"status": "accepted"}
+
+    with pytest.raises(AuthorityLost, match="replacement committed"):
+        reading_publication(sessions, accepted_before_transfer, authority)
+    assert len(sent) == 1
+    with sessions() as session:
+        reading = required(session, ThermalReading, (sid, 1))
+        assert reading.body == sent[0][0] and sent[0][1] == sid
+        assert reading.published_at is None and reading.transport_receipt is None
+
+
+def test_lost_authority_prevents_receiving_or_acknowledging_commands(room: Room) -> None:
+    from packages.thermal.authority import AuthorityLost
+    from packages.thermal.runtime import receive_commands
+
+    _, _, _, clock = room
+
+    class LostAuthority(SQLiteAuthority):
+        def check_active(self) -> None:
+            raise AuthorityLost("owner is permanently inactive")
+
+    class UncalledQueue(DeliveryQueue):
+        def receive(self) -> list[dict[str, str]]:
+            pytest.fail("lost owner must not consume commands")
+
+    clock.authority = LostAuthority()
+    queue = UncalledQueue([])
+    with pytest.raises(AuthorityLost):
+        receive_commands(clock, queue)  # type: ignore[arg-type]
+    assert not queue.acknowledged

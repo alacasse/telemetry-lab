@@ -25,7 +25,8 @@ room nor recovers a simulation. Runtime availability is supplied separately from
 persisted business state; `unknown` and `unavailable` retain their meaning.
 
 `packages/thermal/runtime.py` owns `RoomClock`, measurement publication, command
-publication and command consumption. The monotonic clock remains injectable.
+publication and command consumption. The monotonic clock and a mandatory `Authority` dependency are injected.
+The production authority requires PostgreSQL; SQLite tests supply an explicit double.
 Measurement publication receives a `publish_reading(body, simulation_id)` callback
 that returns the actual transport receipt or raises. It sends the exact stored
 body and records the receipt in a subsequent transaction. Failed publication or
@@ -35,15 +36,54 @@ their `Body` and `ReceiptHandle` fields. Successful application commits before
 acknowledgement, and redelivery cannot repeat a committed effect.
 
 `demo/app.py` assembles the HTTP router and serves the existing static interface.
-`demo/thermal_local.py` validates the local multiplier and observes the launcher's
-runtime file/PID. `demo/thermal_runtime.py` supplies the HTTPX publication adapter,
-local command queue, signals, threads and polling intervals. Startup first commits
-recovery of existing simulations, then optionally initializes the shared room,
-then starts the engine. Recovery requires explicit resume; HTTP reads stay passive.
+`demo/thermal_local.py` validates the local multiplier and reads PostgreSQL authority
+through a separate bounded observation pool, without taking row locks. `demo/thermal_runtime.py` supplies the HTTPX publication adapter,
+local command queue, signals, threads and polling intervals. Startup atomically acquires authority, locks the existing creation advisory lock,
+recovers existing simulations and optionally initializes the shared room. Only
+after commit does it start the engine. Recovery requires explicit resume; HTTP reads stay passive.
 The shared modules import no local composition or transport clients and their
 package initialization starts no work. AWS adapters and execution remain future work.
 
 The API accepting a measurement establishes receipt/publication evidence, not completion. The worker commits business results in PostgreSQL before acknowledging successful processing to the queue. A failed pre-commit attempt can be redelivered. A committed message can also be delivered again when acknowledgement fails.
+
+## Exclusive shared-room engine
+
+`packages/thermal/authority.py` protects the permanent `thermal_authority` row for
+`shared-room`, independently of simulation IDs. A process UUID and increasing
+generation fence runtime transactions. The 10-second lease is renewed every two
+seconds through a separate pool. Each protected transaction locks authority first,
+then checks owner, generation and expiry against `clock_timestamp()` read after
+the lock. Recovery, initialization, tick, commands, publication selection, receipt
+persistence and final cleanup all participate. API and processing-worker business
+transactions remain independent.
+
+A transaction admitted before expiry may commit after expiry, while retaining the
+lock. A successor must wait for its completion. Once the successor's acquisition
+commits, no transaction from the old generation can commit a protected mutation.
+This follows PostgreSQL's transaction-scoped [row-lock behavior](https://www.postgresql.org/docs/16/explicit-locking.html#LOCKING-ROWS).
+
+Database errors, authority loss or five seconds without a confirmed renewal
+permanently disable the process. Every admission and renewal checks the monotonic
+deadline; reconnecting or resuming a suspended process cannot reactivate it.
+Transport failures retain retries. No network call holds the authority lock;
+selection and receipt persistence are separately fenced, so an already in-flight
+send may remain ambiguous. The exact body, identities and commit-before-acknowledge
+contract remain unchanged.
+
+Busy startup exits 75 without recovery, initialization or command consumption.
+The launcher waits for a passively observed free/expired lease before restarting;
+unknown observation spends no attempt. Exit 75 ends automatic retries. A restarted
+simulation remains interrupted until explicit resume, with new monotonic anchors
+and no thermal catch-up. Normal shutdown joins all threads within a shared
+four-second budget and only then recovers/releases if authority remains valid.
+Fatal or unfinished shutdown performs no late business cleanup.
+
+Availability is `available` only with a valid lease and successful clock pass no
+older than three seconds, including idle/interrupted passes. Missing, expired or
+stale evidence is `unavailable`; unreadable evidence is `unknown`. The existing HTTP
+runtime keys remain, supplemented by owner, generation, lease expiry and proof
+timestamps. Launcher files describe process diagnostics only. See the complete
+[phase 2 contract](phase2-proposal.md) and [validation](validation.md).
 
 ## Duplicates and retries
 

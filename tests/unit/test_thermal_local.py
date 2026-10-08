@@ -1,9 +1,10 @@
-import json
-from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
+from sqlalchemy.exc import OperationalError
 
 from demo import thermal_local
+from packages.thermal.authority import unknown_observation
 
 
 @pytest.mark.parametrize("value", ["nan", "inf", "0.49", "2.01", "bad"])
@@ -21,58 +22,44 @@ def test_multiplier_defaults_and_boundaries(monkeypatch: pytest.MonkeyPatch) -> 
         assert thermal_local.multiplier() == float(value)
 
 
-def test_missing_and_invalid_observation(
+def test_database_observation_failure_is_unknown(monkeypatch: pytest.MonkeyPatch) -> None:
+    sessions = MagicMock(side_effect=OperationalError("observe", {}, Exception("offline")))
+    monkeypatch.setattr(thermal_local, "observation_sessions", sessions)
+    assert thermal_local.runtime_observation() == unknown_observation()
+
+
+def test_runtime_observation_preserves_database_provenance(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
 ) -> None:
-    monkeypatch.delenv("THERMAL_RUNTIME_STATE", raising=False)
-    unknown = thermal_local.runtime_observation()
-    assert unknown == {
-        "status": "unknown",
-        "process_id": None,
-        "release_revision": None,
-        "source": "local-launcher-process-observation",
-    }
-    path = tmp_path / "runtime.json"
-    monkeypatch.setenv("THERMAL_RUNTIME_STATE", str(path))
-    assert thermal_local.runtime_observation() == unknown
-    for content in [
-        "bad",
-        "[]",
-        '{"thermal_pid": -1}',
-        '{"thermal_pid": 1, "thermal_status": "bad"}',
-    ]:
-        path.write_text(content)
-        assert thermal_local.runtime_observation() == unknown
-
-
-@pytest.mark.parametrize(
-    "error,status",
-    [(None, "available"), (ProcessLookupError, "unavailable"), (PermissionError, "unknown")],
-)
-def test_process_observation_preserves_provenance(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-    error: type[Exception] | None,
-    status: str,
-) -> None:
-    path = tmp_path / "runtime.json"
-    path.write_text(
-        json.dumps(
-            {"thermal_pid": 123, "thermal_status": "available", "release_revision": "revision"}
-        )
-    )
-    monkeypatch.setenv("THERMAL_RUNTIME_STATE", str(path))
-
-    def probe(pid: int, signal: int) -> None:
-        assert (pid, signal) == (123, 0)
-        if error:
-            raise error()
-
-    monkeypatch.setattr(thermal_local.os, "kill", probe)
-    assert thermal_local.runtime_observation() == {
-        "status": status,
+    observed = {
+        **unknown_observation(),
+        "status": "available",
+        "owner_id": "test-owner",
+        "generation": 8,
         "process_id": 123,
         "release_revision": "revision",
-        "source": "local-launcher-process-observation",
     }
+    factory = MagicMock()
+    session = factory.return_value.__enter__.return_value
+    observer = MagicMock(return_value=observed)
+    monkeypatch.setattr(thermal_local, "observation_sessions", lambda: factory)
+    monkeypatch.setattr(thermal_local, "observe_authority", observer)
+    monkeypatch.setenv("THERMAL_RUNTIME_STATE", "/nonexistent/ignored-launcher-state.json")
+    assert thermal_local.runtime_observation() == observed
+    observer.assert_called_once_with(session)
+    factory.return_value.__exit__.assert_called_once()
+
+
+def test_sqlite_cannot_claim_real_authority(monkeypatch: pytest.MonkeyPatch) -> None:
+    from packages.config import Settings
+
+    monkeypatch.setattr(
+        thermal_local,
+        "get_settings",
+        lambda: Settings(_env_file=None, APP_ENV="local", DATABASE_URL="sqlite://"),
+    )
+    thermal_local.observation_sessions.cache_clear()
+    try:
+        assert thermal_local.runtime_observation() == unknown_observation()
+    finally:
+        thermal_local.observation_sessions.cache_clear()

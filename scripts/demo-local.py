@@ -24,19 +24,88 @@ def command(*args: str) -> str:
     return subprocess.check_output(args, text=True, cwd=ROOT).strip()
 
 
+def authority_free(env: dict[str, str], cwd: str) -> bool | None:
+    """Read PostgreSQL authority passively in the same isolated environment."""
+    try:
+        result = subprocess.run(
+            [sys.executable, "-c",
+             "import json; "
+             "from packages.config import get_settings; "
+             "from packages.thermal.authority import "
+             "create_authority_session_factory, observe_authority; "
+             "s=create_authority_session_factory(get_settings())(); "
+             "print(json.dumps(observe_authority(s))); s.close()"],
+            cwd=cwd, env=env, capture_output=True, text=True, timeout=3,
+        )
+        if result.returncode:
+            return None
+        observation = json.loads(result.stdout)
+        if observation.get("status") == "unknown":
+            return None
+        value = observation.get("authority_free")
+        return value if isinstance(value, bool) else None
+    except (subprocess.SubprocessError, OSError, ValueError):
+        return None
+
+
+def restart_thermal(
+    process: subprocess.Popen, state: dict[str, Any], env: dict[str, str],
+    cwd: str, log_handle: Any,
+) -> subprocess.Popen:
+    """Spend a restart attempt only after a passive observation permits acquisition."""
+    exit_code = process.poll()
+    if exit_code is None:
+        return process
+    if exit_code == 75:
+        state["thermal_restart_refused"] = True
+    if state.get("thermal_restart_refused") or state["thermal_restarts"] >= 3:
+        state["thermal_status"] = "unavailable"
+        return process
+    free = authority_free(env, cwd)
+    state["thermal_status"] = "unknown" if free is None else "unavailable"
+    if free is not True:
+        return process
+    replacement = subprocess.Popen(
+        [sys.executable, "-m", "demo.thermal_runtime"],
+        cwd=cwd, env=env, stdout=log_handle, stderr=subprocess.STDOUT,
+    )
+    state["thermal_pid"] = replacement.pid
+    state["thermal_status"] = "starting"
+    state["thermal_restarts"] += 1
+    return replacement
+
+
+def integration_test_selection(*, thermostat: bool, crash_windows: bool) -> list[str]:
+    if thermostat:
+        return [str(ROOT / "tests/integration/test_thermostat_demo.py")]
+    if crash_windows:
+        return [str(ROOT / "tests/integration/test_thermal_demo.py"), "-k", "crash_windows"]
+    return [
+        str(ROOT / "tests/integration/test_local_demo.py"),
+        str(ROOT / "tests/integration/test_thermal_demo.py"), "-k", "not crash_windows",
+    ]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8088)
-    parser.add_argument(
-        "--test", action="store_true", help="Run real integration tests then clean up"
+    tests = parser.add_mutually_exclusive_group()
+    tests.add_argument(
+        "--test", action="store_true",
+        help=("Run integration tests except relay crash windows; "
+              "run --test-crash-windows separately"),
     )
-    parser.add_argument(
+    tests.add_argument(
+        "--test-crash-windows", action="store_true",
+        help="Run relay crash-window integrations in their own disposable stack, then clean up",
+    )
+    tests.add_argument(
         "--test-thermostat", action="store_true",
         help="Run persistent thermostat integration tests on a fresh room, then clean up",
     )
     parser.add_argument(
         "--legacy-thermal", action="store_true",
-        help="Keep historical scenario initialization (also used by --test)",
+        help="Keep historical scenario initialization (also used by historical integration modes)",
     )
     parser.add_argument("--thermal-multiplier", type=float, default=1.0)
     parser.add_argument(
@@ -139,7 +208,9 @@ def main() -> int:
                 "THERMAL_QUEUE_NAME": "telemetry-lab-local-thermal-commands",
                 "THERMAL_RUNTIME_STATE": str(logs / "runtime.json"),
                 "THERMAL_TIME_MULTIPLIER": str(args.thermal_multiplier),
-                "THERMAL_INITIALIZE_THERMOSTAT": "0" if args.test or args.legacy_thermal else "1",
+                "THERMAL_INITIALIZE_THERMOSTAT": "0" if (
+                    args.test or args.test_crash_windows or args.legacy_thermal
+                ) else "1",
                 "THERMAL_INGESTION_URL": f"http://127.0.0.1:{args.port}/ingestion/telemetry",
                 "PYTHONPATH": os.pathsep.join(
                     str(ROOT / p)
@@ -276,12 +347,13 @@ def main() -> int:
                 f"worker PID {processes[1].pid}). Ctrl-C stops processes and disposable DB.",
                 flush=True,
             )
-            if args.test or args.test_thermostat:
+            if args.test or args.test_thermostat or args.test_crash_windows:
                 env.update(
                     {
                         "TELEMETRY_LAB_DEMO_URL": base,
                         "TELEMETRY_LAB_DEMO_EVIDENCE": str(logs / (
                             "thermostat-evidence.json" if args.test_thermostat
+                            else "thermal-crash-windows-evidence.json" if args.test_crash_windows
                             else "slice2-evidence.json"
                         )),
                         "TELEMETRY_LAB_DEMO_WORKER_PID": str(processes[1].pid),
@@ -295,12 +367,9 @@ def main() -> int:
                         sys.executable,
                         "-m",
                         "pytest",
-                        *(
-                            [str(ROOT / "tests/integration/test_thermostat_demo.py")]
-                            if args.test_thermostat else [
-                                str(ROOT / "tests/integration/test_local_demo.py"),
-                                str(ROOT / "tests/integration/test_thermal_demo.py"),
-                            ]
+                        *integration_test_selection(
+                            thermostat=args.test_thermostat,
+                            crash_windows=args.test_crash_windows,
                         ),
                         "-v",
                     ],
@@ -309,31 +378,17 @@ def main() -> int:
                 )
             else:
                 test_process = None
+            next_authority_probe = 0.0
             while True:
                 if any(p.poll() is not None for p in processes[:2]):
                     raise RuntimeError(f"Local process exited; inspect {logs}")
-                if processes[2].poll() is not None and state["thermal_restarts"] < 3:
-                    time.sleep(0.5)
-                    processes[2] = subprocess.Popen(
-                        [sys.executable, "-m", "demo.thermal_runtime"],
-                        cwd=cwd,
-                        env=env,
-                        stdout=handles[2],
-                        stderr=subprocess.STDOUT,
-                    )
-                    state["thermal_pid"] = processes[2].pid
-                    state["thermal_status"] = "available"
-                    state["thermal_restarts"] += 1
-                    (logs / "runtime.json").write_text(json.dumps(state, indent=2) + "\n")
-                if processes[2].poll() is not None and state["thermal_restarts"] >= 3:
-                    if state.get("thermal_status") != "unavailable":
-                        state["thermal_status"] = "unavailable"
-                        (logs / "runtime.json").write_text(json.dumps(state, indent=2) + "\n")
-                        print(
-                            "Thermal restart budget exhausted; "
-                            "other local services remain available.",
-                            flush=True,
+                if processes[2].poll() is not None:
+                    if time.monotonic() >= next_authority_probe:
+                        next_authority_probe = time.monotonic() + 0.5
+                        processes[2] = restart_thermal(
+                            processes[2], state, env, cwd, handles[2],
                         )
+                        (logs / "runtime.json").write_text(json.dumps(state, indent=2) + "\n")
                 if test_process is not None and test_process.poll() is not None:
                     return test_process.returncode
                 time.sleep(0.1)

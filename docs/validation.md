@@ -1,5 +1,87 @@
 # Validation
 
+## Phase 2 exclusive shared-room engine — 8 October 2026
+
+Implemented on the working tree based on `8b597ef12fea86b776ed67704e7835e2fef9fe6c`.
+The [realized contract](phase2-proposal.md) replaces the proposal. Source and log
+hashes are recorded in [the phase 2 evidence record](validation-phase2-2026-10-08.json).
+All reported execution is local; artifacts describe a dirty working tree, not a
+published release.
+
+| Check | Observed result |
+| --- | --- |
+| Ruff / mypy | Passed; 106 Python source files checked |
+| Default Python suite | 199 passed, 31 opt-in skips, 21 existing deprecation warnings |
+| JavaScript controller and DOM suites | 137 tests passed (27 + 52 + 23 + 35) |
+| Disposable PostgreSQL | 12 passed: pipeline, ten authority cases and multiuser/passive observation |
+| Historical-data / command migration | 1 passed |
+| Thermostat, runtime-first, port 18282 | 1 passed |
+| Thermostat, API-first, port 18287 | 1 passed on the final authority code |
+| Historical scenarios, port 18285 | 15 passed; two crash-window cases deliberately run separately |
+| Outbox crash windows, port 18286 | 2 passed; eight other thermal cases deliberately excluded here |
+| Four Lambda bundles | Final sources rebuilt in SAM Python 3.12/x86_64; all four checksums and isolated imports passed in the Lambda runtime image with networking disabled |
+| Independent general and import reviews | No remaining actionable findings; general review repeated after cache hardening |
+
+All 31 service-backed tests skipped by default were exercised in the separate
+disposable runs. The historical and crash suites passed before the final
+identity-map hardening; the final PostgreSQL regression suite and API-first
+thermostat run additionally exercise that change.
+
+The PostgreSQL tests use independent processes for acquisition, lock ordering and
+actual `SIGSTOP`/`SIGCONT` replacement. They check busy startup without recovery,
+lease expiry, permanent disablement on connection loss, atomic startup rollback,
+old-generation rejection and late-cleanup refusal. A retained-session regression
+exercises SQLAlchemy identity-map staleness during release/takeover. The multiuser
+HTTP test checks competing settings and passive observation while authority is
+locked, including routes that already hold a simulation lock. Unit tests add
+postcommit renewal suspension, failed receipts, redelivery and lost acknowledgments,
+aggregate shutdown timing and the launcher's unknown/busy/restart-budget decisions.
+
+Migrations were applied before engines started in every disposable composition.
+The existing unrelated running compositions were not migrated or stopped. The
+source change therefore does not establish that a previously running demo has
+loaded the new code. See the migration instructions in [the runbook](local-runbook.md).
+No AWS changes, uploads, deployments, multi-room support or browser-storage fix
+were performed. Browser results are automated controller/DOM checks; native visual
+inspection and load testing were not repeated.
+
+Initial checks exposed stale migration-head assertions, a duplicate test module
+basename, and one test fixture retaining another test's lease. These were corrected.
+A duplicate PostgreSQL run hit the temporary bootstrap server before the published
+TCP endpoint was ready; the test script now waits for that endpoint. The original
+combined historical run exceeded the three-restart budget after adding real lease
+ownership to crash relays. The two relay cases now run in their own composition,
+with both commands present in CI. One early relay run exhausted the unchanged
+30-second business expiry; the intentionally unacknowledged test delivery now uses
+a one-second visibility timeout and overlaps child startup with redelivery instead
+of sleeping 3.2 seconds. Production transport defaults and business expiry are
+unchanged. Review found and corrected a renewal-confirmation suspension race and
+a retained ORM-authority row which could otherwise admit stale ownership.
+
+Reproduction commands:
+
+```sh
+.venv/bin/ruff check .
+.venv/bin/mypy .
+.venv/bin/pytest -ra
+node tests/ui/demo.test.cjs
+node tests/ui/thermal.test.cjs
+node tests/ui/thermostat.test.cjs
+node tests/ui/thermostat-flow.test.cjs
+PYTHON=.venv/bin/python sh scripts/test-postgres.sh
+PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
+.venv/bin/python scripts/demo-local.py --test-thermostat --startup-order runtime-first --port 18282
+.venv/bin/python scripts/demo-local.py --test --port 18285
+.venv/bin/python scripts/demo-local.py --test-crash-windows --port 18286
+.venv/bin/python scripts/demo-local.py --test-thermostat --startup-order api-first --port 18287
+```
+
+Raw logs and bundles are local under `.run/validation/phase2/`. Lambda packaging
+uses the locked SAM Python 3.12/x86_64 build; verification checks all four checksums
+and isolated handlers/shared thermal imports inside the Lambda runtime image with
+networking disabled. CI configuration now includes the separate crash composition;
+no remote CI execution is claimed here.
+
 ## Phase 1 shared thermostat extraction — 8 October 2026
 
 The phase 1 working tree is based on `d9c50383e660398ec0785f637eedcbb9e536668a`.

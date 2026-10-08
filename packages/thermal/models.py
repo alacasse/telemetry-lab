@@ -118,3 +118,15 @@ class ThermalSetting(Base):
     target_c: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     origin: Mapped[str] = mapped_column(String(16), default="user")
+
+
+class ThermalAuthority(Base):
+    __tablename__ = "thermal_authority"
+    resource: Mapped[str] = mapped_column(String(64), primary_key=True)
+    owner_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    generation: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    renewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    clock_passed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    pid: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    revision: Mapped[str | None] = mapped_column(String(128), nullable=True)

@@ -1,38 +1,33 @@
-"""Launcher configuration and process observations for the local composition."""
+"""Local configuration and passive PostgreSQL runtime observation."""
 
-import json
 import math
 import os
-from pathlib import Path
+from functools import lru_cache
+
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, sessionmaker
+
+from packages.config import get_settings
+from packages.thermal.authority import (
+    create_authority_session_factory,
+    observe_authority,
+    unknown_observation,
+)
+
+
+@lru_cache(maxsize=1)
+def observation_sessions() -> sessionmaker[Session]:
+    # A separate bounded pool keeps observation independent of API transactions,
+    # including routes which already hold a simulation row lock.
+    return create_authority_session_factory(get_settings())
 
 
 def runtime_observation() -> dict:
-    result: dict[str, object] = {
-        "status": "unknown",
-        "process_id": None,
-        "release_revision": None,
-        "source": "local-launcher-process-observation",
-    }
-    path = os.environ.get("THERMAL_RUNTIME_STATE")
-    if not path:
-        return result
     try:
-        state = json.loads(Path(path).read_text())
-        pid = state.get("thermal_pid")
-        status = state.get("thermal_status", "unknown")
-        if not isinstance(pid, int) or pid <= 0 or status not in {"available", "unavailable"}:
-            return result
-        if status == "available":
-            try:
-                os.kill(pid, 0)
-            except ProcessLookupError:
-                status = "unavailable"
-            except PermissionError:
-                status = "unknown"
-        result.update(status=status, process_id=pid, release_revision=state.get("release_revision"))
-    except (OSError, ValueError, TypeError, AttributeError):
-        pass
-    return result
+        with observation_sessions()() as session:
+            return observe_authority(session)
+    except (SQLAlchemyError, ValueError):
+        return unknown_observation()
 
 
 def multiplier() -> float:

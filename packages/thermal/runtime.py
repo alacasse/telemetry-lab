@@ -10,8 +10,10 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
+from packages.thermal.authority import Authority
 from packages.thermal.commands import CommandMessage, CommandRejected, parse_command_message
 from packages.thermal.models import ThermalCommand, ThermalReading, ThermalSimulation
 from packages.thermal.service import (
@@ -39,9 +41,13 @@ class RoomClock:
     """Serialize physical integration and actuator changes with monotonic anchors."""
 
     def __init__(
-        self, sessions: sessionmaker[Session], monotonic: Callable[[], float] = time.monotonic
+        self,
+        sessions: sessionmaker[Session],
+        authority: Authority,
+        monotonic: Callable[[], float] = time.monotonic,
     ) -> None:
         self.sessions = sessions
+        self.authority = authority
         self.monotonic = monotonic
         self.lock = threading.Lock()
         self.anchors: dict[str, float] = {}
@@ -54,6 +60,7 @@ class RoomClock:
             try:
                 self._tick_transaction()
             except Exception:
+                self.authority.fail()
                 self.recovery_required = True
                 self.anchors.clear()
                 self.samples.clear()
@@ -61,6 +68,7 @@ class RoomClock:
 
     def _tick_transaction(self) -> None:
         with self.sessions() as session, session.begin():
+            self.authority.guard(session)
             if self.recovery_required:
                 recover_simulations(session)
             anchors = dict(self.anchors)
@@ -93,6 +101,7 @@ class RoomClock:
                 if row.observation_requested or now - last_sample >= 1:
                     observe_reading(session, sid)
                     samples[sid] = now
+            self.authority.heartbeat(session)
             for sid in set(anchors) - live:
                 anchors.pop(sid, None)
                 samples.pop(sid, None)
@@ -107,6 +116,7 @@ class RoomClock:
             except CommandRejected:
                 raise
             except Exception:
+                self.authority.fail()
                 self.recovery_required = True
                 self.anchors.clear()
                 self.samples.clear()
@@ -115,6 +125,7 @@ class RoomClock:
     def _command_transaction(self, message: CommandMessage) -> bool:
         sid, sequence = message.simulation_id, message.sequence
         with self.sessions() as session, session.begin():
+            self.authority.guard(session)
             command = verify_command(session, message)
             if command.status != "pending":
                 return True
@@ -139,11 +150,14 @@ class RoomClock:
         return acknowledge  # Commit is complete before transport acknowledgement.
 
 
-def reading_publication(
-    sessions: sessionmaker[Session], publish_reading: Callable[[str, str], dict]
+def _reading_publication(
+    sessions: sessionmaker[Session],
+    publish_reading: Callable[[str, str], dict],
+    authority: Authority,
 ) -> None:
     # Oldest first prevents a slow transport from skipping causal measurements.
     with sessions() as session, session.begin():
+        authority.guard(session)
         reading = session.scalar(
             select(ThermalReading)
             .join(
@@ -163,13 +177,18 @@ def reading_publication(
             return
         sid, seq, body = reading.simulation_id, reading.sequence, reading.body
     # No clock lock held across network I/O; final authority checked before initiating effect.
+    authority.check_active()
     receipt = publish_reading(body, sid)
     with sessions() as session, session.begin():
+        authority.guard(session)
         mark_published(session, sid, seq, receipt=receipt)
 
 
-def command_publication(sessions: sessionmaker[Session], queue: CommandTransport) -> None:
+def _command_publication(
+    sessions: sessionmaker[Session], queue: CommandTransport, authority: Authority
+) -> None:
     with sessions() as session, session.begin():
+        authority.guard(session)
         command = session.scalar(
             select(ThermalCommand)
             .join(
@@ -189,10 +208,12 @@ def command_publication(sessions: sessionmaker[Session], queue: CommandTransport
         if row.status not in {"active", "stopping"}:
             return
         sid, seq, command_type = command.simulation_id, command.sequence, command.command_type
+    authority.check_active()
     message_id = queue.publish(
         json.dumps({"simulation_id": sid, "sequence": seq, "command_type": command_type})
     )
     with sessions() as session, session.begin():
+        authority.guard(session)
         command = session.get(ThermalCommand, (sid, seq))
         if command is not None and command.published_at is None:
             command.published_at = datetime.now(UTC)
@@ -201,7 +222,19 @@ def command_publication(sessions: sessionmaker[Session], queue: CommandTransport
 
 def receive_commands(clock: RoomClock, queue: CommandTransport) -> None:
     """Discard permanently invalid deliveries; retry transaction and transport failures."""
+    clock.authority.check_active()
+    try:
+        with clock.sessions() as session, session.begin():
+            clock.authority.guard(session)
+    except Exception:
+        clock.authority.fail()
+        clock.recovery_required = True
+        clock.anchors.clear()
+        clock.samples.clear()
+        raise
+    clock.authority.check_active()
     for delivery in queue.receive():
+        clock.authority.check_active()
         try:
             message = parse_command_message(delivery["Body"])
             acknowledge = clock.command(
@@ -223,4 +256,27 @@ def receive_commands(clock: RoomClock, queue: CommandTransport) -> None:
             print(f"thermal command rejected: {reason}", flush=True)
             acknowledge = True
         if acknowledge:
+            clock.authority.check_active()
             queue.acknowledge(delivery["ReceiptHandle"])
+
+
+def reading_publication(
+    sessions: sessionmaker[Session],
+    publish_reading: Callable[[str, str], dict],
+    authority: Authority,
+) -> None:
+    try:
+        _reading_publication(sessions, publish_reading, authority)
+    except SQLAlchemyError:
+        authority.fail()
+        raise
+
+
+def command_publication(
+    sessions: sessionmaker[Session], queue: CommandTransport, authority: Authority
+) -> None:
+    try:
+        _command_publication(sessions, queue, authority)
+    except SQLAlchemyError:
+        authority.fail()
+        raise

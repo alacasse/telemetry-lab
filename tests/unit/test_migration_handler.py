@@ -15,10 +15,10 @@ def test_run_migrations_reports_current_and_head_revision(tmp_path: Path) -> Non
     assert result["status"] == "ok"
     assert result["operation"] == "migrate"
     assert result["requested_revision"] == "head"
-    assert result["requested_revision_resolved"] == "0006_thermostat"
+    assert result["requested_revision_resolved"] == "0007_shared_room_authority"
     assert result["previous_revision"] is None
-    assert result["current_revision"] == "0006_thermostat"
-    assert result["expected_head_revision"] == "0006_thermostat"
+    assert result["current_revision"] == "0007_shared_room_authority"
+    assert result["expected_head_revision"] == "0007_shared_room_authority"
     assert result["schema_matches_requested_revision"] is True
     assert result["schema_matches_expected_head"] is True
 
@@ -32,8 +32,8 @@ def test_inspect_schema_reports_head_match_after_migration(tmp_path: Path) -> No
     assert result == {
         "status": "ok",
         "operation": "inspect",
-        "expected_head_revision": "0006_thermostat",
-        "current_revision": "0006_thermostat",
+        "expected_head_revision": "0007_shared_room_authority",
+        "current_revision": "0007_shared_room_authority",
         "schema_matches_expected_head": True,
     }
 

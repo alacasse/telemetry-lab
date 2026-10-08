@@ -71,6 +71,7 @@ jobs:
       - run: PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
       - run: sh scripts/demo-local.sh --test-thermostat --startup-order runtime-first --port 8089
       - run: sh scripts/demo-local.sh --test --port 8090
+      - run: sh scripts/demo-local.sh --test-crash-windows --port 8093
 
   bundles:
     name: Linux x86_64 Python 3.12 Lambda bundles

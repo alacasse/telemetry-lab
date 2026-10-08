@@ -16,6 +16,7 @@ PYTHON=.venv/bin/python sh scripts/test-postgres.sh
 PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
 sh scripts/demo-local.sh --port 8089 --test
 sh scripts/demo-local.sh --port 8090 --test-thermostat --startup-order runtime-first
+sh scripts/demo-local.sh --port 8093 --test-crash-windows
 ```
 
 Ordinary pytest execution can skip opt-in integration tests. The launcher test modes provision real disposable PostgreSQL and LocalStack services and clean them up on exit. Check scripts and GitHub Actions for the exact environment required by each suite.
