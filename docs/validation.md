@@ -37,4 +37,4 @@ Scanning the evidence commit produced four generic API-key alerts on source-file
 
 ## GitHub Actions
 
-The workflow defines quality, disposable integration, Lambda bundle and Terraform jobs. Remote execution was pending when this local record was written. Consult [Actions](https://github.com/alacasse/telemetry-lab/actions) for the result associated with a published commit; workflow configuration alone is not execution evidence.
+The workflow defines quality, disposable integration, Lambda bundle and Terraform jobs. The first completed remote run passed quality, bundles, Terraform and the thermostat scenario, but the following historical scenario failed before startup because it reused the same local port. The workflow now assigns different ports to the two compositions. Consult [Actions](https://github.com/alacasse/telemetry-lab/actions) for the result associated with each published commit; workflow configuration alone is not execution evidence. This is separate from the successful local qualification recorded above.

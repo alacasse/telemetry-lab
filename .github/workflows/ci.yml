@@ -68,8 +68,8 @@ jobs:
       - run: uv sync --frozen --group dev --python 3.12
       - run: PYTHON=.venv/bin/python sh scripts/test-postgres.sh
       - run: PYTHON=.venv/bin/python sh scripts/test-thermal-command-migration.sh
-      - run: sh scripts/demo-local.sh --test-thermostat --startup-order runtime-first
-      - run: sh scripts/demo-local.sh --test
+      - run: sh scripts/demo-local.sh --test-thermostat --startup-order runtime-first --port 8089
+      - run: sh scripts/demo-local.sh --test --port 8090
 
   bundles:
     name: Linux x86_64 Python 3.12 Lambda bundles
