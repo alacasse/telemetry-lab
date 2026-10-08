@@ -222,7 +222,9 @@ import os, json, httpx
 from packages.config import get_settings
 from packages.db.session import create_session_factory
 from demo.thermal_queue import ThermalQueue
-from demo import thermal_runtime as rt
+from demo.thermal_runtime import publish_reading
+from packages.thermal import runtime as rt
+from functools import partial
 sessions = create_session_factory(get_settings())
 """
     with httpx.Client(base_url=BASE, timeout=5) as client:
@@ -240,7 +242,9 @@ sessions = create_session_factory(get_settings())
 def crash(*args, **kwargs): os._exit(42)
 rt.mark_published = crash
 with httpx.Client(timeout=3) as client:
-    rt.reading_publication(sessions, client, os.environ['THERMAL_INGESTION_URL'])
+    rt.reading_publication(
+        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL'])
+    )
 """,
                 42,
             )
@@ -253,7 +257,9 @@ with httpx.Client(timeout=3) as client:
                 setup
                 + """
 with httpx.Client(timeout=3) as client:
-    rt.reading_publication(sessions, client, os.environ['THERMAL_INGESTION_URL'])
+    rt.reading_publication(
+        sessions, partial(publish_reading, client, os.environ['THERMAL_INGESTION_URL'])
+    )
 queue = ThermalQueue(get_settings())
 rt.command_publication(sessions, queue)
 for _ in range(5):

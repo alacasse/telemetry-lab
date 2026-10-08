@@ -14,6 +14,20 @@ The launcher writes process logs and `runtime.json` under `.run/demo/<port>/`. I
 
 A browser reload preserves the stored room within the same running environment. It performs passive reads. A new tab can inspect server evidence but may lack exact submitted bodies and receipts from another tab, so retry availability can differ.
 
+The launcher still starts `demo.app` and `demo.thermal_runtime`. The API assembles
+`packages.thermal.http.create_router` with its database sessions, validated local
+speed and runtime observation callback. The thermal process assembles
+`packages.thermal.runtime` with the local HTTP measurement publisher and dedicated
+command queue. Local environment parsing and file/PID observation live in
+`demo/thermal_local.py`; the shared modules do not inspect launcher state.
+
+The thermal process commits recovery before optionally creating the default room
+and starting its workers. A restarted interrupted room waits for explicit resume.
+The local-only guard, loopback ingestion address checks and queue separation still
+apply. `THERMAL_TIME_MULTIPLIER` is validated at composition startup (0.5–2); restart
+the composition to change it. Router construction and browser reload never seed or
+recover a room.
+
 ## Technical inspection
 
 The main page shows dated evidence for the latest processed measurement and command alongside the thermostat. Recovery controls appear only when needed; there is no Details panel or normal session-stop button.

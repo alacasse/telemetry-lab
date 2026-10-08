@@ -10,9 +10,10 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from demo.thermal_runtime import RoomClock, reading_publication
+from demo.thermal_runtime import publish_reading
 from packages.db.base import Base
 from packages.thermal.models import ThermalCommand, ThermalSimulation
+from packages.thermal.runtime import RoomClock, reading_publication
 from packages.thermal.service import create_simulation, recover_simulations, resume_simulation
 
 Room = tuple[sessionmaker[Session], str, list[float], RoomClock]
@@ -100,7 +101,12 @@ def test_sensor_publishes_exact_durable_http_body(room: Room) -> None:
         return httpx.Response(202, json={"status": "accepted"})
 
     with httpx.Client(transport=httpx.MockTransport(accept)) as client:
-        reading_publication(sessions, client, "http://localhost/ingestion/telemetry")
+        reading_publication(
+            sessions,
+            lambda body, sid: publish_reading(
+                client, "http://localhost/ingestion/telemetry", body, sid
+            ),
+        )
     from packages.thermal.models import ThermalReading
 
     with sessions() as session:
@@ -108,6 +114,29 @@ def test_sensor_publishes_exact_durable_http_body(room: Room) -> None:
         assert requests[0].content.decode() == reading.body
         assert requests[0].headers["X-Correlation-Id"] == sid
         assert reading.published_at is not None
+        assert reading.transport_receipt == {"status": "accepted"}
+
+
+def test_reading_transport_receipt_and_identity_are_preserved(room: Room) -> None:
+    from packages.thermal.models import ThermalReading
+
+    sessions, sid, _, _ = room
+    with sessions() as session:
+        persisted_body = required(session, ThermalReading, (sid, 1)).body
+    deliveries: list[tuple[str, str]] = []
+    receipt = {"transport": "test-adapter", "message_id": "reading-accepted", "duplicate": False}
+
+    def publish(body: str, simulation_id: str) -> dict:
+        deliveries.append((body, simulation_id))
+        return receipt
+
+    reading_publication(sessions, publish)
+    reading_publication(sessions, publish)
+    assert deliveries == [(persisted_body, sid)]
+    with sessions() as session:
+        reading = required(session, ThermalReading, (sid, 1))
+        assert reading.transport_receipt == receipt
+        assert reading.publication_status == "published"
 
 
 def test_sensor_cadence_does_not_follow_multiplier(room: Room) -> None:
@@ -173,7 +202,7 @@ def test_http_acceptance_before_receipt_commit_retries_exact_body(
         requests.append(request.content)
         return httpx.Response(202, json={"status": "accepted"})
 
-    import demo.thermal_runtime as runtime
+    import packages.thermal.runtime as runtime
 
     original = runtime.mark_published
 
@@ -183,9 +212,19 @@ def test_http_acceptance_before_receipt_commit_retries_exact_body(
     with httpx.Client(transport=httpx.MockTransport(accept)) as client:
         monkeypatch.setattr(runtime, "mark_published", unavailable)
         with pytest.raises(RuntimeError):
-            reading_publication(sessions, client, "http://localhost/ingestion/telemetry")
+            reading_publication(
+                sessions,
+                lambda body, sid: publish_reading(
+                    client, "http://localhost/ingestion/telemetry", body, sid
+                ),
+            )
         monkeypatch.setattr(runtime, "mark_published", original)
-        reading_publication(sessions, client, "http://localhost/ingestion/telemetry")
+        reading_publication(
+            sessions,
+            lambda body, sid: publish_reading(
+                client, "http://localhost/ingestion/telemetry", body, sid
+            ),
+        )
     assert len(requests) == 2
     assert requests[0] == requests[1]
 
@@ -233,7 +272,12 @@ def test_publication_failure_does_not_stop_clock_or_expiry(room: Room) -> None:
 
     with httpx.Client(transport=httpx.MockTransport(unavailable)) as client:
         with pytest.raises(httpx.ConnectError):
-            reading_publication(sessions, client, "http://localhost/ingestion/telemetry")
+            reading_publication(
+                sessions,
+                lambda body, sid: publish_reading(
+                    client, "http://localhost/ingestion/telemetry", body, sid
+                ),
+            )
     now[0] += 1
     clock.tick()
     with sessions() as session, session.begin():
@@ -253,7 +297,8 @@ def test_runtime_availability_is_separate_from_persisted_snapshot(
     import json
     import os
 
-    from demo.thermal_routes import local_snapshot
+    from demo.thermal_local import runtime_observation
+    from packages.thermal.service import snapshot
 
     sessions, sid, now, clock = room
     state = tmp_path / "runtime.json"
@@ -268,7 +313,8 @@ def test_runtime_availability_is_separate_from_persisted_snapshot(
     )
     monkeypatch.setenv("THERMAL_RUNTIME_STATE", str(state))
     with sessions() as session:
-        result = local_snapshot(session, required(session, ThermalSimulation, sid))
+        result = snapshot(session, required(session, ThermalSimulation, sid))
+        result["runtime"] = runtime_observation()
     assert result["runtime"]["status"] == "unavailable"
     assert result["runtime"]["release_revision"] == "tested-revision"
     assert result["status"] == "active"
@@ -282,7 +328,7 @@ def test_completion_between_discovery_and_lock_is_not_advanced_or_expired(
 ) -> None:
     from datetime import timedelta
 
-    import demo.thermal_runtime as runtime
+    import packages.thermal.runtime as runtime
 
     sessions, sid, now, clock = room
     clock.tick()
@@ -372,7 +418,7 @@ def test_permanent_rejection_preserves_all_state_and_continues(
 ) -> None:
     import json
 
-    from demo.thermal_runtime import receive_commands
+    from packages.thermal.runtime import receive_commands
 
     _, sid, now, clock = room
     clock.tick()
@@ -457,7 +503,7 @@ def test_command_transaction_failure_does_not_ack_and_requires_recovery(
 ) -> None:
     import json
 
-    import demo.thermal_runtime as runtime
+    import packages.thermal.runtime as runtime
 
     _, sid, _, clock = room
     clock.tick()
@@ -482,7 +528,7 @@ def test_command_transaction_failure_does_not_ack_and_requires_recovery(
 def test_publication_emits_persisted_type(room: Room) -> None:
     import json
 
-    from demo.thermal_runtime import command_publication
+    from packages.thermal.runtime import command_publication
 
     sessions, sid, _, _ = room
     bodies: list[str] = []
@@ -505,7 +551,7 @@ def test_command_commit_failure_rolls_back_without_ack(room: Room) -> None:
 
     from sqlalchemy import event
 
-    from demo.thermal_runtime import receive_commands
+    from packages.thermal.runtime import receive_commands
 
     sessions, sid, _, clock = room
     clock.tick()
@@ -533,8 +579,8 @@ def test_rejection_logging_does_not_expose_unrecognized_exception_text(
 ) -> None:
     import json
 
-    from demo.thermal_runtime import receive_commands
     from packages.thermal.commands import CommandRejected
+    from packages.thermal.runtime import receive_commands
 
     _, sid, _, clock = room
 
@@ -569,3 +615,119 @@ def test_cancelled_late_start_has_no_effect_or_anchor_mutation(room: Room) -> No
     with sessions() as session:
         row = required(session, ThermalSimulation, sid)
         assert row.state_version == before and not row.heater_on and row.temperature_c == 19
+
+
+def test_command_publication_receipt_commit_failure_retries_same_identity(room: Room) -> None:
+    import json
+
+    from sqlalchemy import event
+
+    from packages.thermal.runtime import command_publication
+
+    sessions, sid, _, _ = room
+    bodies: list[str] = []
+
+    class Publisher:
+        def publish(self, body: str) -> str:
+            bodies.append(body)
+            return f"accepted-{len(bodies)}"
+
+    def fail_receipt_commit(session: Session) -> None:
+        if bodies:
+            raise RuntimeError("command receipt commit failed")
+
+    event.listen(sessions.class_, "before_commit", fail_receipt_commit)
+    try:
+        with pytest.raises(RuntimeError, match="command receipt commit failed"):
+            command_publication(sessions, Publisher())  # type: ignore[arg-type]
+    finally:
+        event.remove(sessions.class_, "before_commit", fail_receipt_commit)
+    with sessions() as session:
+        command = required(session, ThermalCommand, (sid, 1))
+        assert command.published_at is None
+        assert command.transport_message_id is None
+        assert command.status == "pending"
+    command_publication(sessions, Publisher())  # type: ignore[arg-type]
+    assert len(bodies) == 2 and bodies[0] == bodies[1]
+    assert json.loads(bodies[0]) == {
+        "simulation_id": sid,
+        "sequence": 1,
+        "command_type": "heating.start",
+    }
+    with sessions() as session:
+        command = required(session, ThermalCommand, (sid, 1))
+        assert command.published_at is not None
+        assert command.transport_message_id == "accepted-2"
+
+
+def test_ack_failure_after_commit_redelivery_does_not_repeat_effect(room: Room) -> None:
+    import json
+
+    from packages.thermal.runtime import receive_commands
+
+    sessions, sid, now, clock = room
+    clock.tick()
+
+    class LostAcknowledgementQueue(DeliveryQueue):
+        def acknowledge(self, receipt: str) -> None:
+            raise RuntimeError("acknowledgement unavailable")
+
+    body = json.dumps({"simulation_id": sid, "sequence": 1, "command_type": "heating.start"})
+    lost_ack = LostAcknowledgementQueue([body])
+    with pytest.raises(RuntimeError, match="acknowledgement unavailable"):
+        receive_commands(clock, lost_ack)  # type: ignore[arg-type]
+    with sessions() as session:
+        command = required(session, ThermalCommand, (sid, 1))
+        assert command.status == "applied"
+        proof = (command.applied_at, command.applied_state_version)
+        assert required(session, ThermalSimulation, sid).heater_on
+    committed_state = command_snapshot(room)
+    now[0] += 2
+    redelivery = DeliveryQueue([body])
+    receive_commands(clock, redelivery)  # type: ignore[arg-type]
+    assert redelivery.acknowledged == ["0"]
+    assert command_snapshot(room) == committed_state
+    assert not clock.recovery_required
+    clock.tick()
+    with sessions() as session:
+        command = required(session, ThermalCommand, (sid, 1))
+        assert (command.applied_at, command.applied_state_version) == proof
+        assert required(session, ThermalSimulation, sid).temperature_c == pytest.approx(19.6)
+
+
+def test_reading_receipt_commit_failure_retries_same_body_and_identity(room: Room) -> None:
+    from sqlalchemy import event
+
+    from packages.thermal.models import ThermalReading
+
+    sessions, sid, _, _ = room
+    with sessions() as session:
+        original_body = required(session, ThermalReading, (sid, 1)).body
+    deliveries: list[tuple[str, str]] = []
+
+    def publish(body: str, simulation_id: str) -> dict:
+        deliveries.append((body, simulation_id))
+        return {"message_id": f"accepted-{len(deliveries)}", "duplicate": len(deliveries) > 1}
+
+    def fail_receipt_commit(session: Session) -> None:
+        if deliveries:
+            raise RuntimeError("reading receipt commit failed")
+
+    event.listen(sessions.class_, "before_commit", fail_receipt_commit)
+    try:
+        with pytest.raises(RuntimeError, match="reading receipt commit failed"):
+            reading_publication(sessions, publish)
+    finally:
+        event.remove(sessions.class_, "before_commit", fail_receipt_commit)
+    with sessions() as session:
+        reading = required(session, ThermalReading, (sid, 1))
+        assert reading.publication_status == "pending"
+        assert reading.published_at is None
+        assert reading.transport_receipt is None
+    reading_publication(sessions, publish)
+    assert deliveries == [(original_body, sid), (original_body, sid)]
+    with sessions() as session:
+        reading = required(session, ThermalReading, (sid, 1))
+        assert reading.publication_status == "published"
+        assert reading.published_at is not None
+        assert reading.transport_receipt == {"message_id": "accepted-2", "duplicate": True}

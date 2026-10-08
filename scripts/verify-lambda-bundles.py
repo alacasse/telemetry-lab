@@ -28,14 +28,17 @@ def main() -> None:
                     "-c",
                     "import sys,importlib; sys.path.insert(0,sys.argv[1]); "
                     "module,attribute=sys.argv[2].rsplit('.',1); "
-                    "assert callable(getattr(importlib.import_module(module),attribute))",
+                    "assert callable(getattr(importlib.import_module(module),attribute)); "
+                    "from packages.thermal.http import create_router; "
+                    "from packages.thermal.runtime import RoomClock; "
+                    "assert callable(create_router) and callable(RoomClock)",
                     directory,
                     target["handler"],
                 ],
                 cwd=directory,
                 check=True,
             )
-        print(f"verified {target['service']}: checksum and isolated runtime import")
+        print(f"verified {target['service']}: checksum, handler and shared thermal imports")
 
 
 if __name__ == "__main__":

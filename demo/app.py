@@ -10,17 +10,24 @@ from ingestion_service.main import app as ingestion_app
 from query_service.main import app as query_app
 
 from demo.queue_observation import QueueObservation, local_queue_observation
-from demo.thermal_routes import multiplier, runtime_observation
-from demo.thermal_routes import router as thermal_router
+from demo.thermal_local import multiplier, runtime_observation
 from packages.config import get_settings
+from packages.db.session import create_session_factory
+from packages.thermal.http import create_router
 
 settings = get_settings()
 if settings.is_staging or os.environ.get("TELEMETRY_LAB_LOCAL_DEMO") != "1":
     raise RuntimeError("The demo entry point is local only")
 
-multiplier()  # Fail at startup on invalid server physics configuration.
+time_multiplier = multiplier()  # Fail at startup on invalid server physics configuration.
 app = FastAPI(docs_url=None, redoc_url=None)
-app.include_router(thermal_router)
+app.include_router(
+    create_router(
+        create_session_factory(),
+        time_multiplier=time_multiplier,
+        observe_runtime=runtime_observation,
+    )
+)
 app.mount("/ingestion", ingestion_app)
 app.mount("/query", query_app)
 

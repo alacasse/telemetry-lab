@@ -16,10 +16,10 @@ from sqlalchemy import MetaData, create_engine, select
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import sessionmaker
 
-from demo.thermal_runtime import RoomClock
 from packages.db.migration_handler import run_migrations
 from packages.thermal.commands import parse_command_message
 from packages.thermal.models import ThermalCommand, ThermalSimulation
+from packages.thermal.runtime import RoomClock
 from packages.thermal.service import recover_simulations, resume_simulation
 
 
